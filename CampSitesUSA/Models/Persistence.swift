@@ -59,12 +59,45 @@ final class Trip {
     var createdAt: Date
     @Relationship(deleteRule: .cascade, inverse: \TripStop.trip) var stops: [TripStop] = []
 
+    // Route endpoints. Optional so trips made before route planning still load.
+    var startName: String?
+    var startLat: Double?
+    var startLon: Double?
+    var endName: String?
+    var endLat: Double?
+    var endLon: Double?
+    var startDate: Date?
+    /// Daily driving budget used to suggest overnight camps.
+    var dailyMiles: Int = 250
+    var preferFree: Bool = true
+
     init(name: String) {
         self.name = name
         createdAt = .now
     }
 
     var orderedStops: [TripStop] { stops.sorted { $0.order < $1.order } }
+    var totalNights: Int { stops.map(\.nights).reduce(0, +) }
+
+    var start: CLLocationCoordinate2D? {
+        guard let startLat, let startLon else { return nil }
+        return .init(latitude: startLat, longitude: startLon)
+    }
+
+    var end: CLLocationCoordinate2D? {
+        guard let endLat, let endLon else { return nil }
+        return .init(latitude: endLat, longitude: endLon)
+    }
+
+    /// Start, every stop, then the destination: the points the route drives through.
+    var waypoints: [CLLocationCoordinate2D] {
+        (start.map { [$0] } ?? []) + orderedStops.map(\.coordinate) + (end.map { [$0] } ?? [])
+    }
+
+    /// Re-number stops 0…n after an insert, move or delete.
+    func renumber() {
+        for (i, s) in orderedStops.enumerated() { s.order = i }
+    }
 }
 
 @Model
@@ -76,6 +109,8 @@ final class TripStop {
     var order: Int
     var nights: Int
     var trip: Trip?
+    /// True when the planner picked this camp (shown as "Suggested" until the user keeps or swaps it).
+    var suggested: Bool = false
 
     init(site: Site, order: Int) {
         siteID = site.id

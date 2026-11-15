@@ -1,89 +1,89 @@
 source_id,entity_type,name,parent_name,agency,state,city,latitude,longitude,reservable,price_min,price_max,price_unit,campsites_count,accessible_campsites_count,max_vehicle_length_ft,equipment_allowed,site_types,reserve_types,activities,average_rating,rating_count,cell_coverage_score,official_url
-10090626,timedentry_tour,1-Day Personal Vehicle Reservation,Silver Glen Springs Recreation Area Vehicle Reservations,,,,29.24803102986030,-81.64298084659239,True,,,,,,,,na,,,4.1125827,151,1.8000000164622352,
-10112102,timedentry_tour,1-Day Personal Vehicle Reservation,Alexander Springs Recreation Area Vehicle Access Reservation,,,,29.44400000000000,-81.34480000000001,True,,,,,,,,na,,,3.4885497,131,1.8791209315205668,
-2563,recarea,American Memorial Park,,National Park Service,,,15.21680000000000,145.72310999999999,False,,,,,,,,na,,,,,,http://www.nps.gov/amme/
+10090626,timedentry_tour,1-Day Personal Vehicle Reservation,Silver Glen Springs Recreation Area Vehicle Reservations,,Florida,,29.24803102986030,-81.64298084659239,True,,,,,,,,na,,,4.1125827,151,1.8000000164622352,
+10112102,timedentry_tour,1-Day Personal Vehicle Reservation,Alexander Springs Recreation Area Vehicle Access Reservation,,Florida,,29.44400000000000,-81.34480000000001,True,,,,,,,,na,,,3.4885497,131,1.8791209315205668,
+2563,recarea,American Memorial Park,,National Park Service,Northern Mariana Islands,,15.21680000000000,145.72310999999999,False,,,,,,,,na,,,,,,http://www.nps.gov/amme/
 13560,recarea,Amish Country Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/13793
 13562,recarea,Angeles Crest Scenic Byway (Route 2),,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/10245
-4675326,permit,Angels Landing: Winter (Hikes on December 1 - February 28),Zion National Park,National Park Service,,Hurricane,37.27233200000000,-112.94916600000001,True,,,,,,,,na,,,4.731818,1100,1.6696202681034427,
+4675326,permit,Angels Landing: Winter (Hikes on December 1 - February 28),Zion National Park,National Park Service,Utah,Hurricane,37.27233200000000,-112.94916600000001,True,,,,,,,,na,,,4.731818,1100,1.6696202681034427,
 13565,recarea,Arkansas Scenic 7 Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2155
-10112650,tour,Art in the Park-All Ages,Indiana Dunes National Park Programs and Tours,,,,41.60628600000000,-87.26748300000000,True,,,,,,,,na,,,5,1,3,
-309,tour,Beat 2,Pecos National Historical Park Fishing Reservations,,,,35.55043890000000,-105.68625830000001,True,,,,,,,,na,,,4.1,30,2.666666723432995,
-310,tour,Beat 3,Pecos National Historical Park Fishing Reservations,,,,35.55043890000000,-105.68625830000001,True,,,,,,,,na,,,4.1714287,35,2.9999999816601095,
+10112650,tour,Art in the Park-All Ages,Indiana Dunes National Park Programs and Tours,,Indiana,,41.60628600000000,-87.26748300000000,True,,,,,,,,na,,,5,1,3,
+309,tour,Beat 2,Pecos National Historical Park Fishing Reservations,,New Mexico,,35.55043890000000,-105.68625830000001,True,,,,,,,,na,,,4.1,30,2.666666723432995,
+310,tour,Beat 3,Pecos National Historical Park Fishing Reservations,,New Mexico,,35.55043890000000,-105.68625830000001,True,,,,,,,,na,,,4.1714287,35,2.9999999816601095,
 13574,recarea,Beaver Canyon Scenic Byway (U-153),,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2024
 10075896,facility,Big Valley Ranger District,,USDA Forest Service,,,,,False,,,,,,,,na,,,,,,https://www.fs.usda.gov/recarea/modoc/recarea/?recid=71244
-1070,tour,Bison Bonebed Tour,Hudson-Meng Education & Research Center Tours,,,,42.82750000000000,-103.60150000000000,True,,,,,,,,na,,,4,1,1,
+1070,tour,Bison Bonebed Tour,Hudson-Meng Education & Research Center Tours,,Nebraska,,42.82750000000000,-103.60150000000000,True,,,,,,,,na,,,4,1,1,
 13586,recarea,Blue Mountain Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2149
-10087519,timedentry_tour,Brainard Lake Picnic Site/Trailhead - Day Use,Brainard Lake Recreation Area Timed Tickets,,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.5507245,2208,0.6690981558052235,
-10087515,timedentry,Brainard Lake Recreation Area Timed Tickets,Arapaho & Roosevelt National Forests Pawnee NG,USDA Forest Service,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.543855,4093,0.6756954557680979,
+10087519,timedentry_tour,Brainard Lake Picnic Site/Trailhead - Day Use,Brainard Lake Recreation Area Timed Tickets,,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.5507245,2208,0.6690981558052235,
+10087515,timedentry,Brainard Lake Recreation Area Timed Tickets,Arapaho & Roosevelt National Forests Pawnee NG,USDA Forest Service,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.543855,4093,0.6756954557680979,
 12792,facility,Breton Wilderness,Breton National Wildlife Refuge,Fish and Wildlife Service,,,29.47121000000000,-88.51261000000000,False,,,,,,,,na,,,,,,http://www.wilderness.net/index.cfm?fuse=NWPS&sec=wildView&WID=75
 10074569,facility,Brice Creek,,USDA Forest Service,,,,,False,,,,,,,,na,,,,,,https://www.fs.usda.gov/recarea/umpqua/recarea/?recid=75136
 13591,recarea,Buffalo Bill Cody Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2166
 10020957,facility,Canyon Creek Trailhead,,Bureau of Land Management,,,,,False,,,,,,,,na,,,,,,
 13595,recarea,Carson Pass Highway (Route 88),,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2291
 10080885,facility,Cornucopia Trailhead,,USDA Forest Service,,,,,False,,,,,,,,na,,,,,,https://www.fs.usda.gov/recarea/wallowa-whitman/recarea/?recid=83192
-86feafcc-f694-11ea-a1ae-aee12105d3ef,activitypass,Deerlick Creek Day Use Passes,Black Warrior and Tombigbee Lakes,US Army Corps of Engineers,,,33.26712900000000,-87.42874500000001,True,,,,,,,,na,,,4.6666665,3,2.5,
-10113323,tour,Delta One Launch Facility,Minuteman Missile NHS Tours,,,,43.84451300000000,-101.90127200000001,True,,,,,,,,na,,,4.9506173,81,2.9111111058129207,
-10113284,timedentry_tour,Derrick Road Camping Area,Sand Lake Recreation Area 4th of July Tickets,,,,45.28657900000000,-123.95727500000000,True,,,,,,,,na,,,,,,
+86feafcc-f694-11ea-a1ae-aee12105d3ef,activitypass,Deerlick Creek Day Use Passes,Black Warrior and Tombigbee Lakes,US Army Corps of Engineers,Alabama,,33.26712900000000,-87.42874500000001,True,,,,,,,,na,,,4.6666665,3,2.5,
+10113323,tour,Delta One Launch Facility,Minuteman Missile NHS Tours,,South Dakota,,43.84451300000000,-101.90127200000001,True,,,,,,,,na,,,4.9506173,81,2.9111111058129207,
+10113284,timedentry_tour,Derrick Road Camping Area,Sand Lake Recreation Area 4th of July Tickets,,Oregon,,45.28657900000000,-123.95727500000000,True,,,,,,,,na,,,,,,
 13634,recarea,East Tennessee Crossing,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/76017
 13638,recarea,Edisto Island National Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/73595
 13639,recarea,El Camino Real,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2065
-10089812,tour,El Portal de El Yunque Centro de visitantes / El Portal de El Yunque Visitor Center,Boletos para El Portal Centro de Visitantes / El Portal Visitor Center Tickets,,,,18.33938900000000,-65.75990400000001,True,,,,,,,,na,,,3.9512196,41,2.827586223339212,
+10089812,tour,El Portal de El Yunque Centro de visitantes / El Portal de El Yunque Visitor Center,Boletos para El Portal Centro de Visitantes / El Portal Visitor Center Tickets,,Puerto Rico,,18.33938900000000,-65.75990400000001,True,,,,,,,,na,,,3.9512196,41,2.827586223339212,
 13640,recarea,Elkhorn Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2151
 10078444,facility,Ellicott Rock Wilderness,,USDA Forest Service,,,,,False,,,,,,,,na,,,,,,https://www.fs.usda.gov/recarea/scnfs/recarea/?recid=47089
 13641,recarea,Emigrant Trail,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2318
-10112509,timedentry_tour,Fee-Free Day - Scenic Section - Large Group Launch,Snake River Non-commercial Group Use Launch Timed Reservations,,,,43.20451600000000,-110.82177900000001,True,,,,,,,,na,,,5,1,,
-10112508,timedentry_tour,Fee-Free Day - Whitewater Section - Large Group Launch,Snake River Non-commercial Group Use Launch Timed Reservations,,,,43.20451600000000,-110.82177900000001,True,,,,,,,,na,,,5,1,,
-10113283,timedentry_tour,Fisherman Day Use,Sand Lake Recreation Area 4th of July Tickets,,,,45.28657900000000,-123.95727500000000,True,,,,,,,,na,,,,,,
+10112509,timedentry_tour,Fee-Free Day - Scenic Section - Large Group Launch,Snake River Non-commercial Group Use Launch Timed Reservations,,Wyoming,,43.20451600000000,-110.82177900000001,True,,,,,,,,na,,,5,1,,
+10112508,timedentry_tour,Fee-Free Day - Whitewater Section - Large Group Launch,Snake River Non-commercial Group Use Launch Timed Reservations,,Wyoming,,43.20451600000000,-110.82177900000001,True,,,,,,,,na,,,5,1,,
+10113283,timedentry_tour,Fisherman Day Use,Sand Lake Recreation Area 4th of July Tickets,,Oregon,,45.28657900000000,-123.95727500000000,True,,,,,,,,na,,,,,,
 13651,recarea,Forest Heritage National Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/77229
-d2dedff6-f697-11ea-ab86-ea94e31cc891,activitypass,Friendship Park Day Use Passes,Granger Lake,US Army Corps of Engineers,,,30.73002800000000,-97.33972300000001,True,,,,,,,,na,,,3.5,10,2.857142891202654,
+d2dedff6-f697-11ea-ab86-ea94e31cc891,activitypass,Friendship Park Day Use Passes,Granger Lake,US Army Corps of Engineers,Texas,,30.73002800000000,-97.33972300000001,True,,,,,,,,na,,,3.5,10,2.857142891202654,
 13677,recarea,Great River Road - Mississippi,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2212
 13681,recarea,Gunflint Trail Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/13548
-10362409,campground,Hatch Point Campground,Canyon Rims,Bureau of Land Management,,Moab,38.38102600000000,-109.61663900000001,True,20,20,night,10,,45,Tent;RV;Trailer;Caravan/Camper Van;Pickup Camper;Fifth Wheel;Pop up,Overnight,Site-Specific,Auto Touring;Camping;Hiking;Photography;Star Gazing,,,,
-10253672,tour,Introduction to Wild Caving Tour,Lehman Caves Tours,,,,39.00551110000000,-114.21998060000000,True,,,,,,,,na,,,5,6,2.25,
-10089921,tour,Junior Ranger,Campbell Creek Science Center Public Programs,,,,61.16421700000000,-149.77670300000000,True,,,,,,,,na,,,5,9,3.6,
-445864,permit,King Range Wilderness Permits (Lost Coast),King Range Wilderness,Bureau of Land Management,,Whitethorn,40.05679170000000,-123.97563060000000,True,,,,,,,,na,,,4.7159624,426,0.7922078003356983,
-AP25911,activitypass,Lake Chelan Federal Dock Site Pass,Okanogan-Wenatchee National Forest,USDA Forest Service,,,47.83795877000000,120.02351700000000,True,,,,,,,,na,,,4.6666665,3,0.6666666666666666,
-5363636,permit,Lake Georgetown Other Small Game Hunt Permits,Georgetown Lake,US Army Corps of Engineers,,Georgetown,30.67685290282021,-97.72065401509552,True,,,,,,,,na,,,,,,
-5353535,permit,Lake Georgetown Waterfowl Hunt Permits,Georgetown Lake,US Army Corps of Engineers,,Georgetown,30.67685290282021,-97.72065401509552,True,,,,,,,,na,,,,,,
+10362409,campground,Hatch Point Campground,Canyon Rims,Bureau of Land Management,Utah,Moab,38.38102600000000,-109.61663900000001,True,20,20,night,10,,45,Tent;RV;Trailer;Caravan/Camper Van;Pickup Camper;Fifth Wheel;Pop up,Overnight,Site-Specific,Auto Touring;Camping;Hiking;Photography;Star Gazing,,,,
+10253672,tour,Introduction to Wild Caving Tour,Lehman Caves Tours,,Nevada,,39.00551110000000,-114.21998060000000,True,,,,,,,,na,,,5,6,2.25,
+10089921,tour,Junior Ranger,Campbell Creek Science Center Public Programs,,Alaska,,61.16421700000000,-149.77670300000000,True,,,,,,,,na,,,5,9,3.6,
+445864,permit,King Range Wilderness Permits (Lost Coast),King Range Wilderness,Bureau of Land Management,California,Whitethorn,40.05679170000000,-123.97563060000000,True,,,,,,,,na,,,4.7159624,426,0.7922078003356983,
+AP25911,activitypass,Lake Chelan Federal Dock Site Pass,Okanogan-Wenatchee National Forest,USDA Forest Service,Washington,,47.837959,-120.023517,True,,,,,,,,na,,,4.6666665,3,0.6666666666666666,
+5363636,permit,Lake Georgetown Other Small Game Hunt Permits,Georgetown Lake,US Army Corps of Engineers,Texas,Georgetown,30.67685290282021,-97.72065401509552,True,,,,,,,,na,,,,,,
+5353535,permit,Lake Georgetown Waterfowl Hunt Permits,Georgetown Lake,US Army Corps of Engineers,Texas,Georgetown,30.67685290282021,-97.72065401509552,True,,,,,,,,na,,,,,,
 13723,recarea,Lake Koocanusa Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2135
-10089508,timedentry,Lava River Cave Timed Reservation Tickets,Deschutes National Forest,USDA Forest Service,,,43.89532000000000,-121.36844000000001,True,,,,,,,,na,,,4.7452054,730,2.0714286632008023,
-10089509,timedentry_tour,Lava River Cave Vehicle Reservations,Lava River Cave Timed Reservation Tickets,,,,43.89532000000000,-121.36844000000001,True,,,,,,,,na,,,4.7452054,730,2.0714286632008023,
-b2be4aea-f69e-11ea-a1ae-aee12105d3ef,activitypass,Lenoir Landing Day Use Passes,Black Warrior and Tombigbee Lakes,US Army Corps of Engineers,,,31.85233700000000,-88.16180900000001,True,,,,,,,,na,,,,,,
-10087517,timedentry_tour,Long Lake Trailhead - Day Use,Brainard Lake Recreation Area Timed Tickets,,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.598579,563,0.6557377111064931,
+10089508,timedentry,Lava River Cave Timed Reservation Tickets,Deschutes National Forest,USDA Forest Service,Oregon,,43.89532000000000,-121.36844000000001,True,,,,,,,,na,,,4.7452054,730,2.0714286632008023,
+10089509,timedentry_tour,Lava River Cave Vehicle Reservations,Lava River Cave Timed Reservation Tickets,,Oregon,,43.89532000000000,-121.36844000000001,True,,,,,,,,na,,,4.7452054,730,2.0714286632008023,
+b2be4aea-f69e-11ea-a1ae-aee12105d3ef,activitypass,Lenoir Landing Day Use Passes,Black Warrior and Tombigbee Lakes,US Army Corps of Engineers,Alabama,,31.85233700000000,-88.16180900000001,True,,,,,,,,na,,,,,,
+10087517,timedentry_tour,Long Lake Trailhead - Day Use,Brainard Lake Recreation Area Timed Tickets,,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.598579,563,0.6557377111064931,
 13740,recarea,Longhouse Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2322
-10089707,tour,Minnetonka Cave Group Tour,Minnetonka Cave Tickets,,,,42.29310389240000,-111.53268814099999,True,,,,,,,,na,,,4,5,0.4,
-10087702,ticketfacility,Minnetonka Cave Tickets,Caribou-Targhee National Forest,USDA Forest Service,,,42.29310389240000,-111.53268814099999,True,,,,,,,,na,,,4.46729,107,0.7166666795810064,
-10087703,tour,Minnetonka Cave Tour,Minnetonka Cave Tickets,,,,42.29310389240000,-111.53268814099999,True,,,,,,,,na,,,4.490196,102,0.7454545611684973,
+10089707,tour,Minnetonka Cave Group Tour,Minnetonka Cave Tickets,,Idaho,,42.29310389240000,-111.53268814099999,True,,,,,,,,na,,,4,5,0.4,
+10087702,ticketfacility,Minnetonka Cave Tickets,Caribou-Targhee National Forest,USDA Forest Service,Idaho,,42.29310389240000,-111.53268814099999,True,,,,,,,,na,,,4.46729,107,0.7166666795810064,
+10087703,tour,Minnetonka Cave Tour,Minnetonka Cave Tickets,,Idaho,,42.29310389240000,-111.53268814099999,True,,,,,,,,na,,,4.490196,102,0.7454545611684973,
 13757,recarea,Mirror Lake Scenic Byway - UT Section,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2007
-10087516,timedentry_tour,Mitchell Lake Trailhead - Day Use,Brainard Lake Recreation Area Timed Tickets,,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.6151485,977,0.7167449182654397,
+10087516,timedentry_tour,Mitchell Lake Trailhead - Day Use,Brainard Lake Recreation Area Timed Tickets,,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.6151485,977,0.7167449182654397,
 369,recarea,Monroe Lake,,US Army Corps of Engineers,,,,,False,,,,,,,,na,,,,,,https://corpsLakes.erdc.dren.mil/visitors/projects.cfm?ID=H211770
 13765,recarea,Mount Evans Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2112
 13766,recarea,Mount Magazine Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2158
 13767,recarea,Mount Rogers Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2323
-4675309,permit,Mount St. Helens Climbing Permit,Gifford Pinchot National Forest,USDA Forest Service,,,46.19140000000000,-122.19560000000000,True,,,,,,,,na,,,4.6107554,781,1.4736842380517206,
+4675309,permit,Mount St. Helens Climbing Permit,Gifford Pinchot National Forest,USDA Forest Service,Washington,,46.19140000000000,-122.19560000000000,True,,,,,,,,na,,,4.6107554,781,1.4736842380517206,
 10030004,facility,Nashua National Fish Hatchery,,Fish and Wildlife Service,,,,,False,,,,,,,,na,,,,,,https://www.fws.gov/nashua/
 210643,cemeteryandmemorial,"Netherlands American Cemetery And Memorial, Netherlands",,American Battle Monuments Commission,,,50.82100000000000,5.08960000000000,False,,,,,,,,na,,,,,,http://www.abmc.gov/cemeteries/cemeteries/ne.php
-10087518,timedentry_tour,Niwot Picnic Site/Trailhead - Day Use,Brainard Lake Recreation Area Timed Tickets,,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.4529915,234,0.7105263008883125,
+10087518,timedentry_tour,Niwot Picnic Site/Trailhead - Day Use,Brainard Lake Recreation Area Timed Tickets,,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.4529915,234,0.7105263008883125,
 13782,recarea,Ocoee Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2288
-46,tour,Official Pearl Harbor Captain's Unlimited Self-Guided Multimedia Tour,Arizona Memorial Tours Pearl Harbor,,,,21.36777780000000,-157.93750000000000,True,,,,,,,,na,,,4.382653,1176,3.463768139187055,
-5373737,permit,Okefenokee National Wildlife Refuge Suwannee Canal Hunt Permit,Okefenokee National Wildlife Refuge,US Army Corps of Engineers,,Folkston,30.73467764560104,-82.13689875932747,True,,,,,,,,na,,,5,1,2,
+46,tour,Official Pearl Harbor Captain's Unlimited Self-Guided Multimedia Tour,Arizona Memorial Tours Pearl Harbor,,Hawaii,,21.36777780000000,-157.93750000000000,True,,,,,,,,na,,,4.382653,1176,3.463768139187055,
+5373737,permit,Okefenokee National Wildlife Refuge Suwannee Canal Hunt Permit,Okefenokee National Wildlife Refuge,US Army Corps of Engineers,Georgia,Folkston,30.73467764560104,-82.13689875932747,True,,,,,,,,na,,,5,1,2,
 13792,recarea,Oscar Wigington Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2292
 13794,recarea,Outer Banks Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/12834
-10087524,timedentry_tour,Overnight - Brainard Lake,Brainard Lake Recreation Area Timed Tickets,,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,3.2564104,39,0.5000000012417635,
-10087522,timedentry_tour,Overnight - Long Lake,Brainard Lake Recreation Area Timed Tickets,,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.0666666,15,0.3333333333333333,
-10087521,timedentry_tour,Overnight - Mitchell Lake,Brainard Lake Recreation Area Timed Tickets,,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.25,12,,
-10087523,timedentry_tour,Overnight - Niwot,Brainard Lake Recreation Area Timed Tickets,,,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,3.7777777,9,0.6,
-10390884,recarea,Parker Dam Road Back Country Byway,,Bureau of Land Management,,,34.28848000000000,114.14170000000000,False,,,,,,,,na,,,,,,
+10087524,timedentry_tour,Overnight - Brainard Lake,Brainard Lake Recreation Area Timed Tickets,,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,3.2564104,39,0.5000000012417635,
+10087522,timedentry_tour,Overnight - Long Lake,Brainard Lake Recreation Area Timed Tickets,,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.0666666,15,0.3333333333333333,
+10087521,timedentry_tour,Overnight - Mitchell Lake,Brainard Lake Recreation Area Timed Tickets,,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,4.25,12,,
+10087523,timedentry_tour,Overnight - Niwot,Brainard Lake Recreation Area Timed Tickets,,Colorado,,40.08096900000000,-105.53529700000000,True,,,,,,,,na,,,3.7777777,9,0.6,
+10390884,recarea,Parker Dam Road Back Country Byway,,Bureau of Land Management,California,,34.288480,-114.141700,False,,,,,,,,na,,,,,,
 13802,recarea,Payette River Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2037
-10087209,timedentry_tour,Platinum Creek Parking (formerly Lewis River Parking),Lewis River Recreation Area Tickets,,,,46.15664000000000,-121.87845200000000,True,,,,,,,,na,,,3.8888888,36,0.3333333395421505,
+10087209,timedentry_tour,Platinum Creek Parking (formerly Lewis River Parking),Lewis River Recreation Area Tickets,,Washington,,46.15664000000000,-121.87845200000000,True,,,,,,,,na,,,3.8888888,36,0.3333333395421505,
 13819,recarea,Ridge and Valley Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.dot.ga.gov/DS/Travel/Scenic#tab-12
 10071157,facility,River Bench Day Use,,USDA Forest Service,,,,,False,,,,,,,,na,,,,,,https://www.fs.usda.gov/recarea/rogue-siskiyou/recarea/?recid=77743
-10113285,timedentry_tour,Sand Access,Sand Lake Recreation Area 4th of July Tickets,,,,45.28657900000000,-123.95727500000000,True,,,,,,,,na,,,4.5,4,1.0000000074505806,
-10390886,facility,Sandpockets Trails,Vernal Field Office,Bureau of Land Management,,,40.51079300000000,109.57460000000000,False,,,,,,,,na,,,,,,
-119,tour,Saucito Ranch Tour,Carrizo Plain National Monument Tours,,,,35.18986390000000,-119.86329720000001,True,,,,,,,,na,,,5,1,,
-10112507,timedentry_tour,Scenic Section - Large Group Launch,Snake River Non-commercial Group Use Launch Timed Reservations,,,,43.20451600000000,-110.82177900000001,True,,,,,,,,na,,,2,1,,
+10113285,timedentry_tour,Sand Access,Sand Lake Recreation Area 4th of July Tickets,,Oregon,,45.28657900000000,-123.95727500000000,True,,,,,,,,na,,,4.5,4,1.0000000074505806,
+10390886,facility,Sandpockets Trails,Vernal Field Office,Bureau of Land Management,Utah,,40.510793,-109.574600,False,,,,,,,,na,,,,,,
+119,tour,Saucito Ranch Tour,Carrizo Plain National Monument Tours,,California,,35.18986390000000,-119.86329720000001,True,,,,,,,,na,,,5,1,,
+10112507,timedentry_tour,Scenic Section - Large Group Launch,Snake River Non-commercial Group Use Launch Timed Reservations,,Wyoming,,43.20451600000000,-110.82177900000001,True,,,,,,,,na,,,2,1,,
 13838,recarea,Schoodic Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/13792
-10112820,tour,Shenango River Lake Dam Tour,Shenango River Lake Dam Tours,,,,41.26538852000000,-80.46256938000001,True,,,,,,,,na,,,5,6,2.75,
+10112820,tour,Shenango River Lake Dam Tour,Shenango River Lake Dam Tours,,Pennsylvania,,41.26538852000000,-80.46256938000001,True,,,,,,,,na,,,5,6,2.75,
 13844,recarea,Sierra Heritage Scenic Byway (Route 168),,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2314
 13848,recarea,Sky Island Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/50186
 13853,recarea,Snowy Range Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2054
@@ -91,16 +91,16 @@ b2be4aea-f69e-11ea-a1ae-aee12105d3ef,activitypass,Lenoir Landing Day Use Passes,
 13860,recarea,Staunton-Parkersburg Turnpike,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/10351
 10056012,facility,Steinberg Road Trailhead,,USDA Forest Service,,,,,False,,,,,,,,na,,,,,,https://www.fs.usda.gov/recarea/hmnf/recarea/?recid=19018
 10004189,recarea,Stu,,USDA Forest Service,,,,,False,,,,,,,,na,,,,,,
-5242424,permit,Tennessee Tombigbee Waterway Hunting Permit,Tennessee-Tombigbee Waterway,US Army Corps of Engineers,,Columbus,33.53446000000000,-88.50160300000000,True,,,,,,,,na,,,4,1,2,
-10086911,timedentry_tour,Timed Entry,Rocky Mountain National Park Timed Entry,,,,40.36667300000000,-105.58118300000000,True,,,,,,,,na,,,4.1854362,22137,1.7376265169835026,
-10086912,timedentry_tour,Timed Entry + Bear Lake Road,Rocky Mountain National Park Timed Entry,,,,40.36667300000000,-105.58118300000000,True,,,,,,,,na,,,4.170057,26303,1.7979226376477293,
-10089777,tour,USS Arizona Memorial (Authorized Commercial Users),Arizona Memorial Tours Pearl Harbor,,,,21.36777780000000,-157.93750000000000,True,,,,,,,,na,,,5,1,,
-10113282,timedentry_tour,West Winds Day Use,Sand Lake Recreation Area 4th of July Tickets,,,,45.28657900000000,-123.95727500000000,True,,,,,,,,na,,,,,,
+5242424,permit,Tennessee Tombigbee Waterway Hunting Permit,Tennessee-Tombigbee Waterway,US Army Corps of Engineers,Mississippi,Columbus,33.53446000000000,-88.50160300000000,True,,,,,,,,na,,,4,1,2,
+10086911,timedentry_tour,Timed Entry,Rocky Mountain National Park Timed Entry,,Colorado,,40.36667300000000,-105.58118300000000,True,,,,,,,,na,,,4.1854362,22137,1.7376265169835026,
+10086912,timedentry_tour,Timed Entry + Bear Lake Road,Rocky Mountain National Park Timed Entry,,Colorado,,40.36667300000000,-105.58118300000000,True,,,,,,,,na,,,4.170057,26303,1.7979226376477293,
+10089777,tour,USS Arizona Memorial (Authorized Commercial Users),Arizona Memorial Tours Pearl Harbor,,Hawaii,,21.36777780000000,-157.93750000000000,True,,,,,,,,na,,,5,1,,
+10113282,timedentry_tour,West Winds Day Use,Sand Lake Recreation Area 4th of July Tickets,,Oregon,,45.28657900000000,-123.95727500000000,True,,,,,,,,na,,,,,,
 13897,recarea,White Pass Scenic Byway,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2064
-10112506,timedentry_tour,Whitewater Section - Large Group Launch,Snake River Non-commercial Group Use Launch Timed Reservations,,,,43.20451600000000,-110.82177900000001,True,,,,,,,,na,,,4.5454545,11,0.8888889153798422,
-96,tour,Wild Cave Tour,Mammoth Cave National Park Tours,,,,37.18833330000000,-86.10111110000000,True,,,,,,,,na,,,4.902174,92,1.2063492385167924,
-10089110,tour,Wild Caving Tour,Jewel Cave National Monument Tours,,,,43.72978000000000,-103.82958000000001,True,,,,,,,,na,,,4.9,10,0.8333333134651184,
-10362485,campground,Windwhistle Campground,Canyon Rims,Bureau of Land Management,,Moab,38.17613000000000,-109.46181000000000,True,20,20,night,15,,40,Tent;RV;Trailer;Caravan/Camper Van;Pickup Camper;Fifth Wheel;Pop up,Overnight,Site-Specific,Auto Touring;Off Road Vehicle Trails;Hiking;Star Gazing;Camping,5,1,2,
+10112506,timedentry_tour,Whitewater Section - Large Group Launch,Snake River Non-commercial Group Use Launch Timed Reservations,,Wyoming,,43.20451600000000,-110.82177900000001,True,,,,,,,,na,,,4.5454545,11,0.8888889153798422,
+96,tour,Wild Cave Tour,Mammoth Cave National Park Tours,,Kentucky,,37.18833330000000,-86.10111110000000,True,,,,,,,,na,,,4.902174,92,1.2063492385167924,
+10089110,tour,Wild Caving Tour,Jewel Cave National Monument Tours,,South Dakota,,43.72978000000000,-103.82958000000001,True,,,,,,,,na,,,4.9,10,0.8333333134651184,
+10362485,campground,Windwhistle Campground,Canyon Rims,Bureau of Land Management,Utah,Moab,38.17613000000000,-109.46181000000000,True,20,20,night,15,,40,Tent;RV;Trailer;Caravan/Camper Van;Pickup Camper;Fifth Wheel;Pop up,Overnight,Site-Specific,Auto Touring;Off Road Vehicle Trails;Hiking;Star Gazing;Camping,5,1,2,
 13900,recarea,Woodlands Trace,,Department of Transportation,,,,,False,,,,,,,,na,,,,,,http://www.fhwa.dot.gov/byways/byways/2345
 10282704,visitorcenter,A.G. Gaston Motel (Temporarily Closed),Birmingham Civil Rights National Monument,National Park Service,Alabama,Birmingham,33.51516700000000,-86.81467800000000,False,,,,,,,,na,,,,,,http://www.nps.gov/bicr/
 232513,campground,AMITY,West Point Lake,US Army Corps of Engineers,Alabama,Lanett,32.97083330000000,-85.22222220000000,True,26,36,night,75,,55,Tent;RV;Trailer,Overnight,Site-Specific,WILDLIFE VIEWING;WATER SPORTS;HIKING;FISHING;CAMPING;BOATING,4.651332,413,2.8628571374075755,

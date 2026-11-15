@@ -30,8 +30,10 @@ struct SiteDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 header
                 actions
+                if site.isBare && visits.isEmpty { bareNote }
                 if !site.amenities.isEmpty { amenities }
                 if let d = site.description, !d.isEmpty { about(d) }
+                NearbyActivitiesSection(site: site)
                 ratingsSection
                 infoSection
             }
@@ -50,6 +52,20 @@ struct SiteDetailView: View {
     }
 
     // MARK: Sections
+
+    /// Bare OpenStreetMap points have a location and nothing else. Say so plainly rather than
+    /// dressing them up: trust comes from real details and verified visits.
+    private var bareNote: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("No details yet", systemImage: "questionmark.circle.fill")
+                .font(.headline).foregroundStyle(Color.canyon)
+            Text("Someone marked a campsite here on OpenStreetMap, but there's no name, fee or amenity info. Long-press the map to check who manages the land, and if you camp here, rate it so the next camper knows what to expect.")
+                .font(.subheadline).foregroundStyle(.secondary)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.canyon.opacity(0.1), in: .rect(cornerRadius: 16, style: .continuous))
+    }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -148,6 +164,7 @@ struct SiteDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Details").font(.headline)
             if let hours = site.openingHours { LabeledContent("Season / hours", value: hours) }
+            if let stay = site.stayLimit { LabeledContent("Stay limit", value: stay) }
             if let len = site.maxVehicleLength { LabeledContent("Max vehicle", value: "\(Int(len)) ft") }
             if let phone = site.phone, let url = URL(string: "tel:\(phone.filter { $0.isNumber || $0 == "+" })") {
                 LabeledContent("Phone") { Link(phone, destination: url) }
@@ -172,9 +189,8 @@ struct SiteDetailView: View {
     }
 
     private func add(to trip: Trip) {
-        guard !trip.stops.contains(where: { $0.siteID == site.id }) else { return }
-        let stop = TripStop(site: site, order: (trip.stops.map(\.order).max() ?? -1) + 1)
-        trip.stops.append(stop)
+        // Goes where it adds the least detour (before the destination on planned trips).
+        TripPlanner.insert(site, into: trip)
     }
 }
 

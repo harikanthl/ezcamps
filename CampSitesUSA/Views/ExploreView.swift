@@ -5,53 +5,79 @@ struct ExploreView: View {
     @Environment(SiteStore.self) private var store
     @Environment(LocationProvider.self) private var location
 
-    // Start over the Four Corners region where the bundled data lives.
-    @State private var position: MapCameraPosition = .region(.init(
-        center: .init(latitude: 37.6, longitude: -111.6),
-        span: .init(latitudeDelta: 6, longitudeDelta: 6)))
     @State private var region: MKCoordinateRegion?
+    @State private var recenter: MKCoordinateRegion?
     @State private var filter = SiteFilter()
     @State private var visible: [Site] = []
     @State private var totalInView = 0
-    @State private var selectedID: String?
     @State private var selectedSite: Site?
+    @State private var landQuery: LandQuery?
     @State private var satellite = false
+    @AppStorage("showPublicLands") private var showPublicLands = false
 
     var body: some View {
-        Map(position: $position, selection: $selectedID) {
-            UserAnnotation()
-            ForEach(visible) { site in
-                Marker(site.name, systemImage: site.kind.symbol, coordinate: site.coordinate)
-                    .tint(site.likelyFree ? Color.meadow : site.kind.color)
-                    .tag(site.id)
-            }
-        }
-        .mapStyle(satellite ? .hybrid(elevation: .realistic, pointsOfInterest: .excludingAll)
-                            : .standard(elevation: .realistic, pointsOfInterest: .excludingAll))
-        .mapControls {
-            MapUserLocationButton()
-            MapCompass()
-            MapPitchToggle()
-            MapScaleView()
-        }
-        .onMapCameraChange(frequency: .onEnd) { ctx in
-            region = ctx.region
-            refresh()
-        }
+        CampMapView(
+            sites: visible,
+            satellite: satellite,
+            showPublicLands: showPublicLands,
+            recenter: $recenter,
+            onRegionChange: { region = $0; refresh() },
+            onSelect: { selectedSite = store.site(id: $0) },
+            onLongPress: { landQuery = LandQuery(coordinate: $0) }
+        )
+        .ignoresSafeArea()
         .onChange(of: filter) { refresh() }
-        .onChange(of: store.isLoaded) { refresh() }
-        .onChange(of: selectedID) { _, id in
-            if let id { selectedSite = store.site(id: id) }
+        .onChange(of: store.isLoaded) {
+            refresh()
+            #if DEBUG
+            // Screenshot/testing aid: `-debugOpenSite <site id>` opens that site's card on launch.
+            if let id = UserDefaults.standard.string(forKey: "debugOpenSite") { selectedSite = store.site(id: id) }
+            #endif
         }
         .safeAreaInset(edge: .top) { header }
-        .overlay(alignment: .bottom) { statusPill }
-        .sheet(item: $selectedSite, onDismiss: { selectedID = nil }) { site in
+        .overlay(alignment: .bottom) {
+            VStack(spacing: 8) {
+                if showPublicLands {
+                    PublicLandsLegend()
+                        .padding(.horizontal)
+                        .transition(.opacity.combined(with: .offset(y: 8)))
+                }
+                statusPill
+            }
+            .padding(.bottom, 12)
+        }
+        .overlay(alignment: .topTrailing) { locateButton }
+        .sensoryFeedback(.impact(weight: .medium), trigger: landQuery?.id)
+        .sheet(item: $selectedSite) { site in
             NavigationStack { SiteDetailView(site: site) }
                 .presentationDetents([.medium, .large])
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 .presentationCornerRadius(28)
         }
+        .sheet(item: $landQuery) { q in
+            LandCheckView(query: q)
+                .presentationDetents([.medium, .large])
+                .presentationBackgroundInteraction(.enabled(upThrough: .medium))
+                .presentationCornerRadius(28)
+        }
         .task { location.start() }
+    }
+
+    private var locateButton: some View {
+        Button {
+            guard let here = location.location?.coordinate else { location.start(); return }
+            recenter = MKCoordinateRegion(center: here, span: .init(latitudeDelta: 0.6, longitudeDelta: 0.6))
+        } label: {
+            Image(systemName: "location.fill")
+                .font(.body.weight(.semibold))
+                .foregroundStyle(Color.sky)
+                .frame(width: 44, height: 44)
+                .background(.regularMaterial, in: .circle)
+        }
+        .buttonStyle(.pressable)
+        .padding(.trailing)
+        .padding(.top, 150)
+        .accessibilityLabel("Show my location")
     }
 
     private func refresh() {
@@ -80,6 +106,19 @@ struct ExploreView: View {
                 .padding(.horizontal, 14)
                 .frame(height: 46)
                 .background(.regularMaterial, in: .capsule)
+
+                Button {
+                    withAnimation(.easeOut(duration: 0.2)) { showPublicLands.toggle() }
+                } label: {
+                    Image(systemName: "square.2.layers.3d.top.filled")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(showPublicLands ? .white : Color.canyon)
+                        .frame(width: 46, height: 46)
+                        .background(showPublicLands ? AnyShapeStyle(Color.canyon) : AnyShapeStyle(.regularMaterial), in: .circle)
+                }
+                .buttonStyle(.pressable)
+                .accessibilityLabel(showPublicLands ? "Hide public lands" : "Show public lands")
+                .accessibilityAddTraits(showPublicLands ? .isSelected : [])
 
                 Button { satellite.toggle() } label: {
                     Image(systemName: satellite ? "map.fill" : "globe.americas.fill")
@@ -122,6 +161,8 @@ struct ExploreView: View {
         Group {
             if !store.isLoaded {
                 Label("Loading campsites…", systemImage: "hourglass")
+            } else if filter.kinds.isEmpty {
+                Label("Pick a site type to see campsites", systemImage: "line.3.horizontal.decrease.circle")
             } else if totalInView > visible.count {
                 Label("Showing \(visible.count) of \(totalInView.formatted()). Zoom in for more", systemImage: "plus.magnifyingglass")
             } else {
@@ -132,7 +173,6 @@ struct ExploreView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
         .background(.regularMaterial, in: .capsule)
-        .padding(.bottom, 12)
         .allowsHitTesting(false)
         .contentTransition(.numericText())
     }

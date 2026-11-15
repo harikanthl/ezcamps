@@ -22,8 +22,9 @@ Snapshot date: **2026-11-15**. Counts drift; re-run the collectors in `scripts/`
 | `osm_rest_areas.csv` | 2,477 | OpenStreetMap | ODbL 1.0 | US rest areas with toilets, water, truck parking, max stay. |
 | `state_park_systems.csv` | 50 | 50 state agencies | Links; check per state | Official URL + detected reservation platform + verification status. |
 | `sources.json` | 78 sources | research | — | Registry of every source, endpoint, license and refresh cadence. |
-| `campsites.db` | — | all of the above | mixed | SQLite: one table per source, `all_campsites` view, `sources` table. |
-| `../CampSitesUSA/Resources/sites.json` | 4,069 | OSM + RIDB + NPS pipeline | mixed; attribution string included | App bundle for UT + AZ (3,693 OSM, 303 RIDB, 73 NPS). Rebuild with `scripts/pipeline/build_sites.py`. |
+| `campsites.db` | — | all of the above | mixed | SQLite: one table per source, raw `all_campsites` view, `sources` table, and the canonical **`campsites`** table (29,105 deduplicated sites with state, fee, amenities, `also_in` merged IDs). Recreation.gov ratings/cell scores are kept only in the raw `recreation_gov` table and are not exported to the app. |
+| `boundaries/us_states.json` | 52 | US Census cb_2024_us_state_20m | Public domain | State polygons used to assign `campsites.state`. Rebuild with `scripts/pipeline/make_state_boundaries.py`. |
+| `../CampSitesUSA/Resources/sites.json` | 29,105 | `campsites` table | mixed; attribution string included | App bundle, all states. Rebuild with `scripts/pipeline/export_app.py`. |
 
 ## Key columns
 
@@ -104,7 +105,7 @@ python3 scripts/collect_state_parks.py
 python3 scripts/render_state_parks.py
 python3 scripts/render_parks.py
 python3 scripts/build_db.py
-python3 scripts/pipeline/build_sites.py --states UT AZ   # app bundle
+python3 -I scripts/pipeline/export_app.py               # app bundle (all states)
 ```
 
 NPS raw JSON is fetched separately:

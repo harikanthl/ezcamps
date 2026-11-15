@@ -1,16 +1,18 @@
 import Foundation
 import CoreLocation
 
-/// A campsite from the bundled open-data dataset (see scripts/pipeline/build_sites.py).
+/// A campsite from the bundled open-data dataset (built by scripts/build_db.py, exported by scripts/pipeline/export_app.py).
 nonisolated struct Site: Codable, Identifiable, Hashable, Sendable {
     enum Source: String, Codable, Sendable {
-        case osm, nps, ridb
+        case osm, nps, ridb, usfs, blm
 
         var label: String {
             switch self {
             case .osm: "OpenStreetMap"
             case .nps: "National Park Service"
             case .ridb: "Recreation.gov"
+            case .usfs: "USDA Forest Service"
+            case .blm: "Bureau of Land Management"
             }
         }
     }
@@ -53,8 +55,20 @@ nonisolated struct Site: Codable, Identifiable, Hashable, Sendable {
     let amenities: [String]
     let maxVehicleLength: Double?
     let openingHours: String?
+    /// e.g. "14 days". Mostly BLM and OSM `max_stay`.
+    let stayLimit: String?
 
     var coordinate: CLLocationCoordinate2D { .init(latitude: lat, longitude: lon) }
+
+    /// A bare OSM point with a placeholder name and nothing else. Not useful (or trustworthy)
+    /// as a pin until the map is zoomed in close; see SiteStore.visible.
+    /// Has a real name (not one of the pipeline's placeholders).
+    var isNamed: Bool { name != "Dispersed site" && name != "Unnamed campsite" }
+
+    var isBare: Bool {
+        (name == "Dispersed site" || name == "Unnamed campsite") && source == .osm
+            && description == nil && amenities.isEmpty && fee == nil && free != true
+    }
 
     /// Explicitly free, or a dispersed site with no fee information (dispersed camping on public land is almost always free).
     var likelyFree: Bool { free == true || (free == nil && kind == .dispersed) }

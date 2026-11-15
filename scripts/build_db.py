@@ -2,8 +2,10 @@
 """
 Build data/campsites.db from the collected CSVs.
 
-Creates one table per source plus a normalized `all_campsites` view with a
-shared column set. Numeric columns are inferred; empty strings become NULL.
+Creates one table per source, a raw `all_campsites` view, and the canonical
+`campsites` table (state assigned from coordinates, coordinates fixed, fees and
+amenities parsed, duplicates across sources merged; see scripts/pipeline/unify.py).
+Numeric columns are inferred; empty strings become NULL.
 
 Usage: python3 scripts/build_db.py
 """
@@ -13,11 +15,21 @@ from __future__ import annotations
 import csv
 import json
 import sqlite3
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 DB = DATA / "campsites.db"
+
+sys.path.insert(0, str(ROOT / "scripts" / "pipeline"))
+from unify import build_campsites  # noqa: E402
+from activities import build_activities  # noqa: E402
+
+# Only index columns people actually filter or join on. Indexing every column
+# (including long descriptions) more than doubled the file size.
+INDEXED = {"id", "source_id", "recareaid", "osm_id", "park_code", "park_codes", "entity_type",
+           "markeractivitygroup", "state", "states", "latitude", "longitude"}
 
 TABLES = {
     "recreation_gov": "recreation_gov_camping.csv",
@@ -81,7 +93,7 @@ def load_table(conn: sqlite3.Connection, name: str, path: Path) -> int:
         f'INSERT INTO "{name}" VALUES ({placeholders})',
         [[clean(r[f]) for f in fields] for r in rows],
     )
-    for c in fields:
+    for c in (f for f in fields if f.lower() in INDEXED):
         conn.execute(f'CREATE INDEX IF NOT EXISTS "idx_{name}_{c}" ON "{name}"("{c}")')
     return len(rows)
 
@@ -156,7 +168,7 @@ def build_view(conn: sqlite3.Connection) -> None:
 
         UNION ALL
         SELECT
-            'nps', park_code, name, 'developed', 'National Park Service',
+            'nps', id, name, 'developed', 'National Park Service',
             (SELECT states FROM nps_parks WHERE nps_parks.park_code = nps_campgrounds.park_code),
             NULL, CAST(latitude AS REAL), CAST(longitude AS REAL),
             NULL, NULL, NULL,
@@ -255,13 +267,19 @@ def main() -> None:
             )
         counts["sources"] = len(sources)
 
+    unify_stats = build_campsites(conn, DATA)
+    unify_stats |= build_activities(conn, DATA)
+
     conn.commit()
     total = conn.execute("SELECT COUNT(*) FROM all_campsites").fetchone()[0]
+    conn.execute("VACUUM")
     conn.close()
 
     for table, n in counts.items():
         print(f"  {table:24} {n:>6} rows")
     print(f"  {'all_campsites (view)':24} {total:>6} rows")
+    for k, v in unify_stats.items():
+        print(f"  campsites: {k:22} {v:>6}")
     print(f"wrote {DB}")
 
 

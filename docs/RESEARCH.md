@@ -74,6 +74,7 @@ Most opengeos projects are **Python (notebooks, analysis)** or **web JS (MapLibr
   - Rate-limit to one rating per site per night, and let people report abuse.
 
 ### Activities near each spot, ranked by difficulty
+- **Built (v1):** `activities` table + `activities.json` bundle; site card shows activities within 25 mi, easiest first. Difficulty rules live in `scripts/pipeline/activities.py`. Note USFS *trail class is a development scale* (TC1 primitive … TC5 paved), so it is inverted and then adjusted for typical grade and length. Not yet: 3DEP elevation gain, OSM `sac_scale`, NPS trail lines, "my level" personalization.
 - **What to show:** for any campsite, list hikes, MTB rides, paddling, climbing, fishing, swimming, scenic drives, OHV routes and ranger programs within a chosen radius or drive time. Sort by difficulty (Easy, Moderate, Hard, Strenuous), distance from camp, duration and season.
 - **Where the data comes from:**
   - **NPS `/thingstodo`**: curated activities per park with duration, season, fees, pets and reservations. Its difficulty field needs checking, and we fill it in from trail data when it's missing.
