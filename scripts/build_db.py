@@ -25,6 +25,9 @@ TABLES = {
     "nps_campgrounds": "nps_campgrounds.csv",
     "blm_camping": "blm_camping.csv",
     "usfs_recreation": "usfs_recreation_sites.csv",
+    "osm_camp_sites": "osm_camp_sites.csv",
+    "osm_dump_stations": "osm_dump_stations.csv",
+    "osm_rest_areas": "osm_rest_areas.csv",
     "nps_alerts": "nps_alerts.csv",
     "nps_things_to_do": "nps_things_to_do.csv",
     "nps_visitor_centers": "nps_visitor_centers.csv",
@@ -146,7 +149,8 @@ def build_view(conn: sqlite3.Connection) -> None:
             reservable,
             average_rating AS rating,
             rating_count,
-            official_url AS source_url
+            official_url AS source_url,
+            'check' AS license
         FROM recreation_gov
         WHERE entity_type IN ('campground', 'recarea')
 
@@ -157,14 +161,14 @@ def build_view(conn: sqlite3.Connection) -> None:
             NULL, CAST(latitude AS REAL), CAST(longitude AS REAL),
             NULL, NULL, NULL,
             CAST(total_sites AS INTEGER), CAST(rv_max_length_ft AS INTEGER),
-            NULL, NULL, NULL, NULL, url
+            NULL, NULL, NULL, NULL, url, 'public-domain'
         FROM nps_campgrounds
 
         UNION ALL
         SELECT
             'blm', CAST(source_id AS TEXT), name, 'dispersed', 'Bureau of Land Management',
             state, NULL, CAST(latitude AS REAL), CAST(longitude AS REAL),
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, blm_url
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, blm_url, 'public-domain'
         FROM blm_camping
 
         UNION ALL
@@ -177,9 +181,25 @@ def build_view(conn: sqlite3.Connection) -> None:
             END,
             'USDA Forest Service', NULL, NULL,
             CAST(latitude AS REAL), CAST(longitude AS REAL),
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, recareaurl
+            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, recareaurl, 'cc-by-4.0'
         FROM usfs_recreation
-        WHERE markeractivitygroup IN ('Camping & Cabins', 'Horse Riding & Camping', 'OHV Riding & Camping', 'Trailhead');
+        WHERE markeractivitygroup IN ('Camping & Cabins', 'Horse Riding & Camping', 'OHV Riding & Camping', 'Trailhead')
+
+        UNION ALL
+        SELECT
+            'osm', osm_type || '/' || CAST(osm_id AS TEXT), name,
+            CASE camp_site
+                WHEN 'serviced' THEN 'developed'
+                WHEN 'deluxe' THEN 'developed'
+                WHEN 'standard' THEN 'primitive'
+                WHEN 'basic' THEN 'primitive'
+                ELSE 'dispersed'
+            END,
+            operator, NULL, NULL,
+            CAST(latitude AS REAL), CAST(longitude AS REAL),
+            CASE WHEN fee = 'free' THEN 0 END, NULL, NULL,
+            CAST(capacity AS INTEGER), NULL, NULL, NULL, NULL, NULL, osm_url, 'odbl'
+        FROM osm_camp_sites;
         """
     )
 
@@ -200,6 +220,12 @@ def main() -> None:
         """CREATE TABLE IF NOT EXISTS usfs_recreation (
             recareaid REAL, recareaname TEXT, markeractivity TEXT, markeractivitygroup TEXT,
             forestname TEXT, latitude REAL, longitude REAL, recareaurl TEXT
+        )"""
+    )
+    conn.execute(
+        """CREATE TABLE IF NOT EXISTS osm_camp_sites (
+            osm_type TEXT, osm_id REAL, name TEXT, camp_site TEXT, fee TEXT,
+            operator TEXT, latitude REAL, longitude REAL, capacity TEXT, osm_url TEXT
         )"""
     )
     build_view(conn)

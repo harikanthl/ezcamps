@@ -249,10 +249,20 @@ def main() -> int:
 
     load_dotenv(ROOT / ".env")
     nps_key, ridb_key = os.environ.get("NPS_API_KEY"), os.environ.get("RIDB_API_KEY")
+    previous: list[dict] = []
+    if args.out.exists():
+        try:
+            previous = json.loads(args.out.read_text()).get("sites", [])
+        except ValueError:
+            pass
     all_sites: list[dict] = []
     for st in (s.upper() for s in args.states):
         print(f"[{st}] OSM…", file=sys.stderr)
-        batch = osm_sites(st)
+        try:
+            batch = osm_sites(st)
+        except Exception as e:  # noqa: BLE001 - Overpass is often overloaded
+            batch = [x for x in previous if x["source"] == "osm" and x["state"] == st]
+            print(f"[{st}] Overpass unavailable ({e}); reusing {len(batch)} OSM sites from last build", file=sys.stderr)
         if nps_key:
             print(f"[{st}] NPS…", file=sys.stderr)
             batch += nps_sites(st, nps_key)

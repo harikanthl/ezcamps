@@ -16,9 +16,14 @@ Snapshot date: **2026-11-15**. Counts drift; re-run the collectors in `scripts/`
 | `nps_campgrounds_raw.json` | 665 | NPS Data API | Public domain | Raw API payload. |
 | `blm_camping.csv` | 539 | BLM ArcGIS (RIDB-derived) | Public domain | Stay limits, fees, activities, reservation URL, directions. |
 | `usfs_recreation_sites.csv` | 14,211 | USFS EDW Recreation Opportunities | CC BY 4.0 | Campgrounds, cabins, trailheads, OHV, horse camps. Attribute USFS. |
+| `osm_camp_sites.csv` | 23,843 | OpenStreetMap (Overpass) | ODbL 1.0 | US `tourism=camp_site` nodes with fee, access, capacity, water, toilets, showers, power, operator. |
+| `osm_camp_sites_raw.json` | 23,843 | OpenStreetMap | ODbL 1.0 | Raw Overpass response (`out body`). |
+| `osm_dump_stations.csv` | 1,697 | OpenStreetMap | ODbL 1.0 | US dump stations with fee, water, toilets, hours. |
+| `osm_rest_areas.csv` | 2,477 | OpenStreetMap | ODbL 1.0 | US rest areas with toilets, water, truck parking, max stay. |
 | `state_park_systems.csv` | 50 | 50 state agencies | Links; check per state | Official URL + detected reservation platform + verification status. |
 | `sources.json` | 78 sources | research | — | Registry of every source, endpoint, license and refresh cadence. |
 | `campsites.db` | — | all of the above | mixed | SQLite: one table per source, `all_campsites` view, `sources` table. |
+| `../CampSitesUSA/Resources/sites.json` | 4,069 | OSM + RIDB + NPS pipeline | mixed; attribution string included | App bundle for UT + AZ (3,693 OSM, 303 RIDB, 73 NPS). Rebuild with `scripts/pipeline/build_sites.py`. |
 
 ## Key columns
 
@@ -86,14 +91,20 @@ SELECT state_code, COUNT(*) FROM all_campsites_norm GROUP BY state_code ORDER BY
 ## Rebuild
 
 ```bash
+export NPS_API_KEY=...
+python3 scripts/collect_nps.py
 python3 scripts/collect_recreation_gov.py
 python3 scripts/collect_usfs.py
 python3 scripts/collect_blm.py
+python3 scripts/collect_osm.py
+python3 scripts/clean_osm.py
+python3 scripts/clean_osm_amenities.py
 python3 scripts/clean_nps.py
 python3 scripts/collect_state_parks.py
 python3 scripts/render_state_parks.py
 python3 scripts/render_parks.py
 python3 scripts/build_db.py
+python3 scripts/pipeline/build_sites.py --states UT AZ   # app bundle
 ```
 
 NPS raw JSON is fetched separately:

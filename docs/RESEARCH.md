@@ -4,7 +4,7 @@ _Research done 2026-11-15. Check API terms and dataset versions again before bui
 
 ## 1. Starting point
 
-- The repo is a new **SwiftUI + SwiftData multiplatform template**: iOS 26.2, macOS and visionOS targets, and a placeholder `Item` model. That makes this a **native Apple app**, which shapes how much of opengeos we can reuse (see §3).
+- The repo is a new **SwiftUI + SwiftData multiplatform app**: iOS 26.2, macOS and visionOS targets. (This section describes the starting point; the app has since been implemented — see the README for current status.) That makes this a **native Apple app**, which shapes how much of opengeos we can reuse (see §3).
 - **freecampsites.net is still online.** Its data comes from users and has no open license, and the same goes for iOverlander. We should not scrape either one. We get our advantage by combining **open government data** with **OSM** and **our own openly licensed community reports**.
 
 ## 2. Data sources (free or public)

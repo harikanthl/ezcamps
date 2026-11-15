@@ -78,6 +78,19 @@ GET https://www.recreation.gov/api/search?q=camping&size=500&start=0
 - Detail pages are hash routes (`#!<id>&query=sitedetails`), so server-side HTML fetches do not contain the listing.
 - Do not scrape or republish. See `docs/FREECAMPSITES.md`.
 
+## OpenStreetMap / Overpass
+
+- Endpoint: `https://overpass-api.de/api/interpreter` (alternates: `overpass.kumi.systems`, `overpass.private.coffee`; both timed out from this network).
+- Send a descriptive `User-Agent` and `Accept: application/json`. Without them the main endpoint returned **406**.
+- US campsite counts at snapshot: **23,843 nodes**, **11,910 ways**, **862 relations**.
+- A full `node + way + relation` query with `out center tags` returned **502** (too large / queue). Pulling **nodes only** with `out body` worked: 5.8 MB, 23,843 records, about 1–2 minutes.
+- `out tags` omits coordinates. Use `out body` (nodes keep lat/lon) or `out center` (ways/relations get a center).
+- Two queries in quick succession produced **429**. Space requests by several seconds and retry with exponential backoff.
+- `out count;` is a cheap way to size a query before pulling data.
+- Relevant tags: `tourism=camp_site`, `camp_site=basic|standard|serviced|deluxe`, `fee`, `charge`, `access`, `capacity`, `maxstay`, `toilets`, `drinking_water`, `shower`, `power_supply`, `sanitary_dump_station`, `picnic_table`, `fire_pit`, `operator`.
+- Snapshot amenities: **1,697** dump stations (1,605 nodes + 92 ways), **2,477** rest areas (490 nodes + 1,987 ways).
+- ODbL: attribute "© OpenStreetMap contributors" and keep derived databases share-alike.
+
 ## State park pages
 
 - Many state sites return **403** to scripted clients (Arkansas, Georgia, Hawaii, Maryland, Massachusetts, Michigan, Minnesota, Missouri, Nebraska, New York, South Carolina, Utah, Virginia, Wisconsin, Wyoming) even with a browser UA.

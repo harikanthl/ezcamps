@@ -4,7 +4,7 @@ _Compiled 2026-11-15 from live endpoints and operator documentation. Counts are 
 
 This catalog covers four things:
 
-1. **Where the data lives** — 65 sources across federal, state, local, community and commercial.
+1. **Where the data lives** — 78 sources across federal, state, local, community and commercial.
 2. **What each source actually gives you** — fields, coverage, access, license, refresh rate.
 3. **What we already pulled** — reproducible CSVs/JSON in `data/`.
 4. **How to combine it** — a unified `Site` schema, licensing rules, and a build order.
@@ -34,9 +34,12 @@ Companion docs:
 | NPS webcams | **287** | `data/nps_webcams.csv` | Public domain |
 | BLM camping points | **539** | `data/blm_camping.csv` | Public domain |
 | USFS recreation opportunities | **14,211** | `data/usfs_recreation_sites.csv` | CC BY 4.0 |
+| OSM campsites (US) | **23,843** | `data/osm_camp_sites.csv` | ODbL 1.0 |
+| OSM dump stations | **1,697** | `data/osm_dump_stations.csv` | ODbL 1.0 |
+| OSM rest areas | **2,477** | `data/osm_rest_areas.csv` | ODbL 1.0 |
 | State park systems | **50** | `data/state_park_systems.csv` | Links to official sources |
-| Source registry | **65 sources** | `data/sources.json` | — |
-| Unified SQLite database | all of the above | `data/campsites.db` | mixed; see per-row license |
+| Source registry | **78 sources** | `data/sources.json` | — |
+| Unified SQLite database | all of the above | `data/campsites.db` | mixed; see per-row `license` |
 
 Recreation.gov agency mix at snapshot:
 
@@ -51,6 +54,18 @@ Recreation.gov agency mix at snapshot:
 | State/local/other partners | ~165 |
 
 Recreation.gov coverage by state (top): California 980, Oregon 689, Utah 674, Colorado 486, Idaho 458, Montana 373, Arizona 319, Washington 304. **49 states + DC + a few territories** are represented; Delaware has no Recreation.gov camping listings in this snapshot. State values are a mix of full names and abbreviations (`ID`, `Saint John`), so normalize before joining.
+
+The unified `all_campsites` view contains **39,270 rows**:
+
+| Source | Rows |
+|---|---:|
+| OpenStreetMap (US campsites) | 23,843 |
+| USFS (camping, horse, OHV, trailheads) | 7,947 |
+| Recreation.gov (campgrounds + rec areas) | 6,276 |
+| NPS campgrounds | 665 |
+| BLM camping | 539 |
+
+OSM and USFS records have no state field; derive `state_code` from coordinates (MapKit/CLLocation or a state polygon join) before filtering by state.
 
 ---
 
@@ -239,7 +254,7 @@ State-level data worth collecting per state:
 | **AllStays** | RV parks, free overnight, rest areas, dump, Walmarts, truck stops | Proprietary | Reference |
 | **RV Parky** | RV parks, free overnight, dump | Proprietary | Reference |
 | **OvernightRVParking** | Verified free overnight parking policies | Paid | Reference |
-| **OpenStreetMap** | `tourism=camp_site`, `fee=no`, `camp_site=basic` | ODbL | **Primary open free-site layer** |
+| **OpenStreetMap** | 23,843 US `tourism=camp_site` nodes; `basic`/`fee=no` subset | ODbL | **Primary open free-site layer** |
 
 ### 5.2 The legal free-camping rules that matter
 
@@ -327,6 +342,8 @@ Commercial inventory is where the money is, but none of it is open. The app's ho
 | Medical | OSM `amenity=hospital`/`clinic` | — | 24h, ER |
 
 **Rest-area overnighting** is state- and site-specific. Some states allow it, some prohibit it, and some allow it only at certain sites. Never infer from a single tag; store the policy source.
+
+Snapshot in this repo: **1,697 dump stations** and **2,477 rest areas** from OSM (`data/osm_dump_stations.csv`, `data/osm_rest_areas.csv`).
 
 ---
 
@@ -465,7 +482,7 @@ Availability is the most fragile layer. Do **not** build a product on undocument
 
 ## 15. Field mapping to the Swift model
 
-Suggested SwiftData models (replace the template `Item`):
+The app already ships `Site`, `SavedSite`, `Visit`, `Trip` and `TripStop` in `CampSitesUSA/Models/`. The fuller national schema suggested by this catalog is:
 
 ```swift
 @Model final class Site {
@@ -525,4 +542,4 @@ The catalog CSVs are the seed data. A build step can import them into a bundled 
 
 ## Source registry
 
-The full machine-readable list — 65 sources with endpoint, auth, license, refresh rate, key fields and notes — is in [`../data/sources.json`](../data/sources.json). Pull requests that add a source should add it there and, if it is ingested, a collector in `scripts/`.
+The full machine-readable list — 78 sources with endpoint/link, auth, license, refresh rate, key fields and notes — is in [`../data/sources.json`](../data/sources.json). Pull requests that add a source should add it there and, if it is ingested, a collector in `scripts/`.
