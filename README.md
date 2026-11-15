@@ -36,7 +36,7 @@ The repo currently contains two things:
 | OSM dump stations | 1,697 | `data/osm_dump_stations.csv` |
 | OSM rest areas | 2,477 | `data/osm_rest_areas.csv` |
 | State park systems | 50 | `data/state_park_systems.csv` |
-| Unified database | — | `data/campsites.db` |
+| Unified database | — | `data/campsites.db`: not in git; download with `python3 -I scripts/fetch_db.py` ([data releases](https://github.com/harikanthl/ezcamps/releases)) |
 
 The SQLite database has one table per source plus an `all_campsites` view with a shared schema:
 
@@ -63,6 +63,7 @@ python3 scripts/clean_nps.py                # requires data/nps_*_raw.json
 python3 scripts/collect_state_parks.py
 python3 scripts/render_state_parks.py
 python3 scripts/build_db.py
+python3 -I scripts/publish_db.py            # publish data/campsites.db as a data-YYYY-MM-DD release
 
 # App bundle: exports the canonical `campsites` table (all states) to CampSitesUSA/Resources/sites.json
 python3 -I scripts/pipeline/export_app.py
