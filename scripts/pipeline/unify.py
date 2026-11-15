@@ -149,9 +149,12 @@ def dist_m(a_lat, a_lon, b_lat, b_lon) -> float:
 def site(**kw) -> dict:
     base = dict(free=None, fee=None, reservable=False, agency=None, url=None, phone=None,
                 description=None, amenities=set(), max_rig_ft=None, opening_hours=None,
-                stay_limit=None, capacity=None)
+                stay_limit=None, capacity=None, cell=None)
     base.update(kw)
     return base
+
+
+CELL = {"Yes - year round": "year-round", "Yes - seasonal": "seasonal", "No": "none"}
 
 
 def from_nps(raw_json: Path) -> list[dict]:
@@ -188,6 +191,7 @@ def from_nps(raw_json: Path) -> list[dict]:
             url=c.get("reservationUrl") or c.get("url"), phone=phones[0] if phones else None,
             description=strip_html(c.get("description")), amenities=a,
             max_rig_ft=rv_len or None, capacity=int(float(sites_.get("totalSites") or 0)) or None,
+            cell=CELL.get(am.get("cellPhoneReception") or ""),
         ))
     return out
 
@@ -350,7 +354,7 @@ def merge(sites: list[dict]) -> list[dict]:
             match["amenities"] |= s["amenities"]
             match["also_in"].append(s["id"])
             for f in ("free", "fee", "url", "phone", "description", "max_rig_ft",
-                      "opening_hours", "stay_limit", "capacity"):
+                      "opening_hours", "stay_limit", "capacity", "cell"):
                 if match[f] is None and s[f] is not None:
                     match[f] = s[f]
             if match["kind"] == "campground" and s["kind"] == "dispersed" and match["source"] == "osm":
@@ -371,7 +375,8 @@ CREATE TABLE campsites (
     free INTEGER, fee TEXT, reservable INTEGER NOT NULL,
     agency TEXT, url TEXT, phone TEXT, description TEXT,
     amenities TEXT NOT NULL, max_rig_ft REAL, opening_hours TEXT, stay_limit TEXT,
-    capacity INTEGER, also_in TEXT NOT NULL, license TEXT NOT NULL
+    capacity INTEGER, also_in TEXT NOT NULL, license TEXT NOT NULL,
+    cell TEXT  -- official cell reception note (NPS): 'year-round' | 'seasonal' | 'none'
 );
 """
 
@@ -407,12 +412,12 @@ def build_campsites(conn: sqlite3.Connection, data_dir: Path) -> dict[str, int]:
     stats["merged_duplicates"] = len(located) - len(kept)
     conn.executescript(SCHEMA)
     conn.executemany(
-        "INSERT INTO campsites VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        "INSERT INTO campsites VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         [(s["id"], s["source"], s["name"], s["kind"], s["lat"], s["lon"], s["state"],
           None if s["free"] is None else int(s["free"]), s["fee"], int(bool(s["reservable"])),
           s["agency"], s["url"], s["phone"], s["description"],
           json.dumps(sorted(s["amenities"])), s["max_rig_ft"], s["opening_hours"], s["stay_limit"],
-          s["capacity"], json.dumps(s["also_in"]), LICENSE[s["source"]]) for s in kept],
+          s["capacity"], json.dumps(s["also_in"]), LICENSE[s["source"]], s["cell"]) for s in kept],
     )
     conn.executescript("""
         CREATE INDEX idx_campsites_state ON campsites(state);

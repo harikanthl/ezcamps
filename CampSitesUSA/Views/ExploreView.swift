@@ -12,14 +12,16 @@ struct ExploreView: View {
     @State private var totalInView = 0
     @State private var selectedSite: Site?
     @State private var landQuery: LandQuery?
-    @State private var satellite = false
+    @AppStorage("mapBase") private var base: MapBase = .standard
     @AppStorage("showPublicLands") private var showPublicLands = false
+    @AppStorage("showForestRoads") private var showForestRoads = false
 
     var body: some View {
         CampMapView(
             sites: visible,
-            satellite: satellite,
+            base: base,
             showPublicLands: showPublicLands,
+            showForestRoads: showForestRoads,
             recenter: $recenter,
             onRegionChange: { region = $0; refresh() },
             onSelect: { selectedSite = store.site(id: $0) },
@@ -37,6 +39,19 @@ struct ExploreView: View {
         .safeAreaInset(edge: .top) { header }
         .overlay(alignment: .bottom) {
             VStack(spacing: 8) {
+                if base == .topo {
+                    Text("Topo: USGS The National Map")
+                        .font(.caption2.weight(.semibold))
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(.regularMaterial, in: .capsule)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal)
+                }
+                if showForestRoads {
+                    ForestRoadsLegend(zoomedIn: (region?.span.latitudeDelta ?? 99) < 0.6)
+                        .padding(.horizontal)
+                        .transition(.opacity.combined(with: .offset(y: 8)))
+                }
                 if showPublicLands {
                     PublicLandsLegend()
                         .padding(.horizontal)
@@ -60,24 +75,56 @@ struct ExploreView: View {
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 .presentationCornerRadius(28)
         }
-        .task { location.start() }
+        .task {
+            location.start()
+            #if DEBUG
+            // Testing aid: `-debugRegion "lat,lon,span"` opens the map there; `-debugRegion us` = the reset button.
+            // `-debugLandCheck "lat,lon"` opens Can I camp here? there (stands in for a long-press).
+            if let c = UserDefaults.standard.string(forKey: "debugLandCheck")?.split(separator: ",").compactMap({ Double($0) }), c.count == 2 {
+                try? await Task.sleep(for: .seconds(2))
+                landQuery = LandQuery(coordinate: .init(latitude: c[0], longitude: c[1]))
+            }
+            if UserDefaults.standard.string(forKey: "debugRegion") == "us" {
+                try? await Task.sleep(for: .seconds(1.5))
+                recenter = Self.usRegion
+            }
+            if let r = UserDefaults.standard.string(forKey: "debugRegion")?.split(separator: ",").compactMap({ Double($0) }), r.count == 3 {
+                try? await Task.sleep(for: .seconds(1.5))  // like a real tap: after the map has its size
+                recenter = MKCoordinateRegion(center: .init(latitude: r[0], longitude: r[1]),
+                                              span: .init(latitudeDelta: r[2], longitudeDelta: r[2]))
+            }
+            #endif
+        }
     }
 
+    /// Whole lower 48, coast to coast (24.5–49.5°N, 125–66.5°W). CampMapView fits its width.
+    static let usRegion = MKCoordinateRegion(center: .init(latitude: 38.0, longitude: -95.75),
+                                             span: .init(latitudeDelta: 25, longitudeDelta: 58.5))
+
     private var locateButton: some View {
-        Button {
-            guard let here = location.location?.coordinate else { location.start(); return }
-            recenter = MKCoordinateRegion(center: here, span: .init(latitudeDelta: 0.6, longitudeDelta: 0.6))
-        } label: {
-            Image(systemName: "location.fill")
+        VStack(spacing: 10) {
+            mapButton(symbol: "location.fill", label: "Show my location") {
+                guard let here = location.location?.coordinate else { location.start(); return }
+                recenter = MKCoordinateRegion(center: here, span: .init(latitudeDelta: 0.6, longitudeDelta: 0.6))
+            }
+            mapButton(symbol: "map", label: "Show all of the US") {
+                recenter = Self.usRegion
+            }
+        }
+        .padding(.trailing)
+        .padding(.top, 150)
+    }
+
+    private func mapButton(symbol: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: symbol)
                 .font(.body.weight(.semibold))
                 .foregroundStyle(Color.sky)
                 .frame(width: 44, height: 44)
                 .background(.regularMaterial, in: .circle)
         }
         .buttonStyle(.pressable)
-        .padding(.trailing)
-        .padding(.top, 150)
-        .accessibilityLabel("Show my location")
+        .accessibilityLabel(label)
     }
 
     private func refresh() {
@@ -107,28 +154,39 @@ struct ExploreView: View {
                 .frame(height: 46)
                 .background(.regularMaterial, in: .capsule)
 
-                Button {
-                    withAnimation(.easeOut(duration: 0.2)) { showPublicLands.toggle() }
+                Menu {
+                    Toggle(isOn: $showPublicLands.animation(.easeOut(duration: 0.2))) {
+                        Label("Public lands", systemImage: "square.2.layers.3d.top.filled")
+                    }
+                    Toggle(isOn: $showForestRoads.animation(.easeOut(duration: 0.2))) {
+                        Label("Forest roads (MVUM)", systemImage: "road.lanes")
+                    }
                 } label: {
+                    let any = showPublicLands || showForestRoads
                     Image(systemName: "square.2.layers.3d.top.filled")
                         .font(.title3.weight(.semibold))
-                        .foregroundStyle(showPublicLands ? .white : Color.canyon)
+                        .foregroundStyle(any ? .white : Color.canyon)
                         .frame(width: 46, height: 46)
-                        .background(showPublicLands ? AnyShapeStyle(Color.canyon) : AnyShapeStyle(.regularMaterial), in: .circle)
+                        .background(any ? AnyShapeStyle(Color.canyon) : AnyShapeStyle(.regularMaterial), in: .circle)
                 }
                 .buttonStyle(.pressable)
-                .accessibilityLabel(showPublicLands ? "Hide public lands" : "Show public lands")
-                .accessibilityAddTraits(showPublicLands ? .isSelected : [])
+                .accessibilityLabel("Map layers")
 
-                Button { satellite.toggle() } label: {
-                    Image(systemName: satellite ? "map.fill" : "globe.americas.fill")
+                Menu {
+                    Picker("Map style", selection: $base) {
+                        ForEach(MapBase.allCases) { b in
+                            Label(b.label, systemImage: b.symbol).tag(b)
+                        }
+                    }
+                } label: {
+                    Image(systemName: base.symbol)
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(.white)
                         .frame(width: 46, height: 46)
                         .background(Color.sky, in: .circle)
                 }
                 .buttonStyle(.pressable)
-                .accessibilityLabel(satellite ? "Standard map" : "Satellite map")
+                .accessibilityLabel("Map style: \(base.label)")
             }
             .padding(.horizontal)
 

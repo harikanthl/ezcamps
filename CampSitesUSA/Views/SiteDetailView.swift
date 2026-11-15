@@ -32,6 +32,8 @@ struct SiteDetailView: View {
                 actions
                 if site.isBare && visits.isEmpty { bareNote }
                 if !site.amenities.isEmpty { amenities }
+                NightConditionsSection(coordinate: site.coordinate, site: site)
+                CellSignalSection(site: site, visits: visits)
                 if let d = site.description, !d.isEmpty { about(d) }
                 NearbyActivitiesSection(site: site)
                 ratingsSection

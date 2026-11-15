@@ -8,6 +8,7 @@ struct TripsView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \Trip.createdAt, order: .reverse) private var trips: [Trip]
     @State private var planning = false
+    @State private var planningWithAI = false
     @State private var path: [Trip] = []
 
     var body: some View {
@@ -21,11 +22,13 @@ struct TripsView: View {
                         Text("Tell us where you're starting and where you're headed. We'll map the drive and suggest a camp for each night, free ones first.")
                     } actions: {
                         Button {
-                            planning = true
+                            planningWithAI = true
                         } label: {
-                            Label("Plan a trip", systemImage: "map.fill").padding(.horizontal, 8)
+                            Label("Plan with AI", systemImage: "sparkles").padding(.horizontal, 8)
                         }
                         .buttonStyle(.borderedProminent).tint(.dusk).controlSize(.large)
+                        Button("Plan manually") { planning = true }
+                            .tint(.dusk)
                     }
                 } else {
                     List {
@@ -39,13 +42,18 @@ struct TripsView: View {
             .navigationTitle("Trips")
             .navigationDestination(for: Trip.self) { TripDetailView(trip: $0) }
             .toolbar {
+                Button("Plan with AI", systemImage: "sparkles") { planningWithAI = true }
                 Button("Plan a trip", systemImage: "plus") { planning = true }
             }
             .sheet(isPresented: $planning) {
                 PlanTripView { trip in path.append(trip) }
             }
+            .sheet(isPresented: $planningWithAI) {
+                PlanWithAIView { trip in path.append(trip) }
+            }
             #if DEBUG
             .onAppear(perform: debugOpen)
+            .onAppear { if UserDefaults.standard.string(forKey: "debugAIPrompt") != nil { planningWithAI = true } }
             .onChange(of: trips.count, debugOpen)
             #endif
         }
@@ -216,29 +224,17 @@ struct PlanTripView: View {
         }
         working = true
         defer { working = false }
-        guard let route = await TripPlanner.route(from: start, to: to.coordinate) else {
-            error = "Couldn't find a driving route between those places."
-            return
+        do {
+            let trip = try await TripPlanner.makeTrip(
+                from: TripPlace(name: from?.name ?? "My location", coordinate: start), to: to,
+                startDate: startDate, dailyMiles: dailyMiles, preferFree: preferFree, store: store, context: context)
+            dismiss()
+            onCreate(trip)
+        } catch {
+            self.error = error.localizedDescription
         }
-        let trip = Trip(name: "\(from?.name ?? "My location") → \(to.name)")
-        trip.startName = from?.name ?? "My location"
-        trip.startLat = start.latitude
-        trip.startLon = start.longitude
-        trip.endName = to.name
-        trip.endLat = to.coordinate.latitude
-        trip.endLon = to.coordinate.longitude
-        trip.startDate = startDate
-        trip.dailyMiles = dailyMiles
-        trip.preferFree = preferFree
-        context.insert(trip)
-        for (i, site) in TripPlanner.suggestStops(on: route, dailyMiles: dailyMiles, preferFree: preferFree, store: store).enumerated() {
-            let stop = TripStop(site: site, order: i)
-            stop.suggested = true
-            trip.stops.append(stop)
-        }
-        dismiss()
-        onCreate(trip)
     }
+
 }
 
 // MARK: - Place search
@@ -310,7 +306,9 @@ struct PlaceSearchView: View {
 struct TripDetailView: View {
     @Bindable var trip: Trip
     @Environment(SiteStore.self) private var store
+    @Environment(OfflineStore.self) private var offline
     @State private var legs: [MKRoute?] = []
+    @State private var offlineNote: String?
     @State private var routing = false
     @State private var position: MapCameraPosition = .automatic
     @State private var openSite: Site?
@@ -319,6 +317,9 @@ struct TripDetailView: View {
     @State private var renaming = false
     @State private var replanning = false
     @State private var editMode: EditMode = .inactive
+    @State private var services: [String: CampServices] = [:]
+    @State private var nightConditions: [String: NightConditions] = [:]
+    @State private var showServices = false
 
     private let legColors: [Color] = [.sunset, .dusk, .sky, .berry, .meadow, .canyon]
 
@@ -380,6 +381,14 @@ struct TripDetailView: View {
             } footer: {
                 Text("Most BLM and National Forest land limits stays to 14 days in one spot. Suggested camps are picked from open data. Check each one before you go.")
             }
+
+            if !tripGearTips.isEmpty {
+                Section {
+                    GearTipsSection(tips: tripGearTips, title: "Pack for this trip")
+                        .listRowBackground(Color.clear)
+                        .listRowInsets(.init())
+                }
+            }
         }
         .navigationTitle(trip.name)
         .navigationBarTitleDisplayMode(.inline)
@@ -389,6 +398,9 @@ struct TripDetailView: View {
                     Button("Add a camp", systemImage: "plus") { addingStop = true }
                     if trip.start != nil && trip.end != nil {
                         Button("Re-suggest camps", systemImage: "sparkles") { Task { await resuggest() } }
+                    }
+                    if FeatureFlags.offlinePacks {
+                        Button("Download for offline", systemImage: "arrow.down.circle") { downloadForOffline() }
                     }
                     Button("Reorder camps", systemImage: "arrow.up.arrow.down") { editMode = .active }
                     Button("Rename", systemImage: "pencil") { renaming = true }
@@ -403,6 +415,10 @@ struct TripDetailView: View {
         }
         .environment(\.editMode, $editMode)
         .task(id: trip.waypoints.map { "\($0.latitude),\($0.longitude)" }) { await buildRoutes() }
+        .task(id: trip.orderedStops.map(\.siteID)) {
+            await loadNightConditions()
+            await loadServices()
+        }
         .sheet(item: $openSite) { site in
             NavigationStack { SiteDetailView(site: site) }.presentationDetents([.medium, .large])
         }
@@ -411,6 +427,11 @@ struct TripDetailView: View {
         }
         .sheet(isPresented: $addingStop) {
             AddStopView(trip: trip, routes: legs.compactMap { $0 })
+        }
+        .alert("Offline maps", isPresented: Binding(get: { offlineNote != nil }, set: { if !$0 { offlineNote = nil } })) {
+            Button("OK") {}
+        } message: {
+            Text(offlineNote ?? "")
         }
         .alert("Rename trip", isPresented: $renaming) {
             TextField("Trip name", text: $trip.name)
@@ -437,6 +458,12 @@ struct TripDetailView: View {
             if let e = trip.end {
                 Marker(trip.endName ?? "Destination", systemImage: "flag.checkered", coordinate: e).tint(Color.berry)
             }
+            if showServices {
+                ForEach(Array(services.values.flatMap { $0.places.values }), id: \.id) { p in
+                    Marker(p.name, systemImage: p.kind.symbol, coordinate: p.coordinate)
+                        .tint(p.kind == .hospital ? Color.berry : p.kind == .gas ? Color.canyon : Color.meadow)
+                }
+            }
             ForEach(Array(legs.enumerated()), id: \.offset) { i, route in
                 if let route {
                     MapPolyline(route.polyline)
@@ -446,6 +473,20 @@ struct TripDetailView: View {
         }
         .overlay(alignment: .topTrailing) {
             if routing { ProgressView().padding(8).background(.regularMaterial, in: .circle).padding(8) }
+        }
+        .overlay(alignment: .bottomLeading) {
+            Button {
+                showServices.toggle()
+            } label: {
+                Label("Services", systemImage: "fuelpump.fill")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 10).padding(.vertical, 6)
+                    .foregroundStyle(showServices ? .white : Color.canyon)
+                    .background(showServices ? AnyShapeStyle(Color.canyon) : AnyShapeStyle(.regularMaterial), in: .capsule)
+            }
+            .buttonStyle(.pressable)
+            .padding(10)
+            .accessibilityAddTraits(showServices ? .isSelected : [])
         }
     }
 
@@ -493,6 +534,10 @@ struct TripDetailView: View {
                     }
                 }
             }
+            if stop.nights > 0 {
+                TripNightLine(conditions: nightConditions[stop.siteID], nightKey: nightKey(of: i))
+            }
+            servicesLine(for: stop)
             HStack {
                 Stepper(value: Binding(get: { stop.nights }, set: { stop.nights = $0; stop.suggested = false }), in: 0...14) {
                     Text(stop.nights == 0 ? "Pass through" : "\(stop.nights) night\(stop.nights == 1 ? "" : "s")")
@@ -605,6 +650,105 @@ struct TripDetailView: View {
     private func remove(_ stop: TripStop) {
         trip.stops.removeAll { $0.id == stop.id }
         trip.renumber()
+    }
+
+    /// States the route passes through: every camp's state plus points sampled along each leg.
+    private var routeStates: [String] {
+        var codes: [String] = trip.orderedStops.compactMap { store.site(id: $0.siteID)?.state }
+        for c in trip.waypoints { if let s = offline.stateCode(at: c) { codes.append(s) } }
+        for route in legs.compactMap({ $0 }) {
+            let poly = route.polyline
+            let pts = UnsafeBufferPointer(start: poly.points(), count: poly.pointCount)
+            for i in stride(from: 0, to: pts.count, by: max(1, pts.count / 40)) {
+                if let s = offline.stateCode(at: pts[i].coordinate) { codes.append(s) }
+            }
+        }
+        var seen = Set<String>()
+        return codes.filter { offline.state($0) != nil && seen.insert($0).inserted }
+    }
+
+    private func downloadForOffline() {
+        let codes = routeStates
+        let missing = codes.filter { offline.packs[$0] == nil }
+        let names = codes.compactMap { offline.state($0)?.name }.formatted(.list(type: .and))
+        if missing.isEmpty {
+            offlineNote = "Public-lands maps for \(names) are already on this iPhone."
+        } else if offline.downloading != nil {
+            offlineNote = "Another download is running. Try again when it finishes (Saved › Offline maps)."
+        } else {
+            offline.download(missing)
+            let mb = missing.compactMap { offline.state($0)?.estimatedMB }.reduce(0, +)
+            offlineNote = "Downloading public-lands maps for \(names) (about \(Int(mb.rounded())) MB). Track it in Saved › Offline maps. Campsites and trails are already offline."
+        }
+    }
+
+    /// Gear for the whole trip: coldest and wettest nights, smoke, off-grid nights, no-signal and no-water camps.
+    private var tripGearTips: [GearTip] {
+        var nights: [NightForecast] = []
+        var aqi: [Int] = []
+        var sites: [(site: Site, nights: Int)] = []
+        for (i, stop) in trip.orderedStops.enumerated() {
+            if let site = store.site(id: stop.siteID) { sites.append((site, stop.nights)) }
+            guard stop.nights > 0, let c = nightConditions[stop.siteID], let start = trip.startDate else { continue }
+            for k in 0..<stop.nights {
+                guard let d = Calendar.current.date(byAdding: .day, value: arrivalDay(of: i) - 1 + k, to: start) else { continue }
+                let key = NightConditions.nightKey(d)
+                if let n = c.night(key) { nights.append(n) }
+                if let a = c.aqi[key] { aqi.append(a) }
+            }
+        }
+        return GearAdvisor.tips(nights: nights, aqi: aqi, sites: sites)
+    }
+
+    /// Date key of the first night at stop i ("2026-11-16"), when the trip has a start date.
+    private func nightKey(of i: Int) -> String? {
+        guard let start = trip.startDate,
+              let d = Calendar.current.date(byAdding: .day, value: arrivalDay(of: i) - 1, to: start) else { return nil }
+        return NightConditions.nightKey(d)
+    }
+
+    private func loadNightConditions() async {
+        for stop in trip.orderedStops where nightConditions[stop.siteID] == nil {
+            nightConditions[stop.siteID] = await ConditionsService.conditions(at: stop.coordinate)
+        }
+    }
+
+    /// Nearest gas, groceries and hospital for each camp (cached by site id).
+    private func loadServices() async {
+        for stop in trip.orderedStops where services[stop.siteID] == nil {
+            services[stop.siteID] = await ServiceFinder.services(near: stop.coordinate)
+        }
+    }
+
+    @ViewBuilder private func servicesLine(for stop: TripStop) -> some View {
+        if let s = services[stop.siteID] {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(ServiceKind.allCases) { kind in
+                        if let p = s.places[kind] {
+                            Button {
+                                p.item.openInMaps()
+                            } label: {
+                                Label("\(kind.label) \(p.miles.formatted(.number.precision(.fractionLength(p.miles < 10 ? 1 : 0)))) mi",
+                                      systemImage: kind.symbol)
+                            }
+                            .buttonStyle(ServicePillStyle(color: kind == .hospital ? .berry : kind == .gas ? .canyon : .meadow))
+                            .accessibilityHint("Opens \(p.name) in Maps")
+                        } else if s.searched.contains(kind) {
+                            Label("No \(kind.label.lowercased()) within \(Int(kind.radii.last!)) mi", systemImage: kind.symbol)
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(Color.berry)
+                                .padding(.horizontal, 8).padding(.vertical, 4)
+                                .background(Color.berry.opacity(0.1), in: .capsule)
+                        }
+                    }
+                }
+            }
+            .scrollClipDisabled()
+        } else {
+            Label("Finding gas, groceries and hospitals…", systemImage: "fuelpump")
+                .font(.caption).foregroundStyle(.secondary)
+        }
     }
 
     private func buildRoutes() async {
@@ -758,5 +902,21 @@ struct SiteOptionRow: View {
             }
         }
         .padding(.vertical, 2)
+    }
+}
+
+/// Small tinted pill for a nearby service. Press feedback only, no movement on appear.
+private struct ServicePillStyle: ButtonStyle {
+    let color: Color
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(color)
+            .padding(.horizontal, 8).padding(.vertical, 4)
+            .background(color.opacity(0.12), in: .capsule)
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.97 : 1)
+            .animation(.easeOut(duration: 0.16), value: configuration.isPressed)
     }
 }

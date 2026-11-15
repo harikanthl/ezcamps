@@ -34,8 +34,14 @@ final class Visit {
     var note: String
     var verified: Bool
     var createdAt: Date
+    /// Cell report: carrier name (see CellSignal.carriers) and 0 none … 3 strong. Optional.
+    var carrier: String?
+    var signal: Int?
 
-    init(site: Site, date: Date, rating: Int, tags: [String], note: String, verified: Bool) {
+    init(site: Site, date: Date, rating: Int, tags: [String], note: String, verified: Bool,
+         carrier: String? = nil, signal: Int? = nil) {
+        self.carrier = carrier
+        self.signal = signal
         siteID = site.id
         siteName = site.name
         self.date = date
@@ -48,7 +54,7 @@ final class Visit {
 
     /// Quick tags people can attach to a rating.
     static let tagOptions = [
-        "Quiet", "Level spots", "Good cell signal", "No signal", "Clean",
+        "Quiet", "Level spots", "Clean",
         "Shade", "Great views", "Dark skies", "Rough road", "Crowded", "Big-rig friendly",
     ]
 }

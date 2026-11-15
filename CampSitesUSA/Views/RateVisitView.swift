@@ -12,6 +12,8 @@ struct RateVisitView: View {
     @State private var date = Date.now
     @State private var tags: Set<String> = []
     @State private var note = ""
+    @State private var carrier: String?
+    @State private var signal: Int?
 
     private var distance: Double? { location.distance(to: site.coordinate) }
     private var isOnSite: Bool { (distance ?? .infinity) <= Visit.verifyRadius }
@@ -43,6 +45,32 @@ struct RateVisitView: View {
                     }
                 }
                 .padding(.vertical, 4)
+            }
+
+            Section {
+                FlowLayout(spacing: 8) {
+                    ForEach(CellSignal.carriers, id: \.self) { c in
+                        Chip(title: c, symbol: "antenna.radiowaves.left.and.right", tint: .sky, isOn: carrier == c) {
+                            carrier = carrier == c ? nil : c
+                            if carrier == nil { signal = nil }
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+                if carrier != nil {
+                    FlowLayout(spacing: 8) {
+                        ForEach(CellSignal.levels.indices, id: \.self) { i in
+                            Chip(title: CellSignal.levels[i], tint: CellSignal.color(i), isOn: signal == i) {
+                                signal = signal == i ? nil : i
+                            }
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+            } header: {
+                Text("Cell signal")
+            } footer: {
+                Text("Which carrier, and how was the signal at camp? Helps the next camper who needs to work or call.")
             }
 
             Section("Notes") {
@@ -93,7 +121,8 @@ struct RateVisitView: View {
 
     private func save() {
         context.insert(Visit(site: site, date: date, rating: rating,
-                             tags: Visit.tagOptions.filter(tags.contains), note: note, verified: isOnSite))
+                             tags: Visit.tagOptions.filter(tags.contains), note: note, verified: isOnSite,
+                             carrier: signal == nil ? nil : carrier, signal: signal))
         dismiss()
     }
 }

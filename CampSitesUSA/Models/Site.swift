@@ -57,6 +57,8 @@ nonisolated struct Site: Codable, Identifiable, Hashable, Sendable {
     let openingHours: String?
     /// e.g. "14 days". Mostly BLM and OSM `max_stay`.
     let stayLimit: String?
+    /// Official cell reception note (NPS): "year-round", "seasonal" or "none".
+    let cell: String?
 
     var coordinate: CLLocationCoordinate2D { .init(latitude: lat, longitude: lon) }
 

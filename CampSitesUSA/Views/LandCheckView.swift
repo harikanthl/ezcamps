@@ -11,6 +11,7 @@ struct LandQuery: Identifiable {
 struct LandCheckView: View {
     let query: LandQuery
     @State private var result: LandCheck?
+    @State private var road: ForestRoad?
     @State private var failed = false
 
     var body: some View {
@@ -21,7 +22,9 @@ struct LandCheckView: View {
                 if let result {
                     answer(result)
                 } else if failed {
-                    Label("Couldn't reach the land records service. Check your connection and try again.",
+                    Label(FeatureFlags.offlinePacks
+                          ? "No signal, and this area isn't downloaded. Save the state in Offline maps (Saved tab) before you lose signal."
+                          : "Couldn't reach the land records service. Check your connection and try again.",
                           systemImage: "wifi.exclamationmark")
                         .foregroundStyle(.secondary)
                     Button("Try again") { Task { await load() } }
@@ -60,6 +63,12 @@ struct LandCheckView: View {
                 }
             }
             Text(r.summary)
+            if let road { RoadCard(road: road) }
+            if r.offline {
+                Label("Offline answer from your downloaded map. Less precise near boundaries.", systemImage: "arrow.down.circle.fill")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color.sky)
+            }
             if !r.rules.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(r.rules, id: \.self) { rule in
@@ -81,8 +90,19 @@ struct LandCheckView: View {
         do {
             let r = try await LandCheck.lookup(query.coordinate)
             withAnimation(.easeOut(duration: 0.2)) { result = r }
+            // National forest: which forest road is nearest, and who may drive it when (MVUM).
+            if r.agencyCode == "USFS", let found = await ForestRoad.nearest(to: query.coordinate) {
+                withAnimation(.easeOut(duration: 0.2)) { road = found }
+            }
         } catch {
-            failed = true
+            // No signal: answer from the downloaded public-lands map if this area is saved.
+            if let code = OfflineLand.agency(at: query.coordinate) {
+                var r = LandCheck.make(code: code, unit: nil, at: query.coordinate)
+                r.offline = true
+                withAnimation(.easeOut(duration: 0.2)) { result = r }
+            } else {
+                failed = true
+            }
         }
     }
 }
@@ -137,6 +157,69 @@ struct PublicLandsLegend: View {
         }
         .font(.caption.weight(.semibold))
         .padding(12)
+        .background(.regularMaterial, in: .rect(cornerRadius: 16, style: .continuous))
+    }
+}
+
+/// Nearest forest road from the Motor Vehicle Use Map.
+private struct RoadCard: View {
+    let road: ForestRoad
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label(road.title, systemImage: road.isTrail ? "point.topleft.down.to.point.bottomright.curvepath" : "road.lanes")
+                .font(.subheadline.weight(.semibold))
+            Text(road.access.replacingOccurrences(of: "Vehicles", with: "vehicles"))
+                .font(.subheadline)
+            if let d = road.datesOpen { Label("Open \(d.replacingOccurrences(of: "-", with: " – "))", systemImage: "calendar").font(.caption) }
+            if let s = road.surface { Label(s, systemImage: "car.side").font(.caption) }
+            if let district = road.district { Text(district).font(.caption).foregroundStyle(.secondary) }
+            Text("Many forests allow camping within a set distance of open roads (often 150–300 ft). Check this forest's MVUM legend for the exact rule.")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.meadow.opacity(0.1), in: .rect(cornerRadius: 14, style: .continuous))
+    }
+}
+
+/// Key for the forest roads layer, using the Forest Service's own MVUM swatches.
+struct ForestRoadsLegend: View {
+    let zoomedIn: Bool
+
+    private let items: [(String, String)] = [
+        ("mvum_road_all_yearlong", "All vehicles"),
+        ("mvum_road_legal_yearlong", "Highway-legal only"),
+        ("mvum_road_all_seasonal", "Seasonal"),
+        ("mvum_trail_atv", "ATV trail (≤50 in)"),
+        ("mvum_trail_motorcycle", "Motorcycle trail"),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if zoomedIn {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(items, id: \.0) { file, label in
+                            HStack(spacing: 5) {
+                                if let img = UIImage(named: file) {
+                                    Image(uiImage: img).interpolation(.none).resizable().frame(width: 16, height: 16)
+                                }
+                                Text(label)
+                            }
+                        }
+                    }
+                }
+                Label("Long-press a forest road for its dates and vehicle rules", systemImage: "hand.point.up.left.fill")
+                    .foregroundStyle(.secondary)
+            } else {
+                Label("Zoom in to see forest roads (Motor Vehicle Use Map)", systemImage: "plus.magnifyingglass")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .font(.caption.weight(.semibold))
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(.regularMaterial, in: .rect(cornerRadius: 16, style: .continuous))
     }
 }

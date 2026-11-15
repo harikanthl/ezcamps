@@ -15,6 +15,8 @@ nonisolated struct LandCheck: Identifiable, Sendable {
     let verdict: Verdict
     let summary: String
     let rules: [String]
+    /// True when answered from downloaded map colors because there was no signal.
+    var offline = false
 
     static func lookup(_ c: CLLocationCoordinate2D) async throws -> LandCheck {
         var comps = URLComponents(string: PublicLandsService.base + "/identify")!

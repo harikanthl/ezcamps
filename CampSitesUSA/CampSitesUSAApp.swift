@@ -1,17 +1,22 @@
 import SwiftUI
 import SwiftData
 import CoreLocation
+import os
 
 @main
 struct CampSitesUSAApp: App {
     @State private var store = SiteStore()
     @State private var location = LocationProvider()
+    @State private var offline = OfflineStore()
+    @State private var ai = AISettings()
 
     var body: some Scene {
         WindowGroup {
             RootView()
                 .environment(store)
                 .environment(location)
+                .environment(offline)
+                .environment(ai)
                 .tint(.sunset)
                 .task { await store.load() }
         }
@@ -23,6 +28,7 @@ struct RootView: View {
     @State private var tab = "explore"
     #if DEBUG
     @Environment(SiteStore.self) private var store
+    @Environment(OfflineStore.self) private var offline
     @Environment(\.modelContext) private var context
     #endif
 
@@ -33,6 +39,21 @@ struct RootView: View {
             Tab("Saved", systemImage: "heart.fill", value: "saved") { SavedView() }
         }
         #if DEBUG
+        // Testing aids: `-debugDownloadState UT` downloads a pack; `-debugOfflineProbe YES` logs
+        // offline land answers for known points (compare with the online check).
+        .task {
+            if let code = UserDefaults.standard.string(forKey: "debugDownloadState") { offline.download([code]) }
+            if UserDefaults.standard.string(forKey: "debugAIPrompt") != nil { tab = "trips" }
+            if UserDefaults.standard.bool(forKey: "debugOfflineProbe") {
+                let log = Logger(subsystem: "ezcamps", category: "OfflineProbe")
+                let points: [(String, Double, Double)] = [("BLM near Moab", 38.9, -110.5), ("Arches NP", 38.62, -109.62),
+                    ("Manti-La Sal NF", 38.45, -109.25), ("Moab town", 38.573, -109.55), ("Navajo Nation", 37.05, -110.0)]
+                for (label, lat, lon) in points {
+                    let code = OfflineLand.agency(at: .init(latitude: lat, longitude: lon)) ?? "nil"
+                    log.notice("probe \(label, privacy: .public) -> \(code, privacy: .public)")
+                }
+            }
+        }
         // Screenshot/testing aid: `-debugPlanTrip YES` plans Moab → Old Faithful and opens Trips.
         .onChange(of: store.isLoaded) {
             guard UserDefaults.standard.bool(forKey: "debugPlanTrip") else { return }

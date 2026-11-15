@@ -1,5 +1,6 @@
 import Foundation
 import MapKit
+import SwiftData
 import Observation
 
 /// Route planning for trips: driving legs, overnight camp suggestions along the route,
@@ -114,6 +115,95 @@ enum TripPlanner {
             }
         }
         return best.values.sorted { $0.1 < $1.1 }.prefix(limit).map(\.0)
+    }
+
+    // MARK: Building a trip
+
+    enum PlanError: LocalizedError {
+        case noStart, notFound(String), noRoute
+        var errorDescription: String? {
+            switch self {
+            case .noStart: "Turn on location, or say where you're starting from."
+            case .notFound(let place): "Couldn't find “\(place)”. Try a city or park name."
+            case .noRoute: "Couldn't find a driving route between those places."
+            }
+        }
+    }
+
+    /// Resolve a place name (city, park, address) to a coordinate with Apple Maps search.
+    static func place(named name: String, near: CLLocationCoordinate2D? = nil) async -> TripPlace? {
+        let req = MKLocalSearch.Request()
+        req.naturalLanguageQuery = name
+        req.resultTypes = [.address, .pointOfInterest]
+        req.region = MKCoordinateRegion(center: near ?? .init(latitude: 39.5, longitude: -98.35),
+                                        span: .init(latitudeDelta: 30, longitudeDelta: 60))
+        guard let item = try? await MKLocalSearch(request: req).start().mapItems.first else { return nil }
+        return TripPlace(name: name, coordinate: item.location.coordinate)
+    }
+
+    /// Build and insert a trip: drive start → via places → destination, a camp near each via place,
+    /// overnight camps every day's drive in between, and any extra requested nights added to the
+    /// via camps first, then the last camp. Every camp comes from ezcamps' data.
+    static func makeTrip(from start: TripPlace, to end: TripPlace, via: [TripPlace] = [], startDate: Date?,
+                         dailyMiles: Int, preferFree: Bool, totalNights: Int? = nil,
+                         store: SiteStore, context: ModelContext) async throws -> Trip {
+        let points = [start] + via + [end]
+        var legs: [MKRoute] = []
+        for (a, b) in zip(points, points.dropFirst()) {
+            guard let r = await route(from: a.coordinate, to: b.coordinate) else { throw PlanError.noRoute }
+            legs.append(r)
+        }
+        let trip = Trip(name: "\(start.name) → \(end.name)")
+        trip.startName = start.name
+        trip.startLat = start.coordinate.latitude
+        trip.startLon = start.coordinate.longitude
+        trip.endName = end.name
+        trip.endLat = end.coordinate.latitude
+        trip.endLon = end.coordinate.longitude
+        trip.startDate = startDate
+        trip.dailyMiles = dailyMiles
+        trip.preferFree = preferFree
+        context.insert(trip)
+
+        var used = Set<String>()
+        var viaStops: [TripStop] = []
+        func add(_ site: Site, suggested: Bool) -> TripStop {
+            used.insert(site.id)
+            let stop = TripStop(site: site, order: trip.stops.count)
+            stop.suggested = suggested
+            trip.stops.append(stop)
+            return stop
+        }
+        for (i, leg) in legs.enumerated() {
+            for site in suggestStops(on: leg, dailyMiles: dailyMiles, preferFree: preferFree, store: store)
+            where !used.contains(site.id) {
+                _ = add(site, suggested: true)
+            }
+            // Stay at each via place: the best camp near it.
+            if i < via.count, let camp = candidates(near: via[i].coordinate, in: store, radius: 30,
+                                                    preferFree: preferFree, excluding: used).first {
+                viaStops.append(add(camp, suggested: true))
+            }
+        }
+        // Requested nights beyond one per camp: via places first (that's where people want time), then the last camp.
+        if let total = totalNights, total > trip.totalNights {
+            var extra = total - trip.totalNights
+            if trip.stops.isEmpty, let camp = candidates(near: end.coordinate, in: store, radius: 30,
+                                                          preferFree: preferFree, excluding: used).first {
+                let stop = add(camp, suggested: true)
+                stop.nights = 0
+                extra = total
+            }
+            let targets = viaStops.isEmpty ? Array(trip.orderedStops.suffix(1)) : viaStops
+            var i = 0
+            while extra > 0, !targets.isEmpty {
+                let t = targets[i % targets.count]
+                if t.nights < 14 { t.nights += 1; extra -= 1 }
+                i += 1
+                if i > 14 * targets.count { break }
+            }
+        }
+        return trip
     }
 
     // MARK: Editing

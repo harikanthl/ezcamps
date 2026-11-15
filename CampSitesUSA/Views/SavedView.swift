@@ -27,6 +27,20 @@ struct SavedView: View {
                 }
             }
             .navigationTitle(segment.rawValue)
+            .toolbar {
+                NavigationLink {
+                    SettingsView()
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
+                }
+                if FeatureFlags.offlinePacks {
+                    NavigationLink {
+                        OfflineMapsView()
+                    } label: {
+                        Label("Offline maps", systemImage: "arrow.down.circle")
+                    }
+                }
+            }
             .sheet(item: $openSite) { site in
                 NavigationStack { SiteDetailView(site: site) }.presentationDetents([.medium, .large])
             }

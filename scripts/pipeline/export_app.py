@@ -22,6 +22,34 @@ ROOT = Path(__file__).resolve().parents[2]
 DB = ROOT / "data" / "campsites.db"
 OUT = ROOT / "CampSitesUSA" / "Resources" / "sites.json"
 ACTIVITIES_OUT = ROOT / "CampSitesUSA" / "Resources" / "activities.json"
+STATES_OUT = ROOT / "CampSitesUSA" / "Resources" / "state_bounds.json"
+BOUNDARIES = ROOT / "data" / "boundaries" / "us_states.json"
+STATE_NAMES = {
+    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California", "CO": "Colorado",
+    "CT": "Connecticut", "DE": "Delaware", "DC": "District of Columbia", "FL": "Florida", "GA": "Georgia",
+    "HI": "Hawaii", "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
+    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland", "MA": "Massachusetts",
+    "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi", "MO": "Missouri", "MT": "Montana",
+    "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey", "NM": "New Mexico",
+    "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
+    "OR": "Oregon", "PA": "Pennsylvania", "PR": "Puerto Rico", "RI": "Rhode Island", "SC": "South Carolina",
+    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont", "VA": "Virginia",
+    "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
+}
+
+
+def export_state_bounds() -> int:
+    """Bounding boxes for offline tile packs (western-hemisphere rings only, so Alaska's
+    Aleutians past the antimeridian don't stretch its box around the globe)."""
+    states = json.loads(BOUNDARIES.read_text())["states"]
+    out = []
+    for code, rings in sorted(states.items()):
+        pts = [p for r in rings for p in r if p[0] < 0]
+        out.append({"code": code, "name": STATE_NAMES.get(code, code),
+                    "minLat": round(min(p[1] for p in pts), 4), "maxLat": round(max(p[1] for p in pts), 4),
+                    "minLon": round(min(p[0] for p in pts), 4), "maxLon": round(max(p[0] for p in pts), 4)})
+    STATES_OUT.write_text(json.dumps(out, separators=(",", ":")))
+    return len(out)
 DESCRIPTION_CHARS = 320  # the sheet shows a short blurb; full text stays in the database
 
 ATTRIBUTION = ("© OpenStreetMap contributors (ODbL); USDA Forest Service (CC BY 4.0); "
@@ -59,6 +87,7 @@ def main() -> int:
             "phone": r["phone"], "description": short(r["description"]),
             "amenities": json.loads(r["amenities"]), "maxVehicleLength": r["max_rig_ft"],
             "openingHours": r["opening_hours"], "stayLimit": r["stay_limit"],
+            "cell": r["cell"],
         })
     activities = []
     for r in conn.execute("SELECT * FROM activities ORDER BY id"):
@@ -81,6 +110,7 @@ def main() -> int:
     }
     args.out.write_text(json.dumps(payload, separators=(",", ":"), ensure_ascii=False))
     print(f"wrote {len(sites)} sites -> {args.out} ({args.out.stat().st_size / 1048576:.1f} MB)")
+    print(f"wrote {export_state_bounds()} state bounds -> {STATES_OUT}")
     return 0
 
 

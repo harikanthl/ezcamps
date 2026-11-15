@@ -85,6 +85,10 @@ Most opengeos projects are **Python (notebooks, analysis)** or **web JS (MapLibr
 - **Personalization:** a "my level" setting (fitness, kids, dog, accessible only) re-ranks the list. A "Day plan" picks one activity a day for a multi-night stay.
 - **Pipeline note:** precompute an activity-to-site index (activities within 10/25 mi of each site) offline and ship it inside the region packs, so it works without signal.
 
+### Offline packs (parked for a later version)
+- **Built behind `FeatureFlags.offlinePacks = false`:** per-state download of BLM SMA raster tiles (zoom 5 up to 12 within an ~8,000-tile budget), on-disk tile cache read by the overlay with overzoom, offline "Can I camp here?" from legend colors (`OfflineStore.swift`, `OfflineMapsView.swift`). Not verified end to end.
+- **Plan before enabling:** build PAD-US vector packs (PMTiles, one per state, ~5–50 MB) in the pipeline and host on Cloudflare R2 instead of bulk-downloading BLM tiles from each phone; render with MapLibre Native; add a near-boundary warning (other manager within ~100 m) since land records are only accurate to ~10–40 m.
+
 ### Planning
 6. **Route corridor search**: "show free camps within 15 mi of my route, about every 250 mi of driving", with a daily driving budget.
 7. **Night score per site**: overnight low, wind, AQI and smoke, fire distance, cell signal for your carrier, dark-sky rating, elevation.
