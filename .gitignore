@@ -1,0 +1,17 @@
+# Secrets and local-only files
+docs/keys.md
+
+# Generated partial downloads
+data/*.partial.jsonl
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
