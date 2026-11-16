@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// The pack list sheet, built to fit a screen: a compact header (what you're doing, people,
 /// nights), tabs for Water, Food, Gear and Essentials with how much of each is packed, and one-line
@@ -11,10 +12,11 @@ struct PackListView: View {
     let storageKey: String
 
     enum Tab: String, CaseIterable, Identifiable {
-        case water, food, gear, essentials, bears
+        case mine, water, food, gear, essentials, bears
         var id: String { rawValue }
         var label: String {
             switch self {
+            case .mine: "My gear"
             case .water: "Water"
             case .food: "Food"
             case .gear: "Gear"
@@ -24,6 +26,7 @@ struct PackListView: View {
         }
         var icon: String {
             switch self {
+            case .mine: "tent"
             case .water: "droplet"
             case .food: "forkknife"
             case .gear: "boot"
@@ -33,6 +36,7 @@ struct PackListView: View {
         }
         var sectionIDs: [String] {
             switch self {
+            case .mine: []
             case .water: ["water"]
             case .food: ["meals", "snacks", "energy"]
             case .gear: ["gear"]
@@ -46,6 +50,7 @@ struct PackListView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Namespace private var tabNS
+    @Query(sort: \GearItem.addedAt) private var closet: [GearItem]
     @State private var lows: [Int]
     @State private var activities = PackActivity.favorites()
     @State private var people = 2
@@ -53,6 +58,7 @@ struct PackListView: View {
     @State private var bearCountry = false
     @State private var checked: Set<String> = []
     @State private var tab: Tab = .water
+    @State private var pickedFirstTab = false
     @State private var open: String?
 
     init(title: String, site: Site?, nights: Int, lows: [Int], storageKey: String) {
@@ -74,11 +80,18 @@ struct PackListView: View {
 
     private var tabs: [Tab] {
         let ids = Set(sections.map(\.id))
-        return Tab.allCases.filter { t in t.sectionIDs.contains(where: ids.contains) }
+        return Tab.allCases.filter { t in t == .mine ? !myGear.isEmpty : t.sectionIDs.contains(where: ids.contains) }
+    }
+
+    /// Your closet items on the shelves that matter for what you're doing.
+    private var myGear: [GearItem] {
+        let shelves = Set(GearCategory.relevant(to: activities))
+        return closet.filter { $0.reviewed && shelves.contains($0.category) }
     }
 
     private func items(_ t: Tab) -> [PackItem] {
-        sections.filter { t.sectionIDs.contains($0.id) }.flatMap(\.items)
+        if t == .mine { return myGear.map { PackItem(id: "gear-\($0.id.uuidString)", title: $0.name, detail: nil, source: nil) } }
+        return sections.filter { t.sectionIDs.contains($0.id) }.flatMap(\.items)
     }
 
     var body: some View {
@@ -99,6 +112,7 @@ struct PackListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
             .task { await load() }
+            .onAppear { if !pickedFirstTab, !myGear.isEmpty { tab = .mine }; pickedFirstTab = true }
             .onAppear { checked = Set(UserDefaults.standard.stringArray(forKey: "pack.\(storageKey)") ?? []) }
             .onChange(of: checked) { _, v in UserDefaults.standard.set(Array(v), forKey: "pack.\(storageKey)") }
             .onChange(of: tabs) { _, t in if !t.contains(tab), let first = t.first { tab = first } }
@@ -211,12 +225,42 @@ struct PackListView: View {
 
     @ViewBuilder private var tabContent: some View {
         switch tab {
+        case .mine: myGearGrid
         case .water: waterCard
         case .essentials: essentialsGrid
         case .food:
             ForEach(sections.filter { Tab.food.sectionIDs.contains($0.id) }) { s in listCard(s) }
         default:
             ForEach(sections.filter { tab.sectionIDs.contains($0.id) }) { s in listCard(s) }
+        }
+    }
+
+    // MARK: My gear
+
+    /// Your own stickers, by shelf; tap one to mark it packed.
+    private var myGearGrid: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Your gear for what you're doing. Tap to pack.").font(.caption).foregroundStyle(.secondary)
+            ForEach(GearCategory.relevant(to: activities), id: \.self) { c in
+                let list = myGear.filter { $0.category == c }
+                if !list.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(c.label).font(.caption.weight(.bold)).foregroundStyle(Color.dusk)
+                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 84), spacing: 12)], spacing: 12) {
+                            ForEach(list) { g in
+                                let id = "gear-\(g.id.uuidString)"
+                                VStack(spacing: 4) {
+                                    GearSticker(item: g, size: 72, packed: checked.contains(id))
+                                    Text(g.name).font(.caption2.weight(.semibold)).lineLimit(1)
+                                }
+                                .onTapGesture {
+                                    withAnimation(.spring(duration: 0.3, bounce: 0.2)) { checked.formSymmetricDifference([id]) }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

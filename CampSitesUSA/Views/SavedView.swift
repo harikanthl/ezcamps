@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct SavedView: View {
-    enum Segment: String, CaseIterable { case saved = "Saved", visits = "My visits" }
+    enum Segment: String, CaseIterable { case saved = "Saved", visits = "My visits", gear = "My gear" }
 
     @Environment(\.modelContext) private var context
     @Environment(SiteStore.self) private var store
@@ -15,17 +15,23 @@ struct SavedView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                Picker("Show", selection: $segment) {
-                    ForEach(Segment.allCases, id: \.self) { Text($0.rawValue) }
-                }
-                .pickerStyle(.segmented)
-                .listRowBackground(Color.clear)
-                .listRowInsets(.init())
-
-                switch segment {
-                case .saved: savedList
-                case .visits: visitList
+            Group {
+                if segment == .gear {
+                    // The closet scrolls on its own (shelves scroll sideways inside it).
+                    VStack(spacing: 0) {
+                        segmentPicker.padding(.horizontal).padding(.top, 8)
+                        GearClosetView()
+                    }
+                } else {
+                    List {
+                        segmentPicker
+                            .listRowBackground(Color.clear)
+                            .listRowInsets(.init())
+                        switch segment {
+                        case .saved: savedList
+                        case .visits, .gear: visitList
+                        }
+                    }
                 }
             }
             .navigationTitle(segment.rawValue)
@@ -33,6 +39,7 @@ struct SavedView: View {
             // Testing aid: `-debugSettings YES` opens Settings on launch.
             .navigationDestination(isPresented: $debugSettings) { SettingsView() }
             .task { if DebugLaunch.flag("debugSettings") { try? await Task.sleep(for: .seconds(1)); debugSettings = true } }
+            .task { if DebugLaunch.isSet("debugSeedGear") { segment = .gear } }
             #endif
             .toolbar {
                 NavigationLink {
@@ -52,6 +59,13 @@ struct SavedView: View {
                 NavigationStack { SiteDetailView(site: site) }.presentationDetents([.medium, .large])
             }
         }
+    }
+
+    private var segmentPicker: some View {
+        Picker("Show", selection: $segment) {
+            ForEach(Segment.allCases, id: \.self) { Text($0.rawValue) }
+        }
+        .pickerStyle(.segmented)
     }
 
     @ViewBuilder private var savedList: some View {

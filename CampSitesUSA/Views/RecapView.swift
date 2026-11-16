@@ -62,18 +62,7 @@ struct RecapView: View {
                     .buttonStyle(.bordered).tint(.dusk)
                 }
             }
-            // ezReels does music, captions and twin cuts; point people there instead of rebuilding it.
-            VStack(alignment: .leading, spacing: 4) {
-                Label("Make it unforgettable in ezReels", systemImage: "sparkles").font(.subheadline.weight(.semibold))
-                Text("Music that hits on the beat, captions and twin cuts, ready for the family group chat. Save your reel to Photos, then open it in ezReels.")
-                    .font(.caption).foregroundStyle(.secondary)
-                if let store = RecapMaker.ezReelsStoreURL {
-                    Button("Get ezReels") { openURL(store) }.font(.caption.weight(.semibold))
-                }
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.berry.opacity(0.1), in: .rect(cornerRadius: 14, style: .continuous))
+            EzReelsPitch(onSave: { Task { await save() } }, saved: saved)
         }
     }
 
@@ -107,5 +96,47 @@ struct RecapView: View {
         } catch {
             self.error = error.localizedDescription
         }
+    }
+}
+
+/// The case for ezReels: this recap is the quick version; ezReels' director makes the film.
+struct EzReelsPitch: View {
+    var onSave: () -> Void
+    var saved: Bool
+    @Environment(\.openURL) private var openURL
+
+    private let points: [(String, String)] = [
+        ("wand.and.stars", "Its director writes the story from your photos and clips, and picks the moments worth keeping."),
+        ("waveform", "Every cut lands on the beat. Captions appear word by word."),
+        ("heart.text.square.fill", "Music, looks and twin cuts, ready for the family group chat in minutes."),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Turn this trip into a film your family will replay")
+                .font(.headline)
+            ForEach(points, id: \.1) { icon, text in
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: icon).font(.subheadline.weight(.semibold)).foregroundStyle(Color.berry).frame(width: 22)
+                    Text(text).font(.subheadline)
+                }
+            }
+            Button {
+                if let store = RecapMaker.ezReelsStoreURL, saved { openURL(store) } else { onSave() }
+            } label: {
+                Label(saved ? "Saved. Open it in ezReels" : "Save to Photos, then open in ezReels",
+                      systemImage: "film.stack.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity, minHeight: 46)
+            }
+            .buttonStyle(.borderedProminent).tint(.berry)
+            .disabled(saved && RecapMaker.ezReelsStoreURL == nil)
+            Text("ezReels is our reel studio for iPhone. Your recap stays yours either way.")
+                .font(.caption2).foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .background(
+            LinearGradient(colors: [Color.berry.opacity(0.14), Color.dusk.opacity(0.12)], startPoint: .topLeading, endPoint: .bottomTrailing),
+            in: .rect(cornerRadius: 20, style: .continuous))
     }
 }

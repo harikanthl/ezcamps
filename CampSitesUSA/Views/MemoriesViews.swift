@@ -57,6 +57,8 @@ struct TripMemoriesSection: View {
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.borderedProminent).tint(.dusk)
+                Label("Want the director's cut? ezReels scripts the story, cuts on the beat and adds captions.", systemImage: "sparkles")
+                    .font(.caption).foregroundStyle(Color.berry)
             }
             if importing { ProgressView("Adding…").font(.caption) }
         }
