@@ -32,6 +32,7 @@ struct CampMapView: UIViewRepresentable {
     var base: MapBase
     var showPublicLands: Bool
     var showForestRoads = false
+    var showWater = false
     @Binding var recenter: MKCoordinateRegion?
     var onRegionChange: (MKCoordinateRegion) -> Void
     var onSelect: (String) -> Void
@@ -71,10 +72,10 @@ struct CampMapView: UIViewRepresentable {
         // Tile overlays only render on flat terrain, so drop 3D elevation while topo or lands is on.
         // Only touch the configuration and overlays on a real change: reassigning reloads the map
         // and cancels tile loads.
-        let style = MapStyleKey(base: base, lands: showPublicLands, roads: showForestRoads)
+        let style = MapStyleKey(base: base, lands: showPublicLands, roads: showForestRoads, water: showWater)
         if context.coordinator.appliedStyle != style {
             context.coordinator.appliedStyle = style
-            let flat = showPublicLands || showForestRoads || base == .topo
+            let flat = showPublicLands || showForestRoads || showWater || base == .topo
             let elevation: MKMapConfiguration.ElevationStyle = flat ? .flat : .realistic
             map.preferredConfiguration = base == .satellite
                 ? MKHybridMapConfiguration(elevationStyle: elevation)
@@ -83,6 +84,7 @@ struct CampMapView: UIViewRepresentable {
             map.removeOverlays(map.overlays.filter { $0 is MKTileOverlay })
             if base == .topo { map.addOverlay(TopoOverlay(), level: .aboveRoads) }
             if showPublicLands { map.addOverlay(PublicLandsOverlay(), level: .aboveRoads) }
+            if showWater { map.addOverlay(WaterOverlay(), level: .aboveRoads) }
             if showForestRoads { map.addOverlay(ForestRoadsOverlay(), level: .aboveLabels) }
         }
 
@@ -203,7 +205,7 @@ struct CampMapView: UIViewRepresentable {
     }
 }
 
-struct MapStyleKey: Equatable { let base: MapBase; let lands: Bool; let roads: Bool }
+struct MapStyleKey: Equatable { let base: MapBase; let lands: Bool; let roads: Bool; let water: Bool }
 
 // MARK: - Annotations
 
@@ -371,6 +373,50 @@ final class PublicLandsOverlay: MKTileOverlay {
                 result(enlarged, nil)
             } else {
                 Self.log.error("tile \(path.z)/\(path.x)/\(path.y) failed: \(status) \(String(describing: error))")
+                result(nil, error)
+            }
+        }.resume()
+    }
+}
+
+// MARK: - Rivers and lakes
+
+/// USGS National Hydrography Dataset, cached as a transparent overlay (public domain): streams,
+/// rivers, lakes and reservoirs with names, drawn over any base map.
+final class WaterOverlay: MKTileOverlay {
+    static let base = "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer"
+    private static let cache: NSCache<NSString, NSData> = {
+        let c = NSCache<NSString, NSData>()
+        c.totalCostLimit = 30 * 1024 * 1024
+        return c
+    }()
+    private static let session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.requestCachePolicy = .returnCacheDataElseLoad
+        config.urlCache = URLCache(memoryCapacity: 10 << 20, diskCapacity: 100 << 20)
+        config.httpMaximumConnectionsPerHost = 6
+        return URLSession(configuration: config)
+    }()
+
+    init() {
+        super.init(urlTemplate: Self.base + "/tile/{z}/{y}/{x}")
+        canReplaceMapContent = false
+        minimumZ = 6
+        maximumZ = 16
+    }
+
+    override func loadTile(at path: MKTileOverlayPath, result: @escaping (Data?, Error?) -> Void) {
+        let url = url(forTilePath: path)
+        let key = url.absoluteString as NSString
+        if let hit = Self.cache.object(forKey: key) { result(hit as Data, nil); return }
+        var req = URLRequest(url: url, timeoutInterval: 20)
+        req.assumesHTTP3Capable = false
+        req.setValue("ezcamp-ios", forHTTPHeaderField: "User-Agent")
+        Self.session.dataTask(with: req) { data, response, error in
+            if let data, (response as? HTTPURLResponse)?.statusCode == 200 {
+                Self.cache.setObject(data as NSData, forKey: key, cost: data.count)
+                result(data, nil)
+            } else {
                 result(nil, error)
             }
         }.resume()

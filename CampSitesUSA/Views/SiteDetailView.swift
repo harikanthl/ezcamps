@@ -38,6 +38,7 @@ struct SiteDetailView: View {
                 if !site.amenities.isEmpty { amenities }
                 NightConditionsSection(coordinate: site.coordinate, site: site)
                 SafetySection(site: site, community: community).id("safety")
+                FishingHuntingSection(site: site).id("fishing")
                 CellSignalSection(site: site, visits: visits)
                 if let d = site.description, !d.isEmpty { about(d) }
                 NearbyActivitiesSection(site: site)

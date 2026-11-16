@@ -16,6 +16,7 @@ struct ExploreView: View {
     @AppStorage("mapBase") private var base: MapBase = .standard
     @AppStorage("showPublicLands") private var showPublicLands = false
     @AppStorage("showForestRoads") private var showForestRoads = false
+    @AppStorage("showWater") private var showWater = false
 
     var body: some View {
         CampMapView(
@@ -23,6 +24,7 @@ struct ExploreView: View {
             base: base,
             showPublicLands: showPublicLands,
             showForestRoads: showForestRoads,
+            showWater: showWater,
             recenter: $recenter,
             onRegionChange: { region = $0; refresh() },
             onSelect: { selectedSite = store.site(id: $0) },
@@ -165,8 +167,11 @@ struct ExploreView: View {
                     Toggle(isOn: $showForestRoads.animation(.easeOut(duration: 0.2))) {
                         Label("Forest roads (MVUM)", systemImage: "road.lanes")
                     }
+                    Toggle(isOn: $showWater.animation(.easeOut(duration: 0.2))) {
+                        Label("Rivers and lakes", systemImage: "drop.fill")
+                    }
                 } label: {
-                    let any = showPublicLands || showForestRoads
+                    let any = showPublicLands || showForestRoads || showWater
                     Image(systemName: "square.2.layers.3d.top.filled")
                         .font(.title3.weight(.semibold))
                         .foregroundStyle(any ? .white : Color.canyon)

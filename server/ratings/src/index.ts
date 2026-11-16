@@ -54,6 +54,7 @@ async function route(req: Request, env: Bindings): Promise<Response> {
   if (m === "DELETE" && path === "/v1/account") return deleteAccount(req, env);
   if (m === "GET" && path === "/v1/summaries") return summaries(url, env);
   if (m === "GET" && path === "/v1/alerts") return parkAlerts(url, env);
+  if (m === "GET" && path === "/v1/wildlife") return wildlife(url);
   if (m === "GET" && (p = path.match(/^\/v1\/sites\/([^/]+)\/ratings$/))) return siteRatings(req, decodeURIComponent(p[1]), env);
   if (m === "PUT" && (p = path.match(/^\/v1\/ratings\/([^/]+)$/))) return putRating(req, p[1], env);
   if (m === "DELETE" && (p = path.match(/^\/v1\/ratings\/([^/]+)$/))) return deleteRating(req, p[1], env);
@@ -319,6 +320,78 @@ async function parkAlerts(url: URL, env: Bindings): Promise<Response> {
   }));
   const out = json({ alerts }, 200, { "Cache-Control": "public, max-age=1800" });
   await cache.put(cacheKey, out.clone());
+  return out;
+}
+
+// MARK: Wildlife (iNaturalist)
+
+/** Game species we flag for hunters (common names as iNaturalist uses them). */
+const GAME_MAMMALS = new Set([
+  "Mule Deer", "White-tailed Deer", "Elk", "Moose", "Pronghorn", "Bighorn Sheep", "Mountain Goat",
+  "American Black Bear", "Caribou", "Wild Boar", "Collared Peccary", "Eastern Cottontail",
+  "Desert Cottontail", "Mountain Cottontail", "Snowshoe Hare", "Black-tailed Jackrabbit", "Eastern Gray Squirrel",
+  "Fox Squirrel", "American Bison",
+]);
+const GAME_BIRDS = new Set([
+  "Wild Turkey", "Ruffed Grouse", "Dusky Grouse", "Sooty Grouse", "Sharp-tailed Grouse", "Greater Sage-Grouse",
+  "Spruce Grouse", "Ring-necked Pheasant", "Chukar", "Gray Partridge", "Gambel's Quail", "California Quail",
+  "Scaled Quail", "Northern Bobwhite", "Mountain Quail", "Mourning Dove", "Eurasian Collared-Dove", "Mallard",
+  "Canada Goose", "Snow Goose", "Wood Duck", "American Wigeon", "Green-winged Teal", "Blue-winged Teal",
+  "Northern Pintail", "Gadwall", "Northern Shoveler", "Canvasback", "Redhead", "Lesser Scaup", "Ring-necked Duck",
+  "Bufflehead", "Common Goldeneye", "American Woodcock", "Wilson's Snipe", "American Coot", "Sandhill Crane",
+]);
+const GAME_FISH = /trout|bass|salmon|walleye|pike|perch|crappie|bluegill|sunfish|catfish|bullhead|muskellunge|sauger|char|grayling|whitefish|kokanee|steelhead|striper|carp|sturgeon|shad|drum|redfish|snook|flounder|tarpon|bonefish|snapper|grouper|cobia|mackerel|tuna|halibut|lingcod|rockfish|sheepshead|warmouth/i;
+
+interface INatCount { count: number; taxon: { id: number; name: string; preferred_common_name?: string; iconic_taxon_name?: string } }
+
+async function inat(params: Record<string, string>): Promise<INatCount[]> {
+  const q = new URLSearchParams({ quality_grade: "research", per_page: "200", ...params });
+  const res = await fetch(`https://api.inaturalist.org/v1/observations/species_counts?${q}`, {
+    headers: { "User-Agent": "ezcamp/1.0 (+https://harikanth.site/ezcamp)", Accept: "application/json" },
+  });
+  if (!res.ok) throw new HttpError(502, "iNaturalist didn't answer. Try again later.");
+  return ((await res.json()) as { results?: INatCount[] }).results ?? [];
+}
+
+/**
+ * Fish, game mammals and game birds recorded within ~25 km of a point (research-grade iNaturalist
+ * observations), with species iNaturalist lists as threatened flagged. GET /v1/wildlife?lat=&lng=
+ * Rounded to ~5 km and cached for a day: wildlife records don't change by the hour.
+ */
+async function wildlife(url: URL): Promise<Response> {
+  const lat = Number(url.searchParams.get("lat")), lng = Number(url.searchParams.get("lng"));
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+    throw new HttpError(400, "Bad coordinates.");
+  }
+  const rl = (Math.round(lat * 20) / 20).toFixed(2), rg = (Math.round(lng * 20) / 20).toFixed(2);
+  const cacheKey = new Request(`https://cache.ezcamps/wildlife?lat=${rl}&lng=${rg}&v=1`);
+  const hit = await caches.default.match(cacheKey);
+  if (hit) return hit;
+
+  const where = { lat: rl, lng: rg, radius: "25" };
+  const [fish, mammals, birds, threatened] = await Promise.all([
+    inat({ ...where, iconic_taxa: "Actinopterygii" }),
+    inat({ ...where, iconic_taxa: "Mammalia" }),
+    inat({ ...where, iconic_taxa: "Aves" }),
+    inat({ ...where, iconic_taxa: "Actinopterygii,Mammalia,Aves", threatened: "true" }),
+  ]);
+  const protectedIds = new Set(threatened.map((t) => t.taxon.id));
+  const row = (t: INatCount) => ({
+    name: t.taxon.preferred_common_name ?? t.taxon.name,
+    scientific: t.taxon.name,
+    observations: t.count,
+    protected: protectedIds.has(t.taxon.id),
+  });
+  const out = json({
+    radiusKm: 25,
+    fish: fish.map((t) => ({ ...row(t), game: GAME_FISH.test(t.taxon.preferred_common_name ?? "") })).slice(0, 40),
+    game: [...mammals.filter((t) => GAME_MAMMALS.has(t.taxon.preferred_common_name ?? "")),
+           ...birds.filter((t) => GAME_BIRDS.has(t.taxon.preferred_common_name ?? ""))]
+      .map((t) => ({ ...row(t), kind: t.taxon.iconic_taxon_name === "Aves" ? "bird" : "mammal" }))
+      .sort((a, b) => b.observations - a.observations),
+    source: "iNaturalist research-grade observations",
+  }, 200, { "Cache-Control": "public, max-age=86400" });
+  await caches.default.put(cacheKey, out.clone());
   return out;
 }
 
