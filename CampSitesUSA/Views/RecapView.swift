@@ -99,21 +99,24 @@ struct RecapView: View {
     }
 }
 
-/// The case for ezReels: this recap is the quick version; ezReels' director makes the film.
+/// The case for ezReels: ezcamp's reel is the quick, silent version; ezReels makes the one people
+/// replay. Only features ezReels has built are claimed here (PRD §3: Make it, Magic Clips,
+/// slideshows with music on the beat, Surprise me, animated captions, titles, carousels).
 struct EzReelsPitch: View {
     var onSave: () -> Void
     var saved: Bool
     @Environment(\.openURL) private var openURL
 
     private let points: [(String, String)] = [
-        ("wand.and.stars", "Its director writes the story from your photos and clips, and picks the moments worth keeping."),
-        ("waveform", "Every cut lands on the beat. Captions appear word by word."),
-        ("heart.text.square.fill", "Music, looks and twin cuts, ready for the family group chat in minutes."),
+        ("wand.and.stars", "One tap on Make it: the best moment first, dead air cut, captions on, music on the beat."),
+        ("film.stack.fill", "Long hike video? Magic Clips finds the best 30 seconds and tells you why."),
+        ("music.note", "Your photos as a slideshow that cuts on the beat, or a carousel ready for Instagram."),
+        ("dice.fill", "Surprise me makes three different reels of the same trip. The family picks a favorite."),
     ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Turn this trip into a film your family will replay")
+            Text("Turn this trip into a reel your family will replay")
                 .font(.headline)
             ForEach(points, id: \.1) { icon, text in
                 HStack(alignment: .top, spacing: 10) {
@@ -131,7 +134,7 @@ struct EzReelsPitch: View {
             }
             .buttonStyle(.borderedProminent).tint(.berry)
             .disabled(saved && RecapMaker.ezReelsStoreURL == nil)
-            Text("ezReels is our reel studio for iPhone. Your recap stays yours either way.")
+            Text("ezReels is our reel studio for iPhone. Your trip reel stays yours either way.")
                 .font(.caption2).foregroundStyle(.secondary)
         }
         .padding(16)

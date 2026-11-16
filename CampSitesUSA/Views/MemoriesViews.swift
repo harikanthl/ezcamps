@@ -16,6 +16,9 @@ struct TripMemoriesSection: View {
     @State private var camera = false
     @State private var viewing: Memory?
 
+    /// Any video long enough that finding the good part is the hard bit (Magic Clips' job).
+    @State private var hasLongVideo = false
+
     private var groups: [(title: String, memories: [Memory])] {
         let sorted = trip.memories.sorted { $0.takenAt < $1.takenAt }
         var out: [(String, [Memory])] = []
@@ -57,7 +60,7 @@ struct TripMemoriesSection: View {
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.borderedProminent).tint(.dusk)
-                Label("Want the director's cut? ezReels scripts the story, cuts on the beat and adds captions.", systemImage: "sparkles")
+                Label(hasLongVideo ? "Long video in here? ezReels' Magic Clips finds its best 30 seconds." : "Want music, captions and a cut on every beat? Open your reel in ezReels.", systemImage: "sparkles")
                     .font(.caption).foregroundStyle(Color.berry)
             }
             if importing { ProgressView("Adding…").font(.caption) }
@@ -71,6 +74,13 @@ struct TripMemoriesSection: View {
                 .ignoresSafeArea()
         }
         .fullScreenCover(item: $viewing) { m in MemoryViewer(memory: m) }
+        .task(id: trip.memories.count) {
+            var long = false
+            for m in trip.memories where m.isVideo {
+                if let d = try? await AVURLAsset(url: m.url).load(.duration), d.seconds > 120 { long = true; break }
+            }
+            hasLongVideo = long
+        }
     }
 
     private var addMenu: some View {
