@@ -74,6 +74,8 @@ final class Trip {
     var name: String
     var createdAt: Date
     @Relationship(deleteRule: .cascade, inverse: \TripStop.trip) var stops: [TripStop] = []
+    /// Photos and videos from the trip (files live in Documents/Memories).
+    @Relationship(deleteRule: .cascade, inverse: \Memory.trip) var memories: [Memory] = []
 
     // Route endpoints. Optional so trips made before route planning still load.
     var startName: String?

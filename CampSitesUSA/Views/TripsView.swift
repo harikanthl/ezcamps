@@ -339,6 +339,7 @@ struct TripDetailView: View {
     @State private var nightConditions: [String: NightConditions] = [:]
     @State private var showServices = false
     @State private var packing = false
+    @State private var makingRecap = false
 
     private let legColors: [Color] = [.sunset, .dusk, .sky, .berry, .meadow, .canyon]
 
@@ -399,6 +400,12 @@ struct TripDetailView: View {
                 Text("Itinerary")
             } footer: {
                 Text("Most BLM and National Forest land limits stays to 14 days in one spot. Suggested camps are picked from open data. Check each one before you go.")
+            }
+
+            Section {
+                TripMemoriesSection(trip: trip, onMakeRecap: { makingRecap = true })
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(.init(top: 8, leading: 4, bottom: 8, trailing: 4))
             }
 
             if !tripGearTips.isEmpty {

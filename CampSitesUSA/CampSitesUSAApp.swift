@@ -22,7 +22,7 @@ struct CampSitesUSAApp: App {
                 .tint(.sunset)
                 .task { await store.load() }
         }
-        .modelContainer(for: [SavedSite.self, Visit.self, Trip.self, TripStop.self])
+        .modelContainer(for: [SavedSite.self, Visit.self, Trip.self, TripStop.self, Memory.self])
     }
 }
 

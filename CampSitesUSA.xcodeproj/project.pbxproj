@@ -262,7 +262,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ezcamp;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Take photos and videos of your trip to keep with each camp.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Shows campsites and public land near you.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record sound with the videos you take on a trip.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save trip recap videos to your photo library.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -302,7 +305,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = ezcamp;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Take photos and videos of your trip to keep with each camp.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Shows campsites and public land near you.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Record sound with the videos you take on a trip.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Save trip recap videos to your photo library.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
