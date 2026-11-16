@@ -24,3 +24,6 @@ DerivedData/
 # Built database: published as a GitHub release (scripts/publish_db.py), fetched with scripts/fetch_db.py
 data/campsites.db
 data/campsites.db.part
+
+# FBI API response cache for scripts/pipeline/safety_index.py
+data/cache/

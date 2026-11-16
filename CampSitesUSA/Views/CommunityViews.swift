@@ -6,9 +6,11 @@ import AuthenticationServices
 /// tags with their age, and the latest ratings. Always shows how the score is worked out.
 struct CommunityRatingsSection: View {
     let site: Site
+    /// Loaded by the site card (shared with the Safety section).
+    let data: SiteCommunity?
+    let failed: Bool
+    var reload: () async -> Void = {}
     @Environment(CommunityAccount.self) private var account
-    @State private var data: SiteCommunity?
-    @State private var failed = false
     @State private var showAll = false
     @State private var reporting: CommunityRating?
 
@@ -21,7 +23,9 @@ struct CommunityRatingsSection: View {
                         .font(.subheadline).foregroundStyle(.secondary)
                 } else {
                     summary(data.summary)
-                    if !data.recentTags.isEmpty { tags(data.recentTags) }
+                    // Safety tags have their own place in the Safety section.
+                    let general = data.recentTags.filter { !SafetyTag.isSafety($0.tag) }
+                    if !general.isEmpty { tags(general) }
                     ForEach(showAll ? data.ratings : Array(data.ratings.prefix(3))) { r in
                         CommunityRatingRow(rating: r)
                             .contextMenu {
@@ -48,25 +52,13 @@ struct CommunityRatingsSection: View {
                 }
             }
         }
-        .task(id: "\(site.id)#\(account.revision)") { await load() }
         .confirmationDialog("Report this rating?", isPresented: Binding(get: { reporting != nil }, set: { if !$0 { reporting = nil } }),
                             titleVisibility: .visible, presenting: reporting) { r in
             ForEach(["Spam or ad", "Offensive", "Not about this site", "Looks fake"], id: \.self) { reason in
-                Button(reason) { Task { if await account.report(r, reason: reason) { await load() } } }
+                Button(reason) { Task { if await account.report(r, reason: reason) { await reload() } } }
             }
         } message: { _ in
             Text("Ratings reported by several campers are hidden.")
-        }
-    }
-
-    private func load() async {
-        do {
-            let d = try await RatingsAPI.site(site.id, token: account.token)
-            guard !Task.isCancelled else { return }
-            data = d
-            failed = false
-        } catch {
-            if !Task.isCancelled && data == nil { failed = true }
         }
     }
 

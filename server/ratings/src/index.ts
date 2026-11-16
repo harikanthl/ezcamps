@@ -7,12 +7,15 @@
 
 import { verifyAppleIdentityToken } from "./apple";
 
-interface Bindings extends Omit<Env, "ALLOW_DEV_AUTH"> {
+interface Bindings extends Omit<Env, "ALLOW_DEV_AUTH" | "NPS_API_KEY"> {
   ALLOW_DEV_AUTH?: string; // only ever set in .dev.vars
+  NPS_API_KEY?: string;    // secret; park alerts are unavailable until it's set
 }
 
 const TAGS = new Set([
   "Quiet", "Level spots", "Clean", "Shade", "Great views", "Dark skies", "Rough road", "Crowded", "Big-rig friendly",
+  // Safety: what campers saw, never who.
+  "Felt safe", "Felt unsafe", "Car break-ins", "Harassed", "Rangers patrol", "Gate locked at night",
 ]);
 const CARRIERS = new Set(["AT&T", "Verizon", "T-Mobile", "Other"]);
 const SITE_ID = /^[a-z]{2,8}:[A-Za-z0-9:-]{1,64}$/;
@@ -50,6 +53,7 @@ async function route(req: Request, env: Bindings): Promise<Response> {
   if (m === "POST" && path === "/v1/auth/dev" && env.ALLOW_DEV_AUTH === "1") return authDev(req, env);
   if (m === "DELETE" && path === "/v1/account") return deleteAccount(req, env);
   if (m === "GET" && path === "/v1/summaries") return summaries(url, env);
+  if (m === "GET" && path === "/v1/alerts") return parkAlerts(url, env);
   if (m === "GET" && (p = path.match(/^\/v1\/sites\/([^/]+)\/ratings$/))) return siteRatings(req, decodeURIComponent(p[1]), env);
   if (m === "PUT" && (p = path.match(/^\/v1\/ratings\/([^/]+)$/))) return putRating(req, p[1], env);
   if (m === "DELETE" && (p = path.match(/^\/v1\/ratings\/([^/]+)$/))) return deleteRating(req, p[1], env);
@@ -219,19 +223,19 @@ async function siteRatings(req: Request, siteId: string, env: Bindings): Promise
   ).bind(siteId).all<RatingRow>();
 
   const today = Date.now();
-  const recentTags = new Map<string, { count: number; latest: string }>();
+  const recentTags = new Map<string, { count: number; verified: number; latest: string }>();
   for (const r of results) {
     if (ageDays(r.visit_date, today) > 120) continue;
     for (const t of parseTags(r.tags)) {
-      const e = recentTags.get(t);
-      if (!e) recentTags.set(t, { count: 1, latest: r.visit_date });
-      else e.count += 1;
+      const e = recentTags.get(t) ?? recentTags.set(t, { count: 0, verified: 0, latest: r.visit_date }).get(t)!;
+      e.count += 1;
+      if (r.verified === 1) e.verified += 1;
     }
   }
 
   return json({
     summary: summarize(results, today),
-    recentTags: [...recentTags].map(([tag, v]) => ({ tag, count: v.count, latest: v.latest }))
+    recentTags: [...recentTags].map(([tag, v]) => ({ tag, count: v.count, verified: v.verified, latest: v.latest }))
       .sort((a, b) => b.count - a.count || b.latest.localeCompare(a.latest)),
     ratings: results.slice(0, 30).map((r) => ({
       id: r.id,
@@ -279,6 +283,43 @@ function summarize(rows: { visit_date: string; rating: number; verified: number 
     verifiedCount: verified,
     latestVisit: latest,
   };
+}
+
+// MARK: Park alerts
+
+const PARK_CODE = /^[a-z]{4}$/;
+
+/**
+ * Current NPS alerts (closures, dangers, cautions) for up to 5 parks: GET /v1/alerts?parks=zion,brca.
+ * Proxied so the NPS key never ships in the app, and cached at the edge for 30 minutes.
+ */
+async function parkAlerts(url: URL, env: Bindings): Promise<Response> {
+  const parks = [...new Set((url.searchParams.get("parks") ?? "").split(",").filter((p) => PARK_CODE.test(p)))].sort().slice(0, 5);
+  if (parks.length === 0) return json({ alerts: [] });
+  if (!env.NPS_API_KEY) throw new HttpError(503, "Park alerts aren't set up yet.");
+
+  const cacheKey = new Request(`https://cache.ezcamps/alerts?parks=${parks.join(",")}`);
+  const cache = caches.default;
+  const hit = await cache.match(cacheKey);
+  if (hit) return hit;
+
+  const res = await fetch(`https://developer.nps.gov/api/v1/alerts?parkCode=${parks.join(",")}&limit=50`, {
+    headers: { "X-Api-Key": env.NPS_API_KEY, "User-Agent": "ezcamps-ratings" },
+  });
+  if (!res.ok) throw new HttpError(502, "The Park Service didn't answer. Try again later.");
+  const body = (await res.json()) as { data?: { id: string; parkCode: string; title: string; description: string; category: string; url: string; lastIndexedDate?: string }[] };
+  const alerts = (body.data ?? []).map((a) => ({
+    id: a.id,
+    park: a.parkCode,
+    title: a.title,
+    description: a.description.slice(0, 600),
+    category: a.category,               // "Danger", "Caution", "Park Closure", "Information"
+    url: /^https:\/\//.test(a.url) ? a.url : null,
+    updated: a.lastIndexedDate ?? null,
+  }));
+  const out = json({ alerts }, 200, { "Cache-Control": "public, max-age=1800" });
+  await cache.put(cacheKey, out.clone());
+  return out;
 }
 
 // MARK: Helpers

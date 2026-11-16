@@ -12,6 +12,9 @@ struct SiteDetailView: View {
     @Query(sort: \Trip.createdAt, order: .reverse) private var trips: [Trip]
     @State private var showingRate = false
     @State private var showingNewTrip = false
+    @State private var community: SiteCommunity?
+    @State private var communityFailed = false
+    @Environment(CommunityAccount.self) private var account
 
     init(site: Site) {
         self.site = site
@@ -34,10 +37,12 @@ struct SiteDetailView: View {
                 if site.isBare && visits.isEmpty { bareNote }
                 if !site.amenities.isEmpty { amenities }
                 NightConditionsSection(coordinate: site.coordinate, site: site)
+                SafetySection(site: site, community: community).id("safety")
                 CellSignalSection(site: site, visits: visits)
                 if let d = site.description, !d.isEmpty { about(d) }
                 NearbyActivitiesSection(site: site)
-                CommunityRatingsSection(site: site).id("community")
+                CommunityRatingsSection(site: site, data: community, failed: communityFailed) { await loadCommunity() }
+                    .id("community")
                 ratingsSection
                 infoSection
             }
@@ -57,6 +62,7 @@ struct SiteDetailView: View {
                 .frame(height: 220)
                 .ignoresSafeArea()
         }
+        .task(id: "\(site.id)#\(account.revision)") { await loadCommunity() }
         .sheet(isPresented: $showingRate) {
             NavigationStack { RateVisitView(site: site) }
         }
@@ -196,6 +202,18 @@ struct SiteDetailView: View {
     }
 
     // MARK: Actions
+
+    /// Shared ratings for this site, used by "From other campers" and the Safety section.
+    private func loadCommunity() async {
+        do {
+            let d = try await RatingsAPI.site(site.id, token: account.token)
+            guard !Task.isCancelled else { return }
+            community = d
+            communityFailed = false
+        } catch {
+            if !Task.isCancelled && community == nil { communityFailed = true }
+        }
+    }
 
     private func toggleSave() {
         if let s = saved.first { context.delete(s) } else { context.insert(SavedSite(site: site)) }

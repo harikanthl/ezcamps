@@ -32,6 +32,8 @@ final class SiteStore {
     private var grid = SiteGrid()
     private var isLoading = false
     private(set) var activities: [Activity] = []
+    /// County, nearby parks and county crime context per site (bundled safety_index.json).
+    private(set) var safety: SafetyIndex?
 
     func site(id: String) -> Site? { byID[id] }
 
@@ -52,6 +54,8 @@ final class SiteStore {
         self.byID = byID
         self.grid = grid
         isLoaded = true
+
+        safety = await Task.detached(priority: .utility) { SafetyIndex.load() }.value
 
         if let aURL = Bundle.main.url(forResource: "activities", withExtension: "json") {
             activities = await Task.detached(priority: .utility) { () -> [Activity] in

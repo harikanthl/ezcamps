@@ -34,6 +34,7 @@ nonisolated struct CommunityRating: Codable, Sendable, Identifiable, Equatable {
 nonisolated struct RecentTag: Codable, Sendable, Equatable {
     var tag: String
     var count: Int
+    var verified: Int?
     var latest: String
 }
 

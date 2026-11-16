@@ -37,12 +37,14 @@ test("rate, one per night, weighted summary, report and hide, delete account", a
   assert.deepEqual((await put(alice, randomUUID(), { rating: 4 })).body, { id: r1 });
   // Someone else can't overwrite it.
   assert.equal((await put(bob, r1)).status, 403);
-  await put(bob, randomUUID(), { rating: 1, verified: false, tags: ["Rough road"] });
+  await put(bob, randomUUID(), { rating: 1, verified: false, tags: ["Rough road", "Car break-ins"] });
 
   const view = (await call("GET", `/v1/sites/${encodeURIComponent(site)}/ratings`, { token: alice })).body;
   assert.equal(view.summary.count, 2);
   assert.equal(view.summary.verifiedCount, 1);
   assert.equal(view.summary.score, 3); // (4×2 + 1×1) / 3
+  assert.deepEqual(view.recentTags.find((t) => t.tag === "Car break-ins"), { tag: "Car break-ins", count: 1, verified: 0, latest: today });
+  assert.equal(view.recentTags.find((t) => t.tag === "Quiet").verified, 1);
   const mine = view.ratings.find((r) => r.mine);
   assert.deepEqual(mine.tags, ["Quiet"]); // unknown tags dropped
   assert.equal(mine.note, "Great");
@@ -68,4 +70,10 @@ test("rate, one per night, weighted summary, report and hide, delete account", a
   assert.equal((await call("DELETE", "/v1/account", { token: bob })).status, 200);
   assert.equal((await call("GET", `/v1/sites/${encodeURIComponent(site)}/ratings`)).body.summary.count, 0);
   assert.equal((await call("DELETE", `/v1/ratings/${r1}`, { token: bob })).status, 401);
+});
+
+test("park alerts: validated codes, unavailable without a key", async () => {
+  assert.deepEqual((await call("GET", "/v1/alerts?parks=../x")).body, { alerts: [] });
+  const r = await call("GET", "/v1/alerts?parks=zion");
+  assert.ok(r.status === 503 || r.status === 200);
 });

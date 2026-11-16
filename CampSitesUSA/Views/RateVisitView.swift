@@ -50,6 +50,21 @@ struct RateVisitView: View {
 
             Section {
                 FlowLayout(spacing: 8) {
+                    ForEach(SafetyTag.all, id: \.self) { tag in
+                        Chip(title: tag, tint: SafetyTag.concerning.contains(tag) ? .berry : .meadow, isOn: tags.contains(tag)) {
+                            tags.formSymmetricDifference([tag])
+                        }
+                    }
+                }
+                .padding(.vertical, 4)
+            } header: {
+                Text("Safety")
+            } footer: {
+                Text("What you saw, not who. Helps the next camper decide, especially at remote free sites.")
+            }
+
+            Section {
+                FlowLayout(spacing: 8) {
                     ForEach(CellSignal.carriers, id: \.self) { c in
                         Chip(title: c, symbol: "antenna.radiowaves.left.and.right", tint: .sky, isOn: carrier == c) {
                             carrier = carrier == c ? nil : c
@@ -133,7 +148,7 @@ struct RateVisitView: View {
 
     private func save() {
         context.insert(Visit(site: site, date: date, rating: rating,
-                             tags: Visit.tagOptions.filter(tags.contains), note: note, verified: isOnSite,
+                             tags: (Visit.tagOptions + SafetyTag.all).filter(tags.contains), note: note, verified: isOnSite,
                              carrier: signal == nil ? nil : carrier, signal: signal))
         try? context.save()
         // Share it now if signed in (and not offline; otherwise it goes up on the next launch).
