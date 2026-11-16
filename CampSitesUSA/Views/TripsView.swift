@@ -481,7 +481,7 @@ struct TripDetailView: View {
             if showServices {
                 ForEach(Array(services.values.flatMap { $0.places.values }), id: \.id) { p in
                     Marker(p.name, systemImage: p.kind.symbol, coordinate: p.coordinate)
-                        .tint(p.kind == .hospital ? Color.berry : p.kind == .gas ? Color.canyon : Color.meadow)
+                        .tint(p.kind.color)
                 }
             }
             ForEach(Array(legs.enumerated()), id: \.offset) { i, route in
@@ -758,7 +758,7 @@ struct TripDetailView: View {
                                 Label("\(kind.label) \(p.miles.formatted(.number.precision(.fractionLength(p.miles < 10 ? 1 : 0)))) mi",
                                       systemImage: kind.symbol)
                             }
-                            .buttonStyle(ServicePillStyle(color: kind == .hospital ? .berry : kind == .gas ? .canyon : .meadow))
+                            .buttonStyle(ServicePillStyle(color: kind.color))
                             .accessibilityHint("Opens \(p.name) in Maps")
                         } else if s.searched.contains(kind) {
                             Label("No \(kind.label.lowercased()) within \(Int(kind.radii.last!)) mi", systemImage: kind.symbol)
@@ -772,7 +772,7 @@ struct TripDetailView: View {
             }
             .scrollClipDisabled()
         } else {
-            Label("Finding gas, groceries and hospitals…", systemImage: "fuelpump")
+            Label("Finding gas, groceries, hospitals and police…", systemImage: "fuelpump")
                 .font(.caption).foregroundStyle(.secondary)
         }
     }

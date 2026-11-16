@@ -214,7 +214,7 @@ struct SafetySection: View {
     private func load() async {
         async let a: [ParkAlert]? = parks.isEmpty ? [] : (try? await RatingsAPI.alerts(parks: parks))
         async let h = ServiceFinder.nearest(.hospital, to: site.coordinate)
-        async let p = ServiceFinder.nearestLawEnforcement(to: site.coordinate)
+        async let p = ServiceFinder.nearest(.police, to: site.coordinate)
         let (alertList, hosp, pol) = await (a, h, p)
         guard !Task.isCancelled else { return }
         if let alertList { alerts = alertList.sorted { $0.rank < $1.rank } } else { alertsFailed = true }

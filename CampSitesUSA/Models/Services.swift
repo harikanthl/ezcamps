@@ -1,10 +1,11 @@
 import Foundation
 import MapKit
+import SwiftUI
 
-/// Practical stops near a camp: fuel, groceries, and the nearest hospital (a safety question at
+/// Practical stops near a camp: fuel, groceries, police, and the nearest hospital (a safety question at
 /// remote free sites). Live from Apple Maps' points of interest, so hours and closures are current.
 enum ServiceKind: String, CaseIterable, Identifiable {
-    case gas, groceries, hospital
+    case gas, groceries, hospital, police
 
     var id: String { rawValue }
 
@@ -13,6 +14,7 @@ enum ServiceKind: String, CaseIterable, Identifiable {
         case .gas: "Gas"
         case .groceries: "Groceries"
         case .hospital: "Hospital"
+        case .police: "Police"
         }
     }
 
@@ -21,6 +23,7 @@ enum ServiceKind: String, CaseIterable, Identifiable {
         case .gas: "fuelpump.fill"
         case .groceries: "cart.fill"
         case .hospital: "cross.case.fill"
+        case .police: "shield.fill"
         }
     }
 
@@ -29,6 +32,7 @@ enum ServiceKind: String, CaseIterable, Identifiable {
         case .gas: [.gasStation, .evCharger]
         case .groceries: [.foodMarket, .store]
         case .hospital: [.hospital]
+        case .police: [.police]
         }
     }
 
@@ -37,6 +41,7 @@ enum ServiceKind: String, CaseIterable, Identifiable {
         case .gas: "gas station"
         case .groceries: "grocery store"
         case .hospital: "hospital emergency room"
+        case .police: "police station"
         }
     }
 
@@ -45,6 +50,7 @@ enum ServiceKind: String, CaseIterable, Identifiable {
         switch self {
         case .gas, .groceries: [30, 80]
         case .hospital: [40, 150]
+        case .police: [30, 80]
         }
     }
 }
@@ -69,6 +75,8 @@ enum ServiceFinder {
     /// Text search limited to the right categories. (MKLocalPointsOfInterestRequest returned
     /// nothing outside towns in testing, so it isn't used.)
     static func nearest(_ kind: ServiceKind, to c: CLLocationCoordinate2D) async -> ServicePlace? {
+        // Police also counts sheriff's offices and ranger stations: on public land that's who answers.
+        if kind == .police { return await nearestLawEnforcement(to: c) }
         for radius in kind.radii {
             let req = MKLocalSearch.Request()
             req.naturalLanguageQuery = kind.query
@@ -119,5 +127,16 @@ enum ServiceFinder {
             }
         }
         return out
+    }
+}
+
+extension ServiceKind {
+    var color: Color {
+        switch self {
+        case .gas: .canyon
+        case .groceries: .meadow
+        case .hospital: .berry
+        case .police: .sky
+        }
     }
 }

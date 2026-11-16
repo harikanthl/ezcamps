@@ -159,7 +159,7 @@ extension ServiceFinder {
                 }
             }
             if let (item, d) = best {
-                return ServicePlace(kind: .hospital, name: item.name ?? "Police", coordinate: item.location.coordinate, miles: d, item: item)
+                return ServicePlace(kind: .police, name: item.name ?? "Police", coordinate: item.location.coordinate, miles: d, item: item)
             }
         }
         return nil
