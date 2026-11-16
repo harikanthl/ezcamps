@@ -30,16 +30,16 @@ struct RecapView: View {
                     Spacer()
                     VStack(spacing: 14) {
                         AppLogo(size: 64)
-                        Text("Making your recap…").font(.headline)
+                        Text("Turning your trip into a reel…").font(.headline)
                         ProgressView(value: progress).tint(.dusk).frame(maxWidth: 240)
-                        Text("Photos in order, a camp title for each day, and your route on the map.")
+                        Text("Your route on the map, every camp by day, and the moments that made it.")
                             .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }
                     Spacer()
                 }
             }
             .padding()
-            .navigationTitle("Trip recap")
+            .navigationTitle("Your trip reel")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
             .task { await make() }
@@ -57,15 +57,15 @@ struct RecapView: View {
                 .disabled(saved)
                 if let url {
                     ShareLink(item: url) {
-                        Label("Share", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity, minHeight: 44)
+                        Label("Share with family", systemImage: "heart.fill").frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.bordered).tint(.dusk)
                 }
             }
             // ezReels does music, captions and twin cuts; point people there instead of rebuilding it.
             VStack(alignment: .leading, spacing: 4) {
-                Label("Make it a reel in ezReels", systemImage: "sparkles").font(.subheadline.weight(.semibold))
-                Text("Add music on the beat, captions and twin cuts. Save the recap to Photos, then open it in ezReels.")
+                Label("Make it unforgettable in ezReels", systemImage: "sparkles").font(.subheadline.weight(.semibold))
+                Text("Music that hits on the beat, captions and twin cuts, ready for the family group chat. Save your reel to Photos, then open it in ezReels.")
                     .font(.caption).foregroundStyle(.secondary)
                 if let store = RecapMaker.ezReelsStoreURL {
                     Button("Get ezReels") { openURL(store) }.font(.caption.weight(.semibold))

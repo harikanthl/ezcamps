@@ -34,7 +34,7 @@ struct TripMemoriesSection: View {
                 addMenu
             }
             if trip.memories.isEmpty {
-                Text("Add photos and videos from the trip. They're kept with each camp, and you can turn them into a recap video.")
+                Text("Every trip is a story worth telling. Add your photos and videos, and ezcamp turns them into a reel you can share with the people you love.")
                     .font(.subheadline).foregroundStyle(.secondary)
             } else {
                 ForEach(groups, id: \.title) { g in
@@ -52,7 +52,7 @@ struct TripMemoriesSection: View {
                     }
                 }
                 Button(action: onMakeRecap) {
-                    Label("Make a recap video", systemImage: "film.stack")
+                    Label("Make my trip reel", systemImage: "film.stack")
                         .font(.subheadline.weight(.semibold))
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
