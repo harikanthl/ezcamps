@@ -27,3 +27,8 @@ The 3D icons in `CampSitesUSA/Assets.xcassets/Icons3D` are from [microsoft/fluen
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE
 ```
+
+## ezReels (MIT-internal lift)
+
+`CampSitesUSA/Recap/Slide*.swift` and `StickerCutout.swift` are lifted from the ezReels app (same author) at edd2483.
+Fonts in `CampSitesUSA/Resources/Fonts` (Anton, Inter, Montserrat) are under the SIL Open Font License; see `SlideFonts-OFL.txt`.

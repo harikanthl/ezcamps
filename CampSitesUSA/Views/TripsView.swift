@@ -452,6 +452,27 @@ struct TripDetailView: View {
         .sheet(item: $swapping) { stop in
             SwapStopView(trip: trip, stop: stop)
         }
+        #if DEBUG
+        // Testing aids: `-debugSeedMemories <folder>` adds the folder's photos to this trip, spread over
+        // its camps; `-debugRecap YES` then opens the recap.
+        .task {
+            if let dir = DebugLaunch.string("debugSeedMemories"),
+               let files = try? FileManager.default.contentsOfDirectory(at: URL(fileURLWithPath: dir), includingPropertiesForKeys: nil) {
+                let stops = trip.orderedStops
+                for (i, f) in files.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }).enumerated() {
+                    guard let data = try? Data(contentsOf: f), let saved = try? MemoryFiles.savePhoto(data) else { continue }
+                    let m = Memory(fileName: saved.fileName, isVideo: false, takenAt: Date.now.addingTimeInterval(Double(i) * 3600), coordinate: nil)
+                    if !stops.isEmpty { let s = stops[i % stops.count]; m.siteID = s.siteID; m.siteName = s.name }
+                    trip.memories.append(m)
+                }
+            }
+            if DebugLaunch.flag("debugRecap") { try? await Task.sleep(for: .seconds(2)); makingRecap = true }
+        }
+        #endif
+        .sheet(isPresented: $makingRecap) {
+            RecapView(trip: trip, miles: legs.compactMap { $0 }.isEmpty ? nil
+                      : Int((legs.compactMap { $0 }.map(\.distance).reduce(0, +) / TripPlanner.metersPerMile).rounded()))
+        }
         .sheet(isPresented: $packing) {
             PackListView(title: trip.name,
                          site: trip.orderedStops.first.flatMap { store.site(id: $0.siteID) },
