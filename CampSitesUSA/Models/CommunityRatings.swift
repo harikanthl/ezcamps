@@ -60,9 +60,12 @@ nonisolated enum RatingsAPI {
         return try await send("GET", path, token: token)
     }
 
-    static func signIn(identityToken: String) async throws -> String {
+    /// The authorization code lets the server revoke Sign in with Apple if the account is deleted.
+    static func signIn(identityToken: String, authorizationCode: String?) async throws -> String {
         struct Out: Decodable { let token: String }
-        let out: Out = try await send("POST", "/v1/auth/apple", body: ["identityToken": identityToken])
+        var body = ["identityToken": identityToken]
+        if let authorizationCode { body["authorizationCode"] = authorizationCode }
+        let out: Out = try await send("POST", "/v1/auth/apple", body: body)
         return out.token
     }
 
@@ -191,7 +194,8 @@ final class CommunityAccount {
                 return
             }
             do {
-                let token = try await RatingsAPI.signIn(identityToken: jwt)
+                let code = cred.authorizationCode.flatMap { String(data: $0, encoding: .utf8) }
+                let token = try await RatingsAPI.signIn(identityToken: jwt, authorizationCode: code)
                 RatingsKeychain.set(token, "session")
                 RatingsKeychain.set(cred.user, "appleUser")
                 isSignedIn = true

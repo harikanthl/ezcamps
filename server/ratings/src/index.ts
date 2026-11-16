@@ -5,11 +5,45 @@
 // site, per night. Verified visits (logged on-site) weigh double and every rating fades with age, so
 // "Rough road" from two weeks ago outranks a three-year-old review.
 
-import { verifyAppleIdentityToken } from "./apple";
+import { verifyAppleIdentityToken, exchangeAuthorizationCode, revokeRefreshToken, type AppleKeys } from "./apple";
 
-interface Bindings extends Omit<Env, "ALLOW_DEV_AUTH" | "NPS_API_KEY"> {
+interface Bindings extends Omit<Env, "ALLOW_DEV_AUTH" | "NPS_API_KEY" | "APPLE_KEY_P8" | "APPLE_KEY_ID" | "TOKEN_KEY"> {
   ALLOW_DEV_AUTH?: string; // only ever set in .dev.vars
   NPS_API_KEY?: string;    // secret; park alerts are unavailable until it's set
+  APPLE_KEY_P8?: string;   // secret: Sign in with Apple key, for revoking on account deletion
+  APPLE_KEY_ID?: string;   // secret
+  TOKEN_KEY?: string;      // secret: base64 32-byte AES key for stored Apple refresh tokens
+}
+
+function appleKeys(env: Bindings): AppleKeys | null {
+  if (!env.APPLE_KEY_P8 || !env.APPLE_KEY_ID || !env.APPLE_TEAM_ID) return null;
+  return { teamId: env.APPLE_TEAM_ID, keyId: env.APPLE_KEY_ID, p8: env.APPLE_KEY_P8, clientId: env.APPLE_AUDIENCE };
+}
+
+async function aesKey(env: Bindings): Promise<CryptoKey | null> {
+  if (!env.TOKEN_KEY) return null;
+  const raw = Uint8Array.from(atob(env.TOKEN_KEY), (c) => c.charCodeAt(0));
+  return crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+
+async function seal(env: Bindings, text: string): Promise<string | null> {
+  const key = await aesKey(env);
+  if (!key) return null;
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text)));
+  return btoa(String.fromCharCode(...iv, ...ct));
+}
+
+async function unseal(env: Bindings, sealed: string): Promise<string | null> {
+  const key = await aesKey(env);
+  if (!key) return null;
+  const all = Uint8Array.from(atob(sealed), (c) => c.charCodeAt(0));
+  try {
+    const pt = await crypto.subtle.decrypt({ name: "AES-GCM", iv: all.slice(0, 12) }, key, all.slice(12));
+    return new TextDecoder().decode(pt);
+  } catch {
+    return null;
+  }
 }
 
 const TAGS = new Set([
@@ -70,7 +104,18 @@ async function authApple(req: Request, env: Bindings): Promise<Response> {
   if (!token) throw new HttpError(400, "identityToken is required.");
   const sub = await verifyAppleIdentityToken(token, env.APPLE_AUDIENCE);
   if (!sub) throw new HttpError(401, "Sign in with Apple couldn't be verified.");
-  return startSession(env, sub);
+  const response = await startSession(env, sub);
+  // Keep a refresh token (encrypted) so deleting the account can revoke Sign in with Apple.
+  const code = str(body.authorizationCode, 2048);
+  const keys = appleKeys(env);
+  if (code && keys) {
+    const refresh = await exchangeAuthorizationCode(code, keys).catch(() => null);
+    const sealed = refresh ? await seal(env, refresh) : null;
+    if (sealed) {
+      await env.DB.prepare("UPDATE users SET apple_refresh = ? WHERE apple_hash = ?").bind(sealed, await hmac(env.SUB_PEPPER, sub)).run();
+    }
+  }
+  return response;
 }
 
 /** Local testing only: a session for a made-up user. The route doesn't exist unless ALLOW_DEV_AUTH=1. */
@@ -117,6 +162,14 @@ async function optionalUser(req: Request, env: Bindings): Promise<string | null>
 /** Deletes the person and everything they wrote (ratings, reports, sessions). */
 async function deleteAccount(req: Request, env: Bindings): Promise<Response> {
   const user = await requireUser(req, env);
+  // Revoke Sign in with Apple first (best effort), then delete everything.
+  let revoked = false;
+  const keys = appleKeys(env);
+  const row = await env.DB.prepare("SELECT apple_refresh FROM users WHERE id = ?").bind(user).first<{ apple_refresh: string | null }>();
+  if (keys && row?.apple_refresh) {
+    const refresh = await unseal(env, row.apple_refresh);
+    if (refresh) revoked = await revokeRefreshToken(refresh, keys).catch(() => false);
+  }
   await env.DB.batch([
     env.DB.prepare("DELETE FROM reports WHERE user_id = ?").bind(user),
     env.DB.prepare("DELETE FROM reports WHERE rating_id IN (SELECT id FROM ratings WHERE user_id = ?)").bind(user),
@@ -124,7 +177,7 @@ async function deleteAccount(req: Request, env: Bindings): Promise<Response> {
     env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(user),
     env.DB.prepare("DELETE FROM users WHERE id = ?").bind(user),
   ]);
-  return json({ deleted: true });
+  return json({ deleted: true, appleRevoked: revoked });
 }
 
 // MARK: Ratings

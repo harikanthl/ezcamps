@@ -64,3 +64,54 @@ function b64urlBytes(s: string): Uint8Array {
 function b64urlText(s: string): string {
   return new TextDecoder().decode(b64urlBytes(s));
 }
+
+// MARK: Token exchange and revocation (account deletion)
+
+export interface AppleKeys {
+  teamId: string;
+  keyId: string;
+  /** The .p8 file's contents (PKCS#8 PEM). */
+  p8: string;
+  clientId: string;
+}
+
+/** The ES256 client secret Apple wants on /auth/token and /auth/revoke, valid for 5 minutes. */
+async function clientSecret(k: AppleKeys): Promise<string> {
+  const pem = k.p8.replace(/-----[^-]+-----/g, "").replace(/\s+/g, "");
+  const der = Uint8Array.from(atob(pem), (c) => c.charCodeAt(0));
+  const key = await crypto.subtle.importKey("pkcs8", der, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  const now = Math.floor(Date.now() / 1000);
+  const enc = (o: unknown) => b64url(new TextEncoder().encode(JSON.stringify(o)));
+  const head = enc({ alg: "ES256", kid: k.keyId });
+  const body = enc({ iss: k.teamId, iat: now, exp: now + 300, aud: APPLE_ISSUER, sub: k.clientId });
+  const sig = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(`${head}.${body}`));
+  return `${head}.${body}.${b64url(new Uint8Array(sig))}`;
+}
+
+/** Trades the one-time authorization code from the app for a refresh token (null on any failure). */
+export async function exchangeAuthorizationCode(code: string, k: AppleKeys): Promise<string | null> {
+  const res = await fetch(`${APPLE_ISSUER}/auth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ client_id: k.clientId, client_secret: await clientSecret(k), code, grant_type: "authorization_code" }),
+  });
+  if (!res.ok) return null;
+  const out = (await res.json()) as { refresh_token?: string };
+  return out.refresh_token ?? null;
+}
+
+/** Revokes ezcamp's Sign in with Apple grant for this person. Best effort: true when Apple accepted. */
+export async function revokeRefreshToken(token: string, k: AppleKeys): Promise<boolean> {
+  const res = await fetch(`${APPLE_ISSUER}/auth/revoke`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ client_id: k.clientId, client_secret: await clientSecret(k), token, token_type_hint: "refresh_token" }),
+  });
+  return res.ok;
+}
+
+function b64url(bytes: Uint8Array): string {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}

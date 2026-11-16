@@ -15,7 +15,7 @@ Status as of 2026-11-16. Release build for a device compiles with no warnings.
 
 ## Blockers before you submit
 
-1. **Sign in with Apple token revocation.** Guideline 5.1.1(v) expects apps with Sign in with Apple to revoke the token when an account is deleted. Needs a Sign in with Apple key (.p8) and its Key ID from the developer account; then the Worker calls Apple's `/auth/revoke`.
+1. ~~Sign in with Apple token revocation~~ **Done 2026-11-16**: key 742GSDKA8H on the Worker; deletion revokes via Apple's `/auth/revoke`. The .p8 stays out of git (`*.p8` ignored); back it up somewhere safe, Apple won't re-download it.
 2. **NPS key.** Rotate the leaked key and set it on the Worker (`npx wrangler secret put NPS_API_KEY` in `server/ratings`), or park alerts show "not available".
 3. **Test on a real iPhone:** Sign in with Apple, rating sync, camera, gear cut-outs (Vision can't run in the Simulator), Ask ezcamp with a real model (on-device and with a key), trip reel save to Photos.
 4. **Screenshots** at 6.9" (iPhone 17 Pro Max, 1320×2868). Boot a 17 Pro Max simulator and use the debug launch arguments (README) for clean screens: map with 3D pins, site card with Safety, Fishing & hunting, Ask ezcamp, pack list, trip reel, gear closet.

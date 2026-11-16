@@ -17,7 +17,8 @@
   ],
   "vars": {
     // Sign in with Apple tokens must be issued for this app.
-    "APPLE_AUDIENCE": "com.harikanthlingutla.CampSitesUSA"
+    "APPLE_AUDIENCE": "com.harikanthlingutla.CampSitesUSA",
+    "APPLE_TEAM_ID": "2F5YSX6AK6"
   }
   // Secrets (wrangler secret put): SUB_PEPPER, HMAC key for Apple user ids.
   // Local only (.dev.vars, never deployed): ALLOW_DEV_AUTH=1 enables POST /v1/auth/dev for tests.

@@ -27,3 +27,6 @@ data/campsites.db.part
 
 # FBI API response cache for scripts/pipeline/safety_index.py
 data/cache/
+
+# Apple private keys (Sign in with Apple .p8): never commit
+*.p8
