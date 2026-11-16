@@ -60,7 +60,7 @@ struct TripMemoriesSection: View {
                         .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .buttonStyle(.borderedProminent).tint(.dusk)
-                Label(hasLongVideo ? "Long video in here? ezReels' Magic Clips finds its best 30 seconds." : "Want music, captions and a cut on every beat? Open your reel in ezReels.", systemImage: "sparkles")
+                Label(hasLongVideo ? "Long video in here? ezReels' Magic Clips finds its best 30 seconds." : "Want music on the beat, captions, and a YouTube cut from the same take? That's ezReels.", systemImage: "sparkles")
                     .font(.caption).foregroundStyle(Color.berry)
             }
             if importing { ProgressView("Adding…").font(.caption) }

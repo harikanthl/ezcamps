@@ -101,7 +101,7 @@ struct RecapView: View {
 
 /// The case for ezReels: ezcamp's reel is the quick, silent version; ezReels makes the one people
 /// replay. Only features ezReels has built are claimed here (PRD §3: Make it, Magic Clips,
-/// slideshows with music on the beat, Surprise me, animated captions, titles, carousels).
+/// slideshows with music on the beat, Surprise me, Twin Cut, animated captions, titles, carousels).
 struct EzReelsPitch: View {
     var onSave: () -> Void
     var saved: Bool
@@ -110,6 +110,7 @@ struct EzReelsPitch: View {
     private let points: [(String, String)] = [
         ("wand.and.stars", "One tap on Make it: the best moment first, dead air cut, captions on, music on the beat."),
         ("film.stack.fill", "Long hike video? Magic Clips finds the best 30 seconds and tells you why."),
+        ("rectangle.split.2x1.fill", "Twin Cut: shoot once at camp, get the vertical reel and the YouTube cut, each edited for its platform."),
         ("music.note", "Your photos as a slideshow that cuts on the beat, or a carousel ready for Instagram."),
         ("dice.fill", "Surprise me makes three different reels of the same trip. The family picks a favorite."),
     ]
