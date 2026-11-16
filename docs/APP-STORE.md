@@ -4,6 +4,8 @@ Status as of 2026-11-16. Release build for a device compiles with no warnings.
 
 ## App Store Connect
 
+- **Submitted for review 2026-11-16 13:24 UTC** (submission bc8b73b6), release type MANUAL: press Release after approval. Listing, screenshots (`docs/store-screenshots`, made by `scripts/storeshots.swift`), privacy (`docs/app-privacy.json`), age rating, Travel category and review notes are all in App Store Connect.
+
 - App record: **ezcamp: Free Camping and Trips**, app ID `6835444197`, SKU `ezcamp`, price Free (USA base).
 - Build 1.0 (1) uploaded 2026-11-16 with `asc builds upload`; TestFlight internal group "Internal" (all builds) with the account holder added.
 - Next build: bump `CURRENT_PROJECT_VERSION`, archive with `-allowProvisioningUpdates`, export (app-store-connect), `asc builds upload --app 6835444197`.
