@@ -4,30 +4,35 @@ import Observation
 /// Features that use AI. Each picks its own model in Settings, so a quick task can use a small, cheap
 /// model while a bigger one can use a frontier model.
 enum AIFeature: String, CaseIterable, Identifiable {
+    case chat
     case planTrip
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
+        case .chat: "Ask ezcamp"
         case .planTrip: "Plan with AI"
         }
     }
 
     var symbol: String {
         switch self {
+        case .chat: "bubble.left.and.text.bubble.right.fill"
         case .planTrip: "sparkles"
         }
     }
 
     var section: String {
         switch self {
+        case .chat: "Chat"
         case .planTrip: "Trips"
         }
     }
 
     var explainer: String {
         switch self {
+        case .chat: "Ask anything about camping on the map: where to stay, whether you can camp somewhere, tonight's weather, safety, fish and game, and plan trips. Answers come from ezcamp's data with sources."
         case .planTrip: "Turns a request like “SF to Moab via Zion, 5 nights, free sites” into a route. Campsites always come from ezcamp' open data, never from the model."
         }
     }

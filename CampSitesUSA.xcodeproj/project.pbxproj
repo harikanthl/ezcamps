@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		AA11000330AA3C2E0032AC7A /* OperatorLLM in Frameworks */ = {isa = PBXBuildFile; productRef = AA11000230AA3C2E0032AC7A /* OperatorLLM */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		2824F1EF30AA3C2E0032AC7A /* CampSitesUSA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CampSitesUSA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA11000330AA3C2E0032AC7A /* OperatorLLM in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = CampSitesUSA;
 			packageProductDependencies = (
+				AA11000230AA3C2E0032AC7A /* OperatorLLM */,
 			);
 			productName = CampSitesUSA;
 			productReference = 2824F1EF30AA3C2E0032AC7A /* CampSitesUSA.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 2824F1E630AA3C2E0032AC7A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				AA11000130AA3C2E0032AC7A /* XCLocalSwiftPackageReference "Packages/OperatorLLM" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2824F1F030AA3C2E0032AC7A /* Products */;
 			projectDirPath = "";
@@ -343,6 +352,20 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		AA11000130AA3C2E0032AC7A /* XCLocalSwiftPackageReference "Packages/OperatorLLM" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/OperatorLLM;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA11000230AA3C2E0032AC7A /* OperatorLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = OperatorLLM;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2824F1E730AA3C2E0032AC7A /* Project object */;
 }

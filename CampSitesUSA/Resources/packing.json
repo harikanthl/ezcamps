@@ -1,0 +1,628 @@
+{
+  "meta": {
+    "compiled": "2026-11-16",
+    "purpose": "Evidence base for the ezcamp personalized pack list (food, snacks, water, gear) by activity, trip length and forecast.",
+    "verification": "verified = page fetched and quoted directly. snippet = page blocked automated fetch (REI returns 403, some USDA/NIOSH pages too); number taken from the search engine's quote of that exact page. Re-check snippet items in a browser before shipping.",
+    "caveats": [
+      "These are general planning numbers for healthy adults, not medical advice. Needs vary with body size, fitness, health and conditions.",
+      "Regulations (blaze orange, licenses, food storage orders, bear spray rules) vary by state and park. The app should tell users to check local rules."
+    ]
+  },
+
+  "hydration": {
+    "baseline": [
+      {
+        "context": "Daily need, normally active person",
+        "guidance": "About 3/4 gallon of fluid a day from water and other drinks. Plan at least 1 gallon per person per day when it must cover drinking and washing.",
+        "source": "https://www.ready.gov/water",
+        "verification": "verified"
+      },
+      {
+        "context": "Before a hike",
+        "guidance": "Drink at least 4 cups of water before you start so you have less to carry.",
+        "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking",
+        "verification": "verified"
+      },
+      {
+        "context": "Moderate activity, moderate weather",
+        "guidance": "About 0.5 liter per hour. Strenuous hiking in high heat may need 1 liter or more per hour.",
+        "source": "https://www.rei.com/learn/expert-advice/hydrate.html",
+        "verification": "snippet"
+      },
+      {
+        "context": "Hiking rule of thumb",
+        "guidance": "Plan about 2 cups (about 0.5 liter) of fluid for every hour of hiking.",
+        "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking",
+        "verification": "verified"
+      },
+      {
+        "context": "Do not wait for thirst",
+        "guidance": "Sip water regularly through the hike, even if you do not feel thirsty.",
+        "source": "https://www.nps.gov/grca/planyourvisit/hike-smart.htm",
+        "verification": "verified"
+      },
+      {
+        "context": "Know your own sweat rate",
+        "guidance": "Weigh yourself before and after exercise to estimate sweat rate. The goal while exercising is to avoid losing more than 2% of body weight from water loss.",
+        "source": "https://pubmed.ncbi.nlm.nih.gov/17277604/",
+        "verification": "verified (ACSM position stand abstract, via Europe PMC)"
+      }
+    ],
+
+    "byActivity": {
+      "camping": {
+        "perDay": "Plan at least 1 gallon (about 3.8 L) per person per day for drinking plus washing; about 3/4 gallon of that is drinking for a normally active person.",
+        "notes": "Add water for cooking and dishes. Double in very hot weather.",
+        "source": "https://www.ready.gov/water",
+        "verification": "verified"
+      },
+      "dayHiking": {
+        "perHour": "About 0.5 L (2 cups) per hour in moderate weather; 0.5 to 1 quart per hour hiking in heat.",
+        "sources": [
+          "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking",
+          "https://www.nps.gov/glac/learn/news/news07-43.htm"
+        ],
+        "verification": "verified (Glacier NPS page is an archived 2007 release)"
+      },
+      "backpacking": {
+        "perHour": "Same hourly rates as day hiking while moving, plus water for cooking and camp.",
+        "notes": "Carry a way to treat water so you can refill from natural sources instead of carrying it all. Pick a route with known water sources.",
+        "source": "https://www.nps.gov/articles/10essentials.htm",
+        "verification": "verified"
+      },
+      "mountainBiking": {
+        "perHour": "No bike-specific number found from an approved source. Use about 0.5 L per hour in moderate weather and more in heat or at altitude.",
+        "notes": "REI lists a hydration pack and/or water bottles as core mountain bike gear.",
+        "sources": [
+          "https://www.rei.com/learn/expert-advice/ten-essentials.html",
+          "https://www.rei.com/learn/expert-advice/mountain-biking-checklist.html"
+        ],
+        "verification": "snippet"
+      },
+      "trailRunning": {
+        "perHour": "No running-specific hourly number from an approved free source. Drink enough to avoid losing more than 2% body weight; weigh before and after to learn your rate. Sweat rates range from 0.3 to 2.4 L per hour depending on sport and conditions.",
+        "sources": [
+          "https://pubmed.ncbi.nlm.nih.gov/17277604/",
+          "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf"
+        ],
+        "verification": "verified"
+      },
+      "fishing": {
+        "perDay": "Usually low effort: use the camping daily amount and the heat rules below when in sun on the water.",
+        "source": "https://www.ready.gov/water",
+        "verification": "verified"
+      },
+      "hunting": {
+        "perDay": "Effort varies a lot. Use day hiking rates while walking or packing out game, camping amounts while sitting. In cold, drink on a schedule because thirst is lower.",
+        "sources": [
+          "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf",
+          "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/"
+        ],
+        "verification": "verified"
+      }
+    },
+
+    "adjustments": {
+      "heat": [
+        {
+          "guidance": "Drink a half to one quart of water or sports drink every hour you hike in the heat, and eat a salty snack every time you drink.",
+          "source": "https://www.nps.gov/glac/learn/news/news07-43.htm",
+          "verification": "verified (archived 2007 release)"
+        },
+        {
+          "guidance": "For moderate activity in heat under 2 hours: 1 cup (8 oz) every 15 to 20 minutes. Do not exceed about 6 cups (48 oz) per hour.",
+          "source": "https://www.cdc.gov/niosh/heat-stress/recommendations/index.html",
+          "verification": "verified"
+        },
+        {
+          "guidance": "Hikers can lose 1 to 2 quarts of water per hour in heat. Fluid and electrolyte loss can exceed 2 quarts per hour hiking uphill in direct sun.",
+          "sources": [
+            "https://www.nps.gov/grca/planyourvisit/hike-smart.htm",
+            "https://www.nps.gov/bibe/planyourvisit/hike-smart.htm"
+          ],
+          "verification": "verified"
+        },
+        {
+          "guidance": "In very hot temperatures, daily water needs can double.",
+          "source": "https://www.ready.gov/water",
+          "verification": "verified"
+        }
+      ],
+      "altitude": [
+        {
+          "guidance": "Above about 8,200 ft (2,500 m) you lose extra water from breathing and more urine, and appetite drops. Total fluid intake at high altitude approaches 3 to 4 L per day.",
+          "source": "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf",
+          "verification": "verified (2009 ADA, Dietitians of Canada, ACSM joint position paper)"
+        },
+        {
+          "guidance": "Dry air and more urine hurt hydration at altitude. Aim for about a gallon of water a day and avoid alcohol.",
+          "source": "https://www.nps.gov/brca/planyourvisit/hiking-at-high-altitudes.htm",
+          "verification": "verified"
+        },
+        {
+          "guidance": "If you get dizziness, headache, muscle aches or nausea at altitude, head to lower elevation.",
+          "source": "https://www.nps.gov/brca/planyourvisit/hiking-at-high-altitudes.htm",
+          "verification": "verified"
+        }
+      ],
+      "cold": [
+        {
+          "guidance": "You can get dehydrated in cold weather from breathing losses, sweating under layers, and drinking less because you feel chilled and drinks are cold.",
+          "source": "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf",
+          "verification": "verified"
+        },
+        {
+          "guidance": "Cold lowers thirst. Drink a full liter within an hour of waking. Use an insulated bottle so water does not freeze.",
+          "source": "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/",
+          "verification": "verified"
+        },
+        {
+          "guidance": "Drink warm, sweetened, non-alcoholic fluids in the cold.",
+          "source": "https://www.cdc.gov/niosh/docs/wp-solutions/2019-113/pdfs/2019-113.pdf",
+          "verification": "snippet"
+        },
+        {
+          "guidance": "Hydration bladder hoses can freeze in winter; bottles are more reliable.",
+          "source": "https://www.rei.com/learn/expert-advice/winter-camping.html",
+          "verification": "snippet"
+        }
+      ]
+    },
+
+    "electrolytes": [
+      {
+        "guidance": "If sweating lasts several hours, drink sports drinks with balanced electrolytes.",
+        "source": "https://www.cdc.gov/niosh/heat-stress/recommendations/index.html",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Sports drinks are a better choice than plain water for moderate to high intensity exercise lasting longer than an hour.",
+        "source": "https://www.eatright.org/fitness/physical-activity/exercise-nutrition/hydrate-right",
+        "verification": "verified"
+      },
+      {
+        "guidance": "For endurance efforts over about 2 hours, sports drinks with sodium (0.5 to 0.7 g per liter) and potassium are recommended.",
+        "source": "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Eat salty snacks such as pretzels, crackers and chips to help your body hold fluid in hot weather.",
+        "source": "https://www.nps.gov/grca/planyourvisit/hike-smart.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Do not drink large amounts of water without food or salt. Low blood sodium (hyponatremia) comes from drinking too much water while losing salt in sweat. Early signs look like heat exhaustion: fatigue, nausea, confusion. Stop drinking water, eat salty food, rest in shade.",
+        "sources": [
+          "https://www.nps.gov/grca/planyourvisit/hike-smart.htm",
+          "https://www.nps.gov/bibe/planyourvisit/hike-smart.htm"
+        ],
+        "verification": "verified"
+      }
+    ],
+
+    "waterTreatment": [
+      {
+        "method": "Boil",
+        "guidance": "Bring clear water to a rolling boil for 1 minute. Above 6,500 ft, boil for 3 minutes. Boiling is the most reliable method.",
+        "source": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html",
+        "verification": "verified"
+      },
+      {
+        "method": "Filter",
+        "guidance": "A filter with an absolute pore size of 0.3 micron or smaller removes bacteria and parasites but not viruses. Many portable filters do not remove viruses.",
+        "source": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html",
+        "verification": "verified"
+      },
+      {
+        "method": "Chemical (chlorine, chlorine dioxide, iodine)",
+        "guidance": "Kills viruses and bacteria but may not kill parasites. Filter first, then disinfect. Follow the label contact time.",
+        "source": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html",
+        "verification": "verified"
+      },
+      {
+        "method": "UV light",
+        "guidance": "Works poorly in cloudy water because particles block the light. Filter first.",
+        "source": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html",
+        "verification": "verified"
+      },
+      {
+        "method": "Best combo",
+        "guidance": "If you cannot boil, filter and then disinfect to cover parasites, bacteria and viruses.",
+        "source": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html",
+        "verification": "verified"
+      }
+    ]
+  },
+
+  "energy": {
+    "perHour": {
+      "note": "CDC figures are for a 154 lb (70 kg) person. Heavier people burn more, lighter people burn less. Carrying a pack, hills and rough trails raise these.",
+      "source": "https://www.cdc.gov/healthy-weight-growth/physical-activity/index.html",
+      "verification": "verified",
+      "values": [
+        { "activity": "Walking 3.5 mph (easy camp walking)", "kcalPerHour": 280 },
+        { "activity": "Hiking", "kcalPerHour": 370 },
+        { "activity": "Walking 4.5 mph", "kcalPerHour": 460 },
+        { "activity": "Bicycling under 10 mph", "kcalPerHour": 290 },
+        { "activity": "Bicycling over 10 mph", "kcalPerHour": 590 },
+        { "activity": "Running or jogging 5 mph", "kcalPerHour": 590 },
+        { "activity": "Heavy yard work, chopping wood", "kcalPerHour": 440 }
+      ]
+    },
+    "byActivity": {
+      "camping": {
+        "guidance": "No specific outdoor figure found. Plan normal daily meals plus extra for any hikes, using the per-hour table.",
+        "source": null,
+        "verification": "unsourced"
+      },
+      "dayHiking": {
+        "guidance": "About 370 kcal per hour for a 154 lb person. Eat and drink through the hike to replace what you use.",
+        "sources": [
+          "https://www.cdc.gov/healthy-weight-growth/physical-activity/index.html",
+          "https://www.nps.gov/bibe/planyourvisit/hike-smart.htm"
+        ],
+        "verification": "verified"
+      },
+      "backpacking": {
+        "guidance": "Plan 1.5 to 2.5 lb of food (2,500 to 4,500 kcal) per person per day. Aim for foods with at least 100 kcal per ounce; 125 or more is better.",
+        "source": "https://www.rei.com/learn/expert-advice/planning-menu.html",
+        "verification": "snippet"
+      },
+      "mountainBiking": {
+        "guidance": "About 290 kcal per hour easy, 590 kcal per hour above 10 mph, for a 154 lb person. Mountain biking on climbs is closer to the higher number.",
+        "source": "https://www.cdc.gov/healthy-weight-growth/physical-activity/index.html",
+        "verification": "verified (mountain bike mapping is our inference)"
+      },
+      "trailRunning": {
+        "guidance": "About 590 kcal per hour at 5 mph for a 154 lb person.",
+        "source": "https://www.cdc.gov/healthy-weight-growth/physical-activity/index.html",
+        "verification": "verified"
+      },
+      "hot": {
+        "guidance": "In heat, eat and drink often. Grand Canyon advises about twice the salty, high-energy food you normally would.",
+        "source": "https://www.nps.gov/grca/planyourvisit/hike-smart.htm",
+        "verification": "verified"
+      },
+      "huntingOrCampingInCold": {
+        "guidance": "A normal winter day outdoors may burn 4,000 to 5,000 kcal. Snack often; eating helps keep you warm. Use dry foods that will not freeze solid.",
+        "source": "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/",
+        "verification": "verified"
+      }
+    },
+    "coldRaisesNeeds": [
+      {
+        "guidance": "Winter days outside can burn 4,000 to 5,000 kcal, so pack more food and snack often.",
+        "source": "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/",
+        "verification": "verified"
+      },
+      {
+        "guidance": "High-calorie foods rich in fat and protein, like nuts and chocolate, help with lasting warmth.",
+        "source": "https://www.nols.edu/blog/how-to-prevent-hypothermia-in-cold-climates/",
+        "verification": "snippet"
+      },
+      {
+        "guidance": "Not eating enough, plus cold, wet and wind, can contribute to hypothermia even above freezing.",
+        "source": "https://www.nols.edu/blog/case-study-hypothermia-on-a-wet-smokies-backpacking-trip/",
+        "verification": "snippet"
+      }
+    ],
+    "endurance": {
+      "source": "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf",
+      "sourceTitle": "Position of the American Dietetic Association, Dietitians of Canada, and the American College of Sports Medicine: Nutrition and Athletic Performance (J Am Diet Assoc, 2009)",
+      "verification": "verified",
+      "items": [
+        "During exercise over about an hour, take in about 30 to 60 g of carbohydrate per hour to keep blood sugar up. This matters most in heat, cold or high altitude.",
+        "Daily carbohydrate for athletes: 6 to 10 g per kg body weight.",
+        "Daily protein for endurance athletes: 1.2 to 1.7 g per kg body weight, usually met by food alone.",
+        "After exercise: 1.0 to 1.5 g carbohydrate per kg in the first 30 minutes, then every 2 hours for 4 to 6 hours, plus some protein."
+      ],
+      "newerVersion": "A 2016 update (J Acad Nutr Diet 116:501-528, https://doi.org/10.1016/j.jand.2015.12.006) is paywalled. Secondary summaries report 3 to 10 g/kg/day carbohydrate and 1.2 to 2.0 g/kg/day protein; not verified against the full text.",
+      "simpleTimingTips": [
+        {
+          "guidance": "Eat 15 to 30 g of carbohydrate in the hour before a run; after, eat protein plus carbohydrate within 15 minutes to an hour.",
+          "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners",
+          "verification": "verified"
+        }
+      ]
+    }
+  },
+
+  "foods": {
+    "sourcesUsed": [
+      "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking",
+      "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners",
+      "https://www.nps.gov/subjects/camping/cooking-in-camp.htm",
+      "https://www.nps.gov/grca/planyourvisit/hike-smart.htm",
+      "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/",
+      "https://www.rei.com/learn/expert-advice/planning-menu.html"
+    ],
+    "byActivity": {
+      "camping": {
+        "meals": [
+          { "item": "Eggs, meat or cheese from the cooler (eat first)", "why": "Perishables go first so you need less ice.", "source": "https://www.nps.gov/subjects/camping/cooking-in-camp.htm" },
+          { "item": "One-pot rice and beans or pasta", "why": "Dry staples are light and one pot saves fuel.", "source": "https://www.nps.gov/subjects/camping/cooking-in-camp.htm" },
+          { "item": "Whole-grain tortillas or bagels with nut butter", "why": "Shelf stable, no fridge needed.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Hot cereal or pancake mix", "why": "Easy warm breakfast from dry mix.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Canned or pouched fish, chicken or meat", "why": "Shelf-stable protein, no cooler needed.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" }
+        ],
+        "snacks": [
+          { "item": "Apples, bananas, oranges", "why": "Whole fruit that keeps without a fridge.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Applesauce or veggie puree pouches", "why": "No-cook fruit and veg that travels well.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Trail mix or nuts", "why": "Dense energy, no prep.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" }
+        ]
+      },
+      "dayHiking": {
+        "meals": [
+          { "item": "Tortilla wrap with tuna or chicken pouch", "why": "No-cook lunch with shelf-stable protein.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Peanut butter sandwich or wrap", "why": "Carbs plus protein, keeps all day.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" }
+        ],
+        "snacks": [
+          { "item": "Trail mix", "why": "Light, nutrient dense, no fridge.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Nut butter packets or nut bars", "why": "Compact fat and protein.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Apples, oranges or bananas", "why": "Fresh fruit that travels well.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Dried fruit", "why": "Quick carbs, light weight.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Jerky (meat, poultry or salmon)", "why": "Shelf-stable protein and salt.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Pretzels or crackers (hot days)", "why": "Salt helps your body hold water in heat.", "source": "https://www.nps.gov/grca/planyourvisit/hike-smart.htm" },
+          { "item": "Extra no-cook food, like a granola bar", "why": "Ten Essentials: carry extra food in case plans change.", "source": "https://www.nps.gov/articles/10essentials.htm" }
+        ]
+      },
+      "backpacking": {
+        "meals": [
+          { "item": "Dry pasta, couscous or rice mix", "why": "Light and calorie dense; cook in one pot.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Dried soups and dehydrated meals", "why": "Light; only if you can boil safe water.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Hot cereal or homemade granola", "why": "Dry, packable breakfast.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Tuna, salmon or chicken pouches", "why": "Shelf-stable protein, no can to pack out.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Tortillas with nut butter", "why": "Packs flat, no cooking.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" }
+        ],
+        "snacks": [
+          { "item": "Nuts and seeds", "why": "Over 100 kcal per ounce saves pack weight.", "source": "https://www.rei.com/learn/expert-advice/planning-menu.html" },
+          { "item": "Dried or freeze-dried fruit and veg", "why": "Produce without the water weight.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Energy bars, chews or gels", "why": "Fast carbs on long climbs.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Jerky", "why": "Protein and salt, no fridge.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Drink powders", "why": "Light; flavor helps you drink more.", "source": "https://www.nps.gov/subjects/camping/cooking-in-camp.htm" }
+        ]
+      },
+      "mountainBiking": {
+        "meals": [
+          { "item": "Peanut butter and jelly wrap", "why": "Carbs plus protein, easy to pocket.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" },
+          { "item": "Pita with hummus (post-ride)", "why": "Protein and carbs for recovery.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" }
+        ],
+        "snacks": [
+          { "item": "Energy chews or gels", "why": "Easy 30 to 60 g carbs per hour on rides over an hour.", "source": "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf" },
+          { "item": "Bananas", "why": "Fresh carbs that need no fridge.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Granola bars", "why": "Compact, no crumbs to manage.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Salted nuts with pretzels", "why": "Replaces salt lost in sweat.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" },
+          { "item": "Sports drink (long or hot rides)", "why": "Fluid, sodium and carbs in one.", "source": "https://www.eatright.org/fitness/physical-activity/exercise-nutrition/hydrate-right" },
+          { "item": "Energy bar with carbs and protein (post-ride)", "why": "Starts recovery within an hour.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" }
+        ]
+      },
+      "trailRunning": {
+        "meals": [
+          { "item": "Cereal or peanut butter sandwich 2 hours before", "why": "Carb-rich, time to digest.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" },
+          { "item": "Toast with jam 1 hour before", "why": "Light, about 15 to 30 g carbs.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" },
+          { "item": "PB&J wrap or pita and hummus after", "why": "Protein plus carbs within an hour.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" }
+        ],
+        "snacks": [
+          { "item": "Gels or chews", "why": "30 to 60 g carbs per hour on runs over an hour.", "source": "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf" },
+          { "item": "Trail mix with dried fruit and pretzels", "why": "Carbs plus salt, good after runs.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" },
+          { "item": "Salted nuts", "why": "Savory option when appetite is low.", "source": "https://www.eatright.org/fitness/sports-and-performance/fueling-your-workout/top-snacks-for-runners" },
+          { "item": "Sports drink (over an hour)", "why": "Better than plain water for long, hard efforts.", "source": "https://www.eatright.org/fitness/physical-activity/exercise-nutrition/hydrate-right" }
+        ]
+      },
+      "fishing": {
+        "meals": [
+          { "item": "Wraps with tuna or chicken pouch", "why": "No-cook lunch on the bank or boat.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Bagel with nut butter", "why": "Shelf stable, filling.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Your catch, cooked to safe temperature", "why": "Check with a food thermometer.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" }
+        ],
+        "snacks": [
+          { "item": "Apples, oranges, bananas", "why": "Fresh fruit without a cooler.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Fruit puree pouches", "why": "No mess, no fridge.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Trail mix", "why": "Easy one-hand snack.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Jerky", "why": "Protein without refrigeration.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Crackers or pretzels (sunny days)", "why": "Salt helps hold fluid in heat.", "source": "https://www.nps.gov/grca/planyourvisit/hike-smart.htm" }
+        ]
+      },
+      "hunting": {
+        "meals": [
+          { "item": "Hot cereal and hot drink before dawn", "why": "Warm, sweet calories help in cold.", "source": "https://www.cdc.gov/niosh/docs/wp-solutions/2019-113/pdfs/2019-113.pdf" },
+          { "item": "Dry pasta or rice meals", "why": "Dry food will not freeze into a block.", "source": "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/" },
+          { "item": "Pre-made burritos frozen at home", "why": "Thaw by lunch on cold trips.", "source": "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/" },
+          { "item": "Soup or broth in an insulated bottle", "why": "Warm fluid plus salt.", "source": "https://www.cdc.gov/niosh/docs/wp-solutions/2019-113/pdfs/2019-113.pdf" }
+        ],
+        "snacks": [
+          { "item": "Nuts and chocolate", "why": "Energy-dense fat for lasting warmth.", "source": "https://www.nols.edu/blog/how-to-prevent-hypothermia-in-cold-climates/" },
+          { "item": "Jerky", "why": "Protein, keeps in a pocket all day.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Nut butter packets", "why": "Dense calories; snack often in cold.", "source": "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/" },
+          { "item": "Granola bars", "why": "Quiet, quick fuel in the stand.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+          { "item": "Dried fruit", "why": "Quick carbs for the walk out.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" }
+        ]
+      }
+    },
+    "foodSafety": [
+      {
+        "guidance": "Keep perishables below 40°F with ice or ice packs in a well-insulated cooler. Keep a thermometer in the cooler.",
+        "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Do not leave perishable food out more than 2 hours, or 1 hour when it is 90°F or hotter. Otherwise throw it out.",
+        "sources": [
+          "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking",
+          "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/food-safety-while-hiking-camping"
+        ],
+        "verification": "verified (EatRight); snippet (USDA FSIS)"
+      },
+      {
+        "guidance": "Keep leftovers in the cooler only if it still has ice.",
+        "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking",
+        "verification": "verified"
+      },
+      {
+        "guidance": "A full cooler stays cold longer than a partly full one.",
+        "source": "https://www.usda.gov/about-usda/news/blog/check-your-steps-chill-how-pack-cooler-prevent-food-poisoning",
+        "verification": "snippet"
+      },
+      {
+        "guidance": "Eat meat and cheese early in the trip.",
+        "source": "https://www.nps.gov/subjects/camping/cooking-in-camp.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Keep raw meat away from ready-to-eat foods, cook to safe internal temps with a thermometer, and wash hands or use sanitizer with at least 60% alcohol.",
+        "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Sanitize dishes in 2 teaspoons of bleach per gallon of water.",
+        "source": "https://www.nps.gov/subjects/camping/cooking-in-camp.htm",
+        "verification": "verified"
+      }
+    ]
+  },
+
+  "essentials": {
+    "source": "https://www.nps.gov/articles/10essentials.htm",
+    "verification": "verified",
+    "items": [
+      { "name": "Navigation", "detail": "Map, compass, GPS. Carry a paper map and a spare phone battery." },
+      { "name": "Sun protection", "detail": "Sunglasses, sunscreen, hat; sun-protective clothing helps." },
+      { "name": "Extra clothing", "detail": "Jacket, hat, gloves, rain shell and layers for the worst weather you could face." },
+      { "name": "Illumination", "detail": "Headlamp or flashlight, plus spare batteries." },
+      { "name": "First-aid supplies", "detail": "A kit adapted to your trip, plus personal medications." },
+      { "name": "Fire", "detail": "Matches or lighter and fire starters. Know park fire rules." },
+      { "name": "Repair kit and tools", "detail": "Duct tape, knife or multi-tool, scissors, plus activity-specific tools." },
+      { "name": "Nutrition", "detail": "At least an extra day of no-cook food, like trail mix or granola bars." },
+      { "name": "Hydration", "detail": "Water and water treatment supplies. Drink before you feel thirsty." },
+      { "name": "Emergency shelter", "detail": "Tent, space blanket, tarp or bivy." }
+    ]
+  },
+
+  "activityGear": {
+    "camping": [
+      { "item": "Cooler with ice packs and a thermometer", "why": "Keeps perishables below 40°F.", "source": "https://www.eatright.org/food/planning-and-prep/snack-and-meal-ideas/food-tips-for-camping-and-hiking" },
+      { "item": "Airtight bags and containers", "why": "Keeps food fresh and cuts odors that draw animals.", "source": "https://www.nps.gov/subjects/camping/cooking-in-camp.htm" },
+      { "item": "Bleach for dishwater", "why": "2 tsp per gallon sanitizes dishes.", "source": "https://www.nps.gov/subjects/camping/cooking-in-camp.htm" },
+      { "item": "Headlamp and spare batteries", "why": "Hands-free light after dark.", "source": "https://www.nps.gov/articles/10essentials.htm" },
+      { "item": "Layers for cold nights", "why": "Base layer that wicks (no cotton), fleece, then a shell.", "source": "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/" }
+    ],
+    "dayHiking": [
+      { "item": "The Ten Essentials", "why": "NPS standard kit for any hike.", "source": "https://www.nps.gov/articles/10essentials.htm" },
+      { "item": "Water treatment (filter plus tablets)", "why": "Lets you refill safely from streams.", "source": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html" },
+      { "item": "Salty snacks and electrolyte drink (hot days)", "why": "Prevents low sodium from water alone.", "source": "https://www.nps.gov/grca/planyourvisit/hike-smart.htm" }
+    ],
+    "backpacking": [
+      { "item": "The Ten Essentials", "why": "Baseline safety kit.", "source": "https://www.nps.gov/articles/10essentials.htm" },
+      { "item": "Bear canister (where bears live)", "why": "Hangs often fail; canisters are required or urged in many parks.", "source": "https://www.nps.gov/seki/planyourvisit/bearhang.htm" },
+      { "item": "35+ ft of rope if hanging is allowed", "why": "Needed to hang food 10 ft up and 4 ft out.", "source": "https://www.nps.gov/yell/planyourvisit/backcountrysafety.htm" },
+      { "item": "Stove and pot", "why": "Boil water (most reliable treatment) and cook dry meals.", "source": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html" },
+      { "item": "Water filter plus chemical treatment", "why": "Filter then disinfect covers parasites, bacteria and viruses.", "source": "https://www.cdc.gov/drinking-water/prevention/water-treatment-hiking-camping-traveling.html" },
+      { "item": "Tent, tarp or bivy", "why": "Shelter from weather and exposure.", "source": "https://www.nps.gov/articles/10essentials.htm" }
+    ],
+    "mountainBiking": [
+      { "item": "Helmet that fits", "why": "Helmets reduce head and brain injury risk in a crash.", "source": "https://www.cdc.gov/pedestrian-bike-safety/about/bicycle-safety.html" },
+      { "item": "Spare tube and/or patch kit", "why": "Fix a flat far from the trailhead.", "source": "https://www.rei.com/learn/expert-advice/mountain-biking-checklist.html" },
+      { "item": "Compact pump and tire levers", "why": "Needed to change and inflate a tire.", "source": "https://www.rei.com/learn/expert-advice/mountain-biking-checklist.html" },
+      { "item": "Bike multi-tool with chain tool", "why": "Trail fixes for bolts, brakes and chains.", "source": "https://www.rei.com/learn/expert-advice/mountain-biking-checklist.html" },
+      { "item": "Hydration pack and/or bottles", "why": "Core gear for carrying water on the bike.", "source": "https://www.rei.com/learn/expert-advice/mountain-biking-checklist.html" },
+      { "item": "First-aid kit", "why": "Crashes cause scrapes and cuts.", "source": "https://www.nps.gov/articles/10essentials.htm" }
+    ],
+    "trailRunning": [
+      { "item": "Hydration vest", "why": "Carries water plus emergency supplies, food and layers.", "source": "https://www.rei.com/learn/expert-advice/trail-running-gear-checklist.html" },
+      { "item": "Phone or other communication device", "why": "Call for help if hurt.", "source": "https://www.rei.com/learn/expert-advice/trail-running-gear-checklist.html" },
+      { "item": "ID and emergency contact card", "why": "Helps rescuers if you cannot speak for yourself.", "source": "https://www.rei.com/dam/trail_running_checklist.pdf" },
+      { "item": "Headlamp (about 200 lumens if running at night)", "why": "Runs can end after dark.", "source": "https://www.rei.com/learn/expert-advice/trail-running-basics.html" },
+      { "item": "Light jacket and emergency shelter", "why": "You cool fast if you stop or get hurt.", "source": "https://www.rei.com/learn/expert-advice/trail-running-gear-checklist.html" },
+      { "item": "Gels or chews", "why": "Fuel for runs longer than an hour.", "source": "https://www.andeal.org/vault/2440/web/200903_NAP_JADA-PositionPaper.pdf" }
+    ],
+    "fishing": [
+      { "item": "Fishing license and photo ID on you", "why": "Many states require both on your person for a warden check.", "source": "https://tpwd.texas.gov/regulations/outdoor-annual/licenses/purchase-requirements" },
+      { "item": "Coast Guard approved life jacket", "why": "Wear it on, in or near water; kids and weak swimmers need a fitted one.", "source": "https://www.nps.gov/articles/fishing-safety.htm" },
+      { "item": "Sunglasses, hat, long sleeves", "why": "Sun reflects off water all day.", "source": "https://www.nps.gov/articles/fishing-safety.htm" },
+      { "item": "Sunscreen SPF 15+", "why": "Reapply every 2 hours or after getting wet.", "source": "https://www.nps.gov/articles/fishing-safety.htm" },
+      { "item": "Closed shoes", "why": "Protects feet from old hooks and sharp rocks.", "source": "https://www.nps.gov/articles/fishing-safety.htm" },
+      { "item": "First-aid kit with hook-removal know-how", "why": "Hook injuries are common.", "source": "https://www.nps.gov/articles/fishing-safety.htm" },
+      { "item": "Tide table (coastal)", "why": "Tides can cut off your way back.", "source": "https://www.nps.gov/articles/fishing-safety.htm" }
+    ],
+    "hunting": [
+      { "item": "Blaze orange (hat and vest)", "why": "Keeps other hunters from mistaking you for game. Most states require 144 to 500 sq in in firearm season.", "sources": ["https://www.hunter-ed.com/blog/essential-hunting-kit/", "https://www.hunter-ed.com/blog/blaze-orange-regulations-every-state/"] },
+      { "item": "Full-body harness fall-arrest system", "why": "Wear it any time your feet leave the ground; most stand falls happen climbing up or down.", "source": "https://www.hunter-ed.com/national/studyGuide/Fall-Arrest-Systems-FAS/201099_93035/" },
+      { "item": "No single-strap belts or chest-only harnesses", "why": "Hunter education warns these can be deadly.", "source": "https://www.hunter-ed.com/national/studyGuide/Fall-Arrest-Systems-FAS/201099_93035/" },
+      { "item": "Suspension relief strap", "why": "A loop to stand in if you fall and hang.", "source": "https://www.hunter-ed.com/national/studyGuide/Fall-Arrest-Systems-FAS/201099_93035/" },
+      { "item": "Field dressing kit: sharp knife, gloves, cord, game bags", "why": "Process and cool game in the field.", "source": "https://www.hunter-ed.com/blog/essential-hunting-kit/" },
+      { "item": "License, tags and hunter ed card", "why": "Required in the field; some tags must be physical.", "sources": ["https://www.hunter-ed.com/blog/essential-hunting-kit/", "https://tpwd.texas.gov/regulations/outdoor-annual/licenses/purchase-requirements"] },
+      { "item": "Map, GPS and compass", "why": "You may end up stranded away from camp or truck overnight.", "source": "https://www.hunter-ed.com/blog/essential-hunting-kit/" },
+      { "item": "Insulated bottle and warm layers", "why": "Water freezes and cold sitting drains heat.", "source": "https://www.nols.edu/blog/everything-you-need-to-know-about-winter-camping/" }
+    ]
+  },
+
+  "wildlife": {
+    "bearCountryFoodStorage": [
+      {
+        "guidance": "Store food 100 yards from your tent. If no prep area exists, cook 100 yards from your tent and 100 yards from water.",
+        "source": "https://www.nps.gov/subjects/camping/cooking-in-camp.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Sleep at least 100 yards, preferably upwind, from where you cook, eat and store food. Do not cook in your tent or sleep in clothes you cooked in.",
+        "source": "https://www.nps.gov/yell/planyourvisit/backcountrysafety.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "If hanging, everything should hang 10 ft above ground and 4 ft from the trunk. Bring at least 35 ft of rope.",
+        "source": "https://www.nps.gov/yell/planyourvisit/backcountrysafety.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Hang or lock up all scented items too: drink cans, coolers, lip balm, sunscreen, bug spray, toothpaste. Never keep them in your tent.",
+        "source": "https://www.nps.gov/yell/planyourvisit/backcountrysafety.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Strain dishwater, pack out food bits, and scatter the water at least 100 yards from your tent.",
+        "source": "https://www.nps.gov/yell/planyourvisit/backcountrysafety.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Bear canisters are the better choice where available. Counterbalance hangs often fail because bears have learned to beat them and good trees are scarce.",
+        "source": "https://www.nps.gov/seki/planyourvisit/bearhang.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Use IGBC-certified bear-resistant containers where regulations require them; Yellowstone allows only IGBC-listed containers. Some areas also allow hanging or electric fences; campgrounds may have food lockers or poles.",
+        "sources": [
+          "https://igbconline.org/food-storage/",
+          "https://www.nps.gov/yell/planyourvisit/backcountrysafety.htm"
+        ],
+        "verification": "verified"
+      },
+      {
+        "guidance": "Rules differ by park. Some Alaska parks use a 100 ft minimum from camp, and Voyageurs uses 14 ft up and 4 ft out. Always check the local rule.",
+        "source": "https://www.nps.gov/voya/planyourvisit/bears-and-food-storage.htm",
+        "verification": "snippet"
+      }
+    ],
+    "bearSpray": [
+      {
+        "guidance": "Carry an EPA-approved bear spray (not human pepper spray). Use it only on an aggressive or charging bear, never as a repellent on gear. Check park rules.",
+        "source": "https://www.nps.gov/subjects/bears/safety.htm",
+        "verification": "verified"
+      },
+      {
+        "guidance": "Stay at least 100 yards from bears. Have spray out with the safety off in an encounter; spray when a charging bear is 60 ft or closer.",
+        "source": "https://www.nps.gov/yell/planyourvisit/backcountrysafety.htm",
+        "verification": "verified"
+      }
+    ]
+  },
+
+  "gaps": [
+    "No approved source gives a calorie number for relaxed car camping; app should use normal meals plus activity.",
+    "No approved source gives a mountain-bike-specific or trail-running-specific water-per-hour figure; general 0.5 L/h plus heat and altitude rules used.",
+    "Polarized sunglasses for fishing: NPS recommends sunglasses but no approved source specifically says polarized.",
+    "ACSM 2007 fluid position stand full text is paywalled; only the abstract (2% body weight goal, weigh before and after) is quoted. The 2016 nutrition statement numbers are unverified; the 2009 version is used.",
+    "REI pages (hydrate, planning-menu, checklists) block automated fetch; their numbers come from search-engine quotes of those exact pages.",
+    "USDA FSIS camping page and NIOSH cold-stress PDF also blocked direct fetch; same caveat.",
+    "Field dressing kit and game bags are sourced from hunter-ed.com (Kalkomey, the official hunter ed provider for many state agencies) rather than IHEA directly."
+  ]
+}

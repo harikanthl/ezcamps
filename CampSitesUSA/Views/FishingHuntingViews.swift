@@ -101,7 +101,7 @@ struct FishingHuntingSection: View {
         VStack(alignment: .leading, spacing: 6) {
             Label { Text("Game seen nearby").font(.subheadline.weight(.semibold)) } icon: { Icon3D("deer", size: 20) }
             if inNationalPark {
-                Label("Hunting isn't allowed in most national parks. Check the park's rules.", systemImage: "nosign")
+                Label(federal?.nationalParks?.text ?? "Hunting isn't allowed in most national parks. Check the park's rules.", systemImage: "nosign")
                     .font(.caption.weight(.semibold)).foregroundStyle(Color.berry)
             }
             if let w = wildlife {
@@ -140,8 +140,8 @@ struct FishingHuntingSection: View {
                     ruleRow("Hunting", detail: h.hunterEducation ?? "License required",
                             extra: h.blazeOrange.map { "Hunter orange: \($0)" }, buy: h.licenseUrl, regs: h.regulationsUrl)
                 }
-                if !inNationalPark, let duck = federal?.hunting?.hunterEducation {
-                    Text("Waterfowl: \(duck)").font(.caption).foregroundStyle(.secondary)
+                if !inNationalPark, let duck = federal?.duckStamp {
+                    Text("Ducks and geese: \(duck.text)").font(.caption).foregroundStyle(.secondary)
                 }
             } else {
                 Text("Check \(stateName)'s wildlife agency for license rules before you fish or hunt.")

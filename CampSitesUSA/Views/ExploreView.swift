@@ -1,9 +1,13 @@
 import SwiftUI
 import MapKit
+import os
+import OperatorLLM
 
 struct ExploreView: View {
     @Environment(SiteStore.self) private var store
     @Environment(LocationProvider.self) private var location
+    @Environment(\.modelContext) private var modelContext
+    @Environment(AISettings.self) private var ai
 
     @State private var region: MKCoordinateRegion?
     @State private var recenter: MKCoordinateRegion?
@@ -13,6 +17,12 @@ struct ExploreView: View {
     @State private var selectedSite: Site?
     @State private var landQuery: LandQuery?
     @State private var siteDetent: PresentationDetent = .medium
+    /// "Ask ezcamp" and the sites its last answer was about (always shown, whatever the filters).
+    @State private var chat: ChatEngine?
+    @State private var chatSites: [Site] = []
+    @State private var chatTrip: Trip?
+    /// Live map center for the chat's "near here" (a reference, so the chat reads where the map is now).
+    @State private var mapCenter = MapCenterBox()
     @AppStorage("mapBase") private var base: MapBase = .standard
     @AppStorage("showPublicLands") private var showPublicLands = false
     @AppStorage("showForestRoads") private var showForestRoads = false
@@ -26,7 +36,7 @@ struct ExploreView: View {
             showForestRoads: showForestRoads,
             showWater: showWater,
             recenter: $recenter,
-            onRegionChange: { region = $0; refresh() },
+            onRegionChange: { region = $0; mapCenter.value = $0.center; refresh() },
             onSelect: { selectedSite = store.site(id: $0) },
             onLongPress: { landQuery = LandQuery(coordinate: $0) }
         )
@@ -65,9 +75,20 @@ struct ExploreView: View {
                 }
                 statusPill
             }
-            .padding(.bottom, 12)
+            .padding(.bottom, chat == nil ? 12 : 92)  // clear of the Ask ezcamp bar
         }
         .overlay(alignment: .topTrailing) { locateButton }
+        .overlay {
+            if let chat {
+                ChatPanel(engine: chat,
+                          onOpenSite: { selectedSite = $0 },
+                          onOpenTrip: { chatTrip = $0 })
+            }
+        }
+        .onChange(of: chat?.highlighted) { _, ids in showChatSites(ids ?? []) }
+        .sheet(item: $chatTrip) { trip in
+            NavigationStack { TripDetailView(trip: trip) }
+        }
         .sensoryFeedback(.impact(weight: .medium), trigger: landQuery?.id)
         .sheet(item: $selectedSite) { site in
             NavigationStack { SiteDetailView(site: site) }
@@ -82,6 +103,35 @@ struct ExploreView: View {
                 .presentationCornerRadius(28)
         }
         .task {
+            if chat == nil {
+                chat = ChatEngine(tools: ChatTools(store: store, location: location, context: modelContext,
+                                                   mapCenter: { [mapCenter] in mapCenter.value }))
+            }
+            #if DEBUG
+            // Testing aid: `-debugChatTools YES` runs each chat tool once and logs what the model would read.
+            if DebugLaunch.flag("debugChatTools"), let tools = chat?.tools {
+                try? await Task.sleep(for: .seconds(4))
+                let log = Logger(subsystem: "ezcamps", category: "ChatTools")
+                let watchman = "nps:2DEDB733-BCA8-41FF-8E0C-3E676DE620DF"
+                let calls: [(String, String)] = [
+                    ("search_campsites", #"{"near":"Moab","radius_miles":20,"free_only":true}"#),
+                    ("campsite_details", #"{"site_id":"\#(watchman)"}"#),
+                    ("can_i_camp_here", #"{"site_id":"\#(watchman)"}"#),
+                    ("fishing_hunting", #"{"site_id":"\#(watchman)"}"#),
+                    ("safety", #"{"site_id":"\#(watchman)"}"#),
+                    ("things_to_do", #"{"site_id":"\#(watchman)","difficulty":"easy"}"#),
+                ]
+                for (name, args) in calls {
+                    let out = await tools.run(LLMToolCall(id: name, name: name, argumentsJSON: args))
+                    log.notice("\(name, privacy: .public): \(String(out.prefix(700)), privacy: .public)")
+                }
+            }
+            // Testing aid: `-debugChat "question"` asks Ask ezcamp once the map has loaded.
+            if let q = DebugLaunch.string("debugChat") {
+                try? await Task.sleep(for: .seconds(3))
+                chat?.send(q, settings: ai)
+            }
+            #endif
             location.start()
             #if DEBUG
             // Testing aid: `-debugRegion "lat,lon,span"` opens the map there; `-debugRegion us` = the reset button.
@@ -133,10 +183,22 @@ struct ExploreView: View {
         .accessibilityLabel(label)
     }
 
+    /// Put the sites an answer is about on the map, and frame them.
+    private func showChatSites(_ ids: [String]) {
+        chatSites = ids.compactMap { store.site(id: $0) }
+        refresh()
+        guard !chatSites.isEmpty else { return }
+        let lats = chatSites.map(\.lat), lons = chatSites.map(\.lon)
+        let span = max(0.08, (lats.max()! - lats.min()!) * 1.5, (lons.max()! - lons.min()!) * 1.5)
+        recenter = MKCoordinateRegion(center: .init(latitude: (lats.max()! + lats.min()!) / 2, longitude: (lons.max()! + lons.min()!) / 2),
+                                      span: .init(latitudeDelta: span, longitudeDelta: span))
+    }
+
     private func refresh() {
         guard let region else { return }
         let result = store.visible(in: region, filter: filter)
-        visible = result.sites
+        let shown = Set(result.sites.map(\.id))
+        visible = result.sites + chatSites.filter { !shown.contains($0.id) }
         totalInView = result.total
     }
 
@@ -243,4 +305,9 @@ struct ExploreView: View {
         .allowsHitTesting(false)
         .contentTransition(.numericText())
     }
+}
+
+/// Holds the map's current center for code that outlives a view update (the chat tools).
+final class MapCenterBox {
+    var value: CLLocationCoordinate2D?
 }

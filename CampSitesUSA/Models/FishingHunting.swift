@@ -112,11 +112,19 @@ nonisolated struct StateLicenses: Codable, Sendable {
         var hunterEducation: String?
         var blazeOrange: String?
     }
+    /// Federal rules (the "US" entry only).
+    struct Note: Codable, Sendable {
+        var text: String
+        var url: String?
+    }
     var state: String
     var agency: String?
     var agencyUrl: String?
     var fishing: Fishing?
     var hunting: Hunting?
+    var duckStamp: Note?
+    var nationalParks: Note?
+    var wildlifeRefuges: Note?
 }
 
 enum LicenseBook {
