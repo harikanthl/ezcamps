@@ -288,7 +288,16 @@ def main() -> int:
         print(f"crime: {len(states)} states, year {args.year}, key {'DEMO_KEY' if key == 'DEMO_KEY' else 'set'}", file=sys.stderr)
         found = 0
         for st in states:
-            agencies = cde(f"agency/byStateAbbr/{st}", key)
+            try:
+                raw = cde(f"agency/byStateAbbr/{st}", key)
+            except RuntimeError as e:
+                print(f"  {st}: no agency list ({e})", file=sys.stderr)
+                continue
+            # Expect {county: [agency, ...]}; territories and errors come back in other shapes.
+            agencies = {k: [a for a in v if isinstance(a, dict)] for k, v in raw.items() if isinstance(v, list)} if isinstance(raw, dict) else {}
+            if not agencies:
+                print(f"  {st}: no agencies listed, skipped", file=sys.stderr)
+                continue
             state_name = next((a.get("state_name") for rows in agencies.values() for a in rows if a.get("state_name")), st)
             for g, c in sorted(used.items()):
                 if c["state"] != st:

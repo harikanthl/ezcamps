@@ -58,7 +58,9 @@ struct LandCheckView: View {
                     .background(r.verdict.color, in: .rect(cornerRadius: 14, style: .continuous))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(r.verdict.label).font(.headline).foregroundStyle(r.verdict.color)
-                    Text(r.unitName.map { "\(r.agencyName) · \($0)" } ?? r.agencyName)
+                    // The unit is often just the agency's name again ("Bureau of Land Management"); don't repeat it.
+                    Text(r.unitName.flatMap { $0.caseInsensitiveCompare(r.agencyName) == .orderedSame ? nil : "\(r.agencyName) · \($0)" }
+                         ?? r.agencyName)
                         .font(.subheadline.weight(.semibold))
                 }
             }

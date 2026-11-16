@@ -17,6 +17,10 @@ final class LocationProvider: NSObject, CLLocationManagerDelegate {
     }
 
     func start() {
+        #if DEBUG
+        // Screenshot aid: `-debugNoLocation YES` never asks for location, so no prompt covers the app.
+        if UserDefaults.standard.bool(forKey: "debugNoLocation") { return }
+        #endif
         if manager.authorizationStatus == .notDetermined {
             manager.requestWhenInUseAuthorization()
         }

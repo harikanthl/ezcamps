@@ -42,7 +42,12 @@ struct CampMapView: UIViewRepresentable {
     func makeUIView(context: Context) -> MKMapView {
         let map = MKMapView()
         map.delegate = context.coordinator
+        #if DEBUG
+        // Screenshot aid: even turning the dot on for a moment asks for location.
+        map.showsUserLocation = !UserDefaults.standard.bool(forKey: "debugNoLocation")
+        #else
         map.showsUserLocation = true
+        #endif
         map.showsCompass = true
         map.showsScale = true
         // Nature landmarks only (parks, beaches, trailheads, climbing, paddling); no shops or restaurants.
