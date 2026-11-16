@@ -43,6 +43,9 @@ struct ChatPanel: View {
             .gesture(dragGesture(total: geo.size.height))
         }
         .onChange(of: engine.items.count) { _, n in if n > 0 && detent == .bar { move(to: .half) } }
+        #if DEBUG
+        .task { if DebugLaunch.flag("debugChatOpen") { try? await Task.sleep(for: .seconds(2)); move(to: .half) } }
+        #endif
     }
 
     // MARK: Pieces
