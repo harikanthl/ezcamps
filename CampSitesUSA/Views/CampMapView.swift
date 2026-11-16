@@ -254,6 +254,10 @@ final class Site3DPinView: MKAnnotationView {
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
         addSubview(nameLabel)
+        // The label's halo follows light and dark mode.
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (view: Site3DPinView, _: UITraitCollection) in
+            view.nameLabel.layer.shadowColor = UIColor.systemBackground.resolvedColor(with: view.traitCollection).cgColor
+        }
     }
 
     required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
@@ -263,11 +267,6 @@ final class Site3DPinView: MKAnnotationView {
         let width: CGFloat = 110
         let fit = nameLabel.sizeThatFits(CGSize(width: width, height: 40))
         nameLabel.frame = CGRect(x: (bounds.width - fit.width) / 2, y: bounds.height, width: fit.width, height: fit.height)
-    }
-
-    override func traitCollectionDidChange(_ previous: UITraitCollection?) {
-        super.traitCollectionDidChange(previous)
-        nameLabel.layer.shadowColor = UIColor.systemBackground.resolvedColor(with: traitCollection).cgColor
     }
 
     override var annotation: MKAnnotation? {

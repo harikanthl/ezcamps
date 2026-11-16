@@ -37,7 +37,13 @@ struct TripsView: View {
                         ForEach(trips) { trip in
                             NavigationLink(value: trip) { TripCard(trip: trip) }
                         }
-                        .onDelete { $0.map { trips[$0] }.forEach(context.delete) }
+                        .onDelete { offsets in
+                            // Memories cascade with the trip, but their photo and video files don't.
+                            for trip in offsets.map({ trips[$0] }) {
+                                for m in trip.memories { MemoryFiles.delete(m) }
+                                context.delete(trip)
+                            }
+                        }
                     }
                 }
             }
