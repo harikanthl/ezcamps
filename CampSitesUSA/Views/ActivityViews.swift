@@ -184,7 +184,7 @@ struct ActivityDetailView: View {
                         item.name = a.name
                         item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
                     }
-                    if let s = a.url, let url = URL(string: s) {
+                    if let url = URL.web(a.url) {
                         Link(destination: url) {
                             VStack(spacing: 6) {
                                 Image(systemName: "safari.fill").font(.title3.weight(.semibold))

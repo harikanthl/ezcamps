@@ -64,7 +64,14 @@ enum ConditionsService {
         out.alerts = await alerts ?? []
         if let f = await fires { out.fires = f } else { out.firesFailed = true }
         if let a = await air { out.aqi = a } else { out.aqiFailed = true }
-        if !out.weatherFailed { cache[key] = (.now, out) }
+        if !out.weatherFailed {
+            // Bounded: a long session of browsing sites shouldn't grow this forever.
+            if cache.count >= 150 {
+                cache = cache.filter { Date.now.timeIntervalSince($0.value.0) < 1800 }
+                if cache.count >= 150, let oldest = cache.min(by: { $0.value.0 < $1.value.0 })?.key { cache[oldest] = nil }
+            }
+            cache[key] = (.now, out)
+        }
         return out
     }
 

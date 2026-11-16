@@ -128,3 +128,16 @@ enum Amenity: String, CaseIterable, Identifiable {
         }
     }
 }
+
+extension URL {
+    /// A web link from open data (OSM `website`, NPS, RIDB). Only http(s) with a host: anyone can edit
+    /// OSM, and a `tel:`, `sms:`, app or `javascript:` scheme there shouldn't become a tappable link.
+    /// Bare "www.example.org" values get https.
+    nonisolated static func web(_ raw: String?) -> URL? {
+        guard var s = raw?.trimmingCharacters(in: .whitespacesAndNewlines), !s.isEmpty else { return nil }
+        if !s.contains("://") { s = "https://" + s }
+        guard let url = URL(string: s), let scheme = url.scheme?.lowercased(), scheme == "https" || scheme == "http",
+              let host = url.host(), host.contains(".") else { return nil }
+        return url
+    }
+}

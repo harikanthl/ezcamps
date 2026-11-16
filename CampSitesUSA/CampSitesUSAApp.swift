@@ -56,7 +56,7 @@ struct RootView: View {
         }
         // Screenshot/testing aid: `-debugPlanTrip YES` plans Moab → Old Faithful and opens Trips.
         .onChange(of: store.isLoaded) {
-            guard UserDefaults.standard.bool(forKey: "debugPlanTrip") else { return }
+            guard store.isLoaded, DebugLaunch.flag("debugPlanTrip") else { return }
             Task {
                 let from = CLLocationCoordinate2D(latitude: 38.5733, longitude: -109.5498)
                 let to = CLLocationCoordinate2D(latitude: 44.4605, longitude: -110.8281)

@@ -29,20 +29,28 @@ final class SiteStore {
     private(set) var attribution = ""
     private(set) var isLoaded = false
     private var byID: [String: Site] = [:]
+    private var grid = SiteGrid()
+    private var isLoading = false
     private(set) var activities: [Activity] = []
 
     func site(id: String) -> Site? { byID[id] }
 
     func load() async {
-        guard !isLoaded, let url = Bundle.main.url(forResource: "sites", withExtension: "json") else { return }
-        let dataset = await Task.detached(priority: .userInitiated) { () -> SiteDataset? in
-            guard let data = try? Data(contentsOf: url) else { return nil }
-            return try? JSONDecoder().decode(SiteDataset.self, from: data)
+        // `.task` re-runs if the root view is rebuilt; decode the 29k-site bundle once.
+        guard !isLoaded, !isLoading, let url = Bundle.main.url(forResource: "sites", withExtension: "json") else { return }
+        isLoading = true
+        defer { isLoading = false }
+        let built = await Task.detached(priority: .userInitiated) { () -> (SiteDataset, [String: Site], SiteGrid)? in
+            guard let data = try? Data(contentsOf: url),
+                  let dataset = try? JSONDecoder().decode(SiteDataset.self, from: data) else { return nil }
+            let byID = Dictionary(dataset.sites.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+            return (dataset, byID, SiteGrid(dataset.sites))
         }.value
-        guard let dataset else { return }
+        guard let (dataset, byID, grid) = built else { return }
         sites = dataset.sites
         attribution = dataset.attribution
-        byID = Dictionary(dataset.sites.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a })
+        self.byID = byID
+        self.grid = grid
         isLoaded = true
 
         if let aURL = Bundle.main.url(forResource: "activities", withExtension: "json") {
@@ -57,10 +65,10 @@ final class SiteStore {
     func sites(near c: CLLocationCoordinate2D, radius: Double) -> [Site] {
         let dLat = radius / 69.0
         let dLon = radius / (69.0 * max(0.2, cos(c.latitude * .pi / 180)))
-        return sites.filter {
-            abs($0.lat - c.latitude) <= dLat && abs($0.lon - c.longitude) <= dLon
-                && TripPlanner.miles($0.coordinate, c) <= radius
-        }
+        return Array(grid.indices(minLat: c.latitude - dLat, maxLat: c.latitude + dLat,
+                                  minLon: c.longitude - dLon, maxLon: c.longitude + dLon)
+            .lazy.map { self.sites[$0] }
+            .filter { TripPlanner.miles($0.coordinate, c) <= radius })
     }
 
     /// Activities within `radius` miles of a point, ranked by difficulty (Easy first, unrated last),
@@ -87,10 +95,12 @@ final class SiteStore {
         let minLon = c.longitude - s.longitudeDelta / 2, maxLon = c.longitude + s.longitudeDelta / 2
         // Bare placeholder points only appear when zoomed in to roughly 25 km across.
         let showBare = s.latitudeDelta < 0.25 || !filter.query.isEmpty
-        let inView = sites.filter {
-            $0.lat >= minLat && $0.lat <= maxLat && $0.lon >= minLon && $0.lon <= maxLon
-                && (showBare || !$0.isBare) && filter.matches($0)
-        }
+        let inView = Array(grid.indices(minLat: minLat, maxLat: maxLat, minLon: minLon, maxLon: maxLon)
+            .lazy.map { self.sites[$0] }
+            .filter {  // cells overhang the view; keep the exact box
+                $0.lat >= minLat && $0.lat <= maxLat && $0.lon >= minLon && $0.lon <= maxLon
+                    && (showBare || !$0.isBare) && filter.matches($0)
+            })
         guard inView.count > limit else { return (inView, inView.count) }
 
         // Bucket into a cols×rows grid (roughly phone-shaped), then take sites round-robin across cells.
@@ -122,5 +132,33 @@ final class SiteStore {
 
     private func score(_ s: Site) -> Int {
         (s.likelyFree ? 2 : 0) + (s.name.hasPrefix("Unnamed") || s.name == "Dispersed site" ? 0 : 1)
+    }
+}
+
+/// Sites bucketed into half-degree cells (~35 mi), so "sites near here" looks at a few cells instead
+/// of all 29k sites. Route searches ask this hundreds of times per trip.
+nonisolated struct SiteGrid: Sendable {
+    private static let cell = 0.5
+    private var cells: [Int: [Int]] = [:]
+
+    init() {}
+
+    init(_ sites: [Site]) {
+        for (i, s) in sites.enumerated() { cells[Self.key(Self.row(s.lat), Self.col(s.lon)), default: []].append(i) }
+    }
+
+    private static func row(_ lat: Double) -> Int { Int(((min(max(lat, -90), 90) + 90) / cell).rounded(.down)) }
+    private static func col(_ lon: Double) -> Int { Int(((min(max(lon, -180), 180) + 180) / cell).rounded(.down)) }
+    private static func key(_ r: Int, _ c: Int) -> Int { r * 1000 + c }
+
+    /// Indices of sites inside the box, in ascending order (the dataset's order).
+    func indices(minLat: Double, maxLat: Double, minLon: Double, maxLon: Double) -> [Int] {
+        guard minLat <= maxLat, minLon <= maxLon else { return [] }
+        var out: [Int] = []
+        let r0 = Self.row(minLat), r1 = Self.row(maxLat), c0 = Self.col(minLon), c1 = Self.col(maxLon)
+        for r in r0...r1 {
+            for c in c0...c1 { if let ids = cells[Self.key(r, c)] { out.append(contentsOf: ids) } }
+        }
+        return out
     }
 }

@@ -1,4 +1,6 @@
-# CampSitesUSA
+<p align="center"><img src="docs/assets/logo.png" width="128" alt="ezcamps logo"></p>
+
+# CampSitesUSA (ezcamps)
 
 A SwiftUI + SwiftData multiplatform app for finding and planning campsites across the United States — with a focus on **open data**, **public land**, and **free/dispersed camping**.
 

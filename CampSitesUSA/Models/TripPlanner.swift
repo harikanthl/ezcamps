@@ -15,6 +15,7 @@ enum TripPlanner {
         guard points.count >= 2 else { return [] }
         var out: [MKRoute?] = []
         for (a, b) in zip(points, points.dropFirst()) {
+            if Task.isCancelled { return [] }
             out.append(await route(from: a, to: b))
         }
         return out
@@ -153,6 +154,8 @@ enum TripPlanner {
             guard let r = await route(from: a.coordinate, to: b.coordinate) else { throw PlanError.noRoute }
             legs.append(r)
         }
+        // Routing takes a few seconds; if the person cancelled meanwhile, save nothing.
+        try Task.checkCancellation()
         let trip = Trip(name: "\(start.name) → \(end.name)")
         trip.startName = start.name
         trip.startLat = start.coordinate.latitude

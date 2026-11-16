@@ -43,6 +43,9 @@ final class AISettings {
     /// Bumps when keys, custom models or the catalog change, so views re-read them.
     private(set) var version = 0
 
+    /// Keychain lookups are slow-ish and views ask on every render; cache them, drop on any change.
+    @ObservationIgnored private var keyCache: [AIProvider: Bool] = [:]
+
     var customBaseURL: String {
         didSet { defaults.set(customBaseURL, forKey: "ai.customBaseURL") }
     }
@@ -71,7 +74,10 @@ final class AISettings {
 
     func hasKey(_ provider: AIProvider) -> Bool {
         _ = version
-        return APIKeyStore.hasKey(provider)
+        if let hit = keyCache[provider] { return hit }
+        let has = APIKeyStore.hasKey(provider)
+        keyCache[provider] = has
+        return has
     }
 
     var hasAnyKey: Bool { AIProvider.allCases.contains(where: hasKey) }
@@ -80,6 +86,7 @@ final class AISettings {
     /// feature still on-device, so adding a key "just works".
     func setKey(_ key: String, for provider: AIProvider) -> String? {
         let error = APIKeyStore.setKey(key, for: provider)
+        keyCache[provider] = nil
         version += 1
         if error == nil, !key.isEmpty, let first = models(for: provider).first {
             for f in AIFeature.allCases where model(for: f).isOnDevice { setModel(first, for: f) }
@@ -151,7 +158,6 @@ final class AISettings {
     }
 
     func refreshCatalog() async {
-        try? await catalog.refresh()
-        version += 1
+        if (try? await catalog.refresh()) == true { version += 1 }
     }
 }

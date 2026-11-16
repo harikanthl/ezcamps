@@ -171,7 +171,7 @@ struct SiteDetailView: View {
             if let phone = site.phone, let url = URL(string: "tel:\(phone.filter { $0.isNumber || $0 == "+" })") {
                 LabeledContent("Phone") { Link(phone, destination: url) }
             }
-            if let s = site.url, let url = URL(string: s) {
+            if let s = site.url, let url = URL.web(s) {
                 LabeledContent("Website") { Link(url.host() ?? s, destination: url).lineLimit(1) }
             }
             LabeledContent("Coordinates") {

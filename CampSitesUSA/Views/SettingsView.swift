@@ -10,6 +10,18 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section {
+                HStack(spacing: 14) {
+                    AppLogo(size: 60)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("ezcamps").font(.title3.weight(.bold))
+                        Text("Version \(Self.version) · Camps from open public data")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 6)
+            }
+
             ForEach(sections, id: \.self) { section in
                 Section {
                     ForEach(AIFeature.allCases.filter { $0.section == section }) { feature in
@@ -58,6 +70,10 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .task { await ai.refreshCatalog() }
+    }
+
+    private static var version: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
     }
 
     private var sections: [String] {

@@ -1,5 +1,6 @@
 import Foundation
 import Security
+import Synchronization
 
 // Bring-your-own-key AI, following the same pattern as ezLaw and Operator: providers reached through
 // their OpenAI-compatible endpoints, keys in the Keychain, model lists from the Operator catalog worker.
@@ -144,39 +145,48 @@ nonisolated struct ModelCatalog: Sendable {
         var label: String
     }
 
-    struct Payload: Codable {
+    struct Payload: Codable, Sendable {
         var providerModels: [String: [Entry]]
         var updatedAt: String?
     }
 
     static let endpoint = URL(string: "https://catalog.operatorok.com/provider-models")!
 
-    let cacheURL: URL = {
+    var cacheURL: URL { Self.cacheURL }
+    static let cacheURL: URL = {
         let dir = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appending(path: "ai")
         return dir.appending(path: "provider-models.json")
     }()
 
+    /// Decoded once and kept in memory: settings rows ask for model lists on every render, and
+    /// re-reading and decoding the JSON file each time made the picker stutter.
+    private static let current = Mutex<Payload?>(decode(try? Data(contentsOf: cacheURL)) ?? bundled)
+
     func models(for provider: AIProvider) -> [Entry] {
         guard let key = provider.catalogKey else { return [] }
-        return (Self.decode(try? Data(contentsOf: cacheURL)) ?? Self.bundled)?.providerModels[key] ?? []
+        return Self.current.withLock { $0?.providerModels[key] } ?? []
     }
 
-    var updatedAt: String? { (Self.decode(try? Data(contentsOf: cacheURL)) ?? Self.bundled)?.updatedAt }
+    var updatedAt: String? { Self.current.withLock { $0?.updatedAt } }
 
-    func refresh() async throws {
+    /// Returns true when a newer list was downloaded.
+    @discardableResult
+    func refresh() async throws -> Bool {
         var request = URLRequest(url: Self.endpoint, timeoutInterval: 15)
         if let etag = try? String(contentsOf: cacheURL.appendingPathExtension("etag"), encoding: .utf8) {
             request.setValue(etag, forHTTPHeaderField: "If-None-Match")
         }
         let (data, response) = try await URLSession.shared.data(for: request)
         let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        guard status != 304 else { return }
-        guard status == 200, Self.decode(data) != nil else { throw ProviderHTTPError(status: status, body: "") }
+        guard status != 304 else { return false }
+        guard status == 200, let payload = Self.decode(data) else { throw ProviderHTTPError(status: status, body: "") }
         try FileManager.default.createDirectory(at: cacheURL.deletingLastPathComponent(), withIntermediateDirectories: true)
         try data.write(to: cacheURL, options: .atomic)
         if let etag = (response as? HTTPURLResponse)?.value(forHTTPHeaderField: "ETag") {
             try? etag.write(to: cacheURL.appendingPathExtension("etag"), atomically: true, encoding: .utf8)
         }
+        Self.current.withLock { $0 = payload }
+        return true
     }
 
     static func decode(_ data: Data?) -> Payload? {
@@ -199,6 +209,7 @@ nonisolated struct ProviderHTTPError: LocalizedError {
         case 401, 403: "The provider rejected this key (\(status))."
         case 404: "Model or endpoint not found (404). Check the model ID."
         case 429: "Rate limited or out of credit (429)."
+        case -1: "The base URL must start with https:// so your key isn't sent unencrypted."
         case 0: "Couldn't reach the provider."
         default: "Provider error \(status)\(body.isEmpty ? "" : ": \(body.prefix(140))")"
         }
@@ -226,10 +237,19 @@ nonisolated enum CloudChat {
         }
     }
 
+    /// `…/path` under the provider's base URL, HTTPS only: the key rides in a header, and a custom
+    /// base URL typed as http:// (or a typo'd scheme) would send it in the clear.
+    static func endpoint(_ baseURL: String, _ path: String) throws -> URL {
+        let root = baseURL.trimmingCharacters(in: .whitespacesAndNewlines).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+        guard let url = URL(string: root + path), url.scheme?.lowercased() == "https", url.host() != nil else {
+            throw ProviderHTTPError(status: -1, body: "")
+        }
+        return url
+    }
+
     static func complete(system: String, user: String, model: String, provider: AIProvider,
                          baseURL: String, key: String) async throws -> String {
-        let root = baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        guard let url = URL(string: root + "/chat/completions") else { throw URLError(.badURL) }
+        let url = try endpoint(baseURL, "/chat/completions")
         var request = URLRequest(url: url, timeoutInterval: 90)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -260,9 +280,7 @@ nonisolated enum CloudChat {
 
     /// Checks a key by listing the provider's models: cheap and content-free.
     static func verify(key: String, provider: AIProvider, baseURL: String) async throws {
-        guard let url = URL(string: baseURL.trimmingCharacters(in: CharacterSet(charactersIn: "/")) + "/models") else {
-            throw URLError(.badURL)
-        }
+        let url = try endpoint(baseURL, "/models")
         var request = URLRequest(url: url, timeoutInterval: 15)
         authorize(&request, key: key, provider: provider, listing: true)
         let (data, response) = try await URLSession.shared.data(for: request)

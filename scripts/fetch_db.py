@@ -62,6 +62,9 @@ def main() -> int:
     assets = {a["name"]: a["browser_download_url"] for a in release["assets"]}
     if ASSET not in assets:
         sys.exit(f"{release['tag_name']} has no {ASSET}.")
+    if f"{ASSET}.sha256" not in assets:
+        # Never install an unverified database: publish_db.py always uploads the checksum.
+        sys.exit(f"{release['tag_name']} has no {ASSET}.sha256. Not installing an unverified file.")
     print(f"downloading {release['tag_name']} …", file=sys.stderr)
 
     with tempfile.TemporaryDirectory() as tmp:
@@ -70,12 +73,14 @@ def main() -> int:
         with urllib.request.urlopen(req, timeout=600) as r, gz.open("wb") as out:
             shutil.copyfileobj(r, out)
 
-        if f"{ASSET}.sha256" in assets:
-            expected = get(assets[f"{ASSET}.sha256"]).decode().split()[0]
-            actual = hashlib.sha256(gz.read_bytes()).hexdigest()
-            if actual != expected:
-                sys.exit(f"Checksum mismatch: expected {expected}, got {actual}. Not installing.")
-            print("checksum ok", file=sys.stderr)
+        expected = get(assets[f"{ASSET}.sha256"]).decode().split()[0].lower()
+        h = hashlib.sha256()
+        with gz.open("rb") as f:
+            for chunk in iter(lambda: f.read(1 << 20), b""):
+                h.update(chunk)
+        if h.hexdigest() != expected:
+            sys.exit(f"Checksum mismatch: expected {expected}, got {h.hexdigest()}. Not installing.")
+        print("checksum ok", file=sys.stderr)
 
         DB.parent.mkdir(parents=True, exist_ok=True)
         part = DB.with_suffix(".db.part")

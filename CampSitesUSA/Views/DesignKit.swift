@@ -165,3 +165,21 @@ struct StarPicker: View {
         .sensoryFeedback(.selection, trigger: rating)
     }
 }
+
+// MARK: - Logo
+
+/// The ezcamps glass-tile logo (same art as the app icon), clipped to the iOS icon shape.
+struct AppLogo: View {
+    var size: CGFloat = 64
+
+    var body: some View {
+        Image("Logo")
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .clipShape(.rect(cornerRadius: size * 0.225, style: .continuous))
+            .shadow(color: Color.dusk.opacity(0.35), radius: size * 0.12, y: size * 0.06)
+            .accessibilityHidden(true)
+    }
+}

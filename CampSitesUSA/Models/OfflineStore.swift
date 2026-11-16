@@ -158,8 +158,11 @@ final class OfflineStore {
     }
 
     func download(_ codes: [String]) {
-        guard downloading == nil else { return }
+        // `downloading` is only set once the task starts, so a second tap could start a second task.
+        guard downloading == nil, task == nil, let first = codes.first(where: { packs[$0] == nil }) else { return }
+        downloading = first
         task = Task { [weak self] in
+            defer { self?.task = nil }
             for code in codes where self?.packs[code] == nil {
                 await self?.downloadOne(code)
                 if Task.isCancelled { break }
@@ -200,6 +203,8 @@ final class OfflineStore {
 
         let tiles = state.tiles()
         let session = URLSession(configuration: .ephemeral)
+        // A session holds its connections and delegate until it's invalidated.
+        defer { session.finishTasksAndInvalidate() }
         var done = 0, bytes = 0, failed = 0
         // Six at a time: fast on a good connection, polite to the BLM server.
         await withTaskGroup(of: (Int, Bool).self) { group in

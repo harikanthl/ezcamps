@@ -16,8 +16,10 @@ struct TripsView: View {
             Group {
                 if trips.isEmpty {
                     ContentUnavailableView {
-                        Label("Plan a road trip", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill")
-                            .foregroundStyle(Color.dusk)
+                        VStack(spacing: 14) {
+                            AppLogo(size: 88)
+                            Text("Plan a road trip")
+                        }
                     } description: {
                         Text("Tell us where you're starting and where you're headed. We'll map the drive and suggest a camp for each night, free ones first.")
                     } actions: {
@@ -53,7 +55,10 @@ struct TripsView: View {
             }
             #if DEBUG
             .onAppear(perform: debugOpen)
-            .onAppear { if UserDefaults.standard.string(forKey: "debugAIPrompt") != nil { planningWithAI = true } }
+            .onAppear {
+                // Once per launch: this view reappears every time you come back from a trip.
+                if DebugLaunch.isSet("debugAIPrompt"), DebugLaunch.once("openPlanWithAI") { planningWithAI = true }
+            }
             .onChange(of: trips.count, debugOpen)
             #endif
         }
@@ -63,7 +68,9 @@ struct TripsView: View {
 #if DEBUG
 extension TripsView {
     func debugOpen() {
-        if UserDefaults.standard.bool(forKey: "debugPlanTrip"), let t = trips.first, path.isEmpty { path = [t] }
+        guard UserDefaults.standard.bool(forKey: "debugPlanTrip"), let t = trips.first, path.isEmpty,
+              DebugLaunch.once("openPlannedTrip") else { return }
+        path = [t]
     }
 }
 #endif
@@ -112,6 +119,7 @@ struct PlanTripView: View {
     @State private var picking: Field?
     @State private var working = false
     @State private var error: String?
+    @State private var work: Task<Void, Never>?
 
     enum Field: String, Identifiable { case from, to; var id: String { rawValue } }
 
@@ -155,7 +163,12 @@ struct PlanTripView: View {
             .navigationTitle("Plan a trip")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        work?.cancel()  // a plan finishing after Cancel would still add the trip
+                        dismiss()
+                    }
+                }
             }
             .safeAreaInset(edge: .bottom) { planButton }
             .sheet(item: $picking) { field in
@@ -192,7 +205,13 @@ struct PlanTripView: View {
 
     private var planButton: some View {
         Button {
-            Task { await plan() }
+            // Flip `working` now, not inside the task, so a quick double tap can't plan two trips.
+            guard !working else { return }
+            working = true
+            work = Task {
+                await plan()
+                working = false
+            }
         } label: {
             HStack(spacing: 8) {
                 if working {
@@ -222,8 +241,6 @@ struct PlanTripView: View {
             error = "Turn on location, or choose where you're starting from."
             return
         }
-        working = true
-        defer { working = false }
         do {
             let trip = try await TripPlanner.makeTrip(
                 from: TripPlace(name: from?.name ?? "My location", coordinate: start), to: to,
@@ -231,10 +248,9 @@ struct PlanTripView: View {
             dismiss()
             onCreate(trip)
         } catch {
-            self.error = error.localizedDescription
+            if !Task.isCancelled { self.error = error.localizedDescription }
         }
     }
-
 }
 
 // MARK: - Place search
@@ -262,8 +278,9 @@ struct PlaceSearchView: View {
                 }
                 ForEach(search.results, id: \.self) { c in
                     Button {
+                        guard resolving == nil else { return }  // a second tap would pick twice
+                        resolving = c
                         Task {
-                            resolving = c
                             if let place = await search.resolve(c) {
                                 onPick(place)
                                 dismiss()
@@ -305,6 +322,7 @@ struct PlaceSearchView: View {
 
 struct TripDetailView: View {
     @Bindable var trip: Trip
+    @Environment(\.modelContext) private var context
     @Environment(SiteStore.self) private var store
     @Environment(OfflineStore.self) private var offline
     @State private var legs: [MKRoute?] = []
@@ -435,7 +453,9 @@ struct TripDetailView: View {
         }
         .alert("Rename trip", isPresented: $renaming) {
             TextField("Trip name", text: $trip.name)
-            Button("Done") {}
+            Button("Done") {
+                if trip.name.trimmingCharacters(in: .whitespaces).isEmpty { trip.name = "My trip" }
+            }
         }
         .overlay {
             if replanning {
@@ -647,8 +667,10 @@ struct TripDetailView: View {
         for (i, s) in stops.enumerated() { s.order = i }
     }
 
+    /// Delete the stop itself: dropping it from `trip.stops` alone leaves an orphan row in the store.
     private func remove(_ stop: TripStop) {
         trip.stops.removeAll { $0.id == stop.id }
+        context.delete(stop)
         trip.renumber()
     }
 
@@ -709,14 +731,18 @@ struct TripDetailView: View {
 
     private func loadNightConditions() async {
         for stop in trip.orderedStops where nightConditions[stop.siteID] == nil {
-            nightConditions[stop.siteID] = await ConditionsService.conditions(at: stop.coordinate)
+            let c = await ConditionsService.conditions(at: stop.coordinate)
+            if Task.isCancelled { return }  // left the trip, or the stops changed
+            nightConditions[stop.siteID] = c
         }
     }
 
     /// Nearest gas, groceries and hospital for each camp (cached by site id).
     private func loadServices() async {
         for stop in trip.orderedStops where services[stop.siteID] == nil {
-            services[stop.siteID] = await ServiceFinder.services(near: stop.coordinate)
+            let s = await ServiceFinder.services(near: stop.coordinate)
+            if Task.isCancelled { return }
+            services[stop.siteID] = s
         }
     }
 
@@ -753,17 +779,22 @@ struct TripDetailView: View {
 
     private func buildRoutes() async {
         routing = true
-        defer { routing = false }
-        legs = await TripPlanner.legs(through: trip.waypoints)
+        let result = await TripPlanner.legs(through: trip.waypoints)
+        // A newer run (the stops changed) replaces this one; don't let the old routes win.
+        guard !Task.isCancelled else { return }
+        legs = result
+        routing = false
     }
 
     /// Replace the planner's picks (keeping camps the user chose) with fresh suggestions.
     private func resuggest() async {
-        guard let s = trip.start, let e = trip.end else { return }
+        guard let s = trip.start, let e = trip.end, !replanning else { return }
         replanning = true
         defer { replanning = false }
         guard let route = await TripPlanner.route(from: s, to: e) else { return }
+        let old = trip.stops.filter(\.suggested)
         trip.stops.removeAll { $0.suggested }
+        old.forEach(context.delete)
         trip.renumber()
         for site in TripPlanner.suggestStops(on: route, dailyMiles: trip.dailyMiles, preferFree: trip.preferFree, store: store) {
             TripPlanner.insert(site, into: trip, suggested: true)

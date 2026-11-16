@@ -12,6 +12,8 @@ final class LocationProvider: NSObject, CLLocationManagerDelegate {
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        // Every view reads `location`; without a filter each GPS tick re-renders them all.
+        manager.distanceFilter = 50
     }
 
     func start() {

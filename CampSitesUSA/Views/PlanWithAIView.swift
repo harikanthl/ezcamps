@@ -18,6 +18,8 @@ struct PlanWithAIView: View {
     @State private var readByModel = true
     @State private var phase: Phase = .idle
     @State private var error: String?
+    /// The running read or plan. Cancel stops it, so a plan can't finish after the sheet is gone.
+    @State private var work: Task<Void, Never>?
     @FocusState private var focused: Bool
 
     enum Phase { case idle, understanding, planning }
@@ -33,7 +35,10 @@ struct PlanWithAIView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Where do you want to go?").font(.title3.weight(.bold))
+                        HStack(spacing: 12) {
+                            AppLogo(size: 40)
+                            Text("Where do you want to go?").font(.title3.weight(.bold))
+                        }
                         TextField("Describe your trip…", text: $text, axis: .vertical)
                             .lineLimit(3...6)
                             .focused($focused)
@@ -70,22 +75,27 @@ struct PlanWithAIView: View {
             }
             .navigationTitle("Plan with AI")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { cancel() } } }
             .safeAreaInset(edge: .bottom) { actionButton }
             .onAppear {
-                focused = true
+                if phase == .idle && intent == nil { focused = true }
                 #if DEBUG
-                // Testing aid: `-debugAIPrompt "…"` fills the request and runs it.
-                if let p = UserDefaults.standard.string(forKey: "debugAIPrompt"), text.isEmpty {
+                // Testing aid: `-debugAIPrompt "…"` fills the request and runs it, once per launch.
+                // (onAppear also fires coming back from Settings, and on every new sheet.)
+                if text.isEmpty, let p = DebugLaunch.string("debugAIPrompt") {
                     text = p
-                    Task {
+                    let autoPlan = DebugLaunch.flag("debugAIAutoPlan")
+                    start(.understanding) {
                         await understand()
-                        if UserDefaults.standard.bool(forKey: "debugAIAutoPlan") { await plan() }
+                        if autoPlan, !Task.isCancelled, intent?.isUsable == true {
+                            phase = .planning
+                            await plan()
+                        }
                     }
                 }
                 #endif
             }
-            .onChange(of: text) { if intent != nil { intent = nil } }
+            .onChange(of: text) { if intent != nil && phase == .idle { intent = nil } }
         }
         .interactiveDismissDisabled(phase != .idle)
     }
@@ -105,7 +115,7 @@ struct PlanWithAIView: View {
 
     private var actionButton: some View {
         Button {
-            Task { intent == nil ? await understand() : await plan() }
+            if intent == nil { start(.understanding) { await understand() } } else { start(.planning) { await plan() } }
         } label: {
             HStack(spacing: 8) {
                 switch phase {
@@ -133,26 +143,44 @@ struct PlanWithAIView: View {
         phase == .idle && !text.trimmingCharacters(in: .whitespaces).isEmpty && (intent == nil || intent!.isUsable)
     }
 
+    /// Starts `body` as the one running job. The phase flips synchronously, so a quick second tap
+    /// finds the button disabled instead of starting a second plan (and a duplicate trip).
+    private func start(_ next: Phase, _ body: @escaping @MainActor () async -> Void) {
+        guard phase == .idle else { return }
+        phase = next
+        work = Task {
+            await body()
+            phase = .idle
+            work = nil
+        }
+    }
+
+    private func cancel() {
+        work?.cancel()
+        work = nil
+        phase = .idle
+        dismiss()
+    }
+
     private func understand() async {
         focused = false
         error = nil
-        phase = .understanding
-        defer { phase = .idle }
+        let request = text
         do {
-            let (result, byModel) = try await TripAI.understand(text, using: ai.model(for: .planTrip), settings: ai)
+            let (result, byModel) = try await TripAI.understand(request, using: ai.model(for: .planTrip), settings: ai)
+            // Cancelled, or the request was edited while the model was reading it: drop the stale answer.
+            guard !Task.isCancelled, request == text else { return }
             readByModel = byModel
             withAnimation(.easeOut(duration: 0.2)) { intent = result }
             if !result.isUsable { error = "Where are you headed? Add a destination and try again." }
         } catch {
-            self.error = error.localizedDescription
+            if !Task.isCancelled { self.error = error.localizedDescription }
         }
     }
 
     private func plan() async {
         guard let intent, let toName = intent.to else { return }
         error = nil
-        phase = .planning
-        defer { phase = .idle }
         do {
             let here = location.location?.coordinate
             let start: TripPlace
@@ -176,8 +204,10 @@ struct PlanWithAIView: View {
                 preferFree: intent.freeOnly ?? true, totalNights: intent.nights, store: store, context: context)
             dismiss()
             onCreate(trip)
+        } catch is CancellationError {
+            // Cancelled: nothing was saved.
         } catch {
-            self.error = error.localizedDescription
+            if !Task.isCancelled { self.error = error.localizedDescription }
         }
     }
 }

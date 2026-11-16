@@ -35,9 +35,9 @@ PAGE = 500
 
 
 def fetch(path: str, params: dict) -> dict:
-    params = {**params, "api_key": KEY}
+    # Key in a header, not the query string, so it never shows up in URLs, logs or tracebacks.
     url = f"{BASE}/{path}?{urllib.parse.urlencode(params)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "CampSitesUSA-research/0.1"})
+    req = urllib.request.Request(url, headers={"User-Agent": "CampSitesUSA-research/0.1", "X-Api-Key": KEY})
     for attempt in range(5):
         try:
             with urllib.request.urlopen(req, timeout=90) as r:
