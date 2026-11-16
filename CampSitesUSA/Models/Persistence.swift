@@ -37,6 +37,16 @@ final class Visit {
     /// Cell report: carrier name (see CellSignal.carriers) and 0 none … 3 strong. Optional.
     var carrier: String?
     var signal: Int?
+    /// Id of this rating on the shared ratings server (assigned on first upload).
+    var remoteID: String?
+    /// False until the latest version is on the server. Only uploaded when sharing is on.
+    var synced: Bool = false
+
+    /// The night camped, as the server stores it ("2026-11-15", in the phone's time zone).
+    var visitDay: String {
+        let c = Calendar.current.dateComponents([.year, .month, .day], from: date)
+        return String(format: "%04d-%02d-%02d", c.year ?? 2000, c.month ?? 1, c.day ?? 1)
+    }
 
     init(site: Site, date: Date, rating: Int, tags: [String], note: String, verified: Bool,
          carrier: String? = nil, signal: Int? = nil) {

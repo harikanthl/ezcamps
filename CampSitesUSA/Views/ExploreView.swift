@@ -12,6 +12,7 @@ struct ExploreView: View {
     @State private var totalInView = 0
     @State private var selectedSite: Site?
     @State private var landQuery: LandQuery?
+    @State private var siteDetent: PresentationDetent = .medium
     @AppStorage("mapBase") private var base: MapBase = .standard
     @AppStorage("showPublicLands") private var showPublicLands = false
     @AppStorage("showForestRoads") private var showForestRoads = false
@@ -33,7 +34,10 @@ struct ExploreView: View {
             refresh()
             #if DEBUG
             // Screenshot/testing aid: `-debugOpenSite <site id>` opens that site's card on launch.
-            if let id = UserDefaults.standard.string(forKey: "debugOpenSite") { selectedSite = store.site(id: id) }
+            if let id = UserDefaults.standard.string(forKey: "debugOpenSite") {
+                if DebugLaunch.isSet("debugSiteSection") { siteDetent = .large }
+                selectedSite = store.site(id: id)
+            }
             #endif
         }
         .safeAreaInset(edge: .top) { header }
@@ -65,7 +69,7 @@ struct ExploreView: View {
         .sensoryFeedback(.impact(weight: .medium), trigger: landQuery?.id)
         .sheet(item: $selectedSite) { site in
             NavigationStack { SiteDetailView(site: site) }
-                .presentationDetents([.medium, .large])
+                .presentationDetents([.medium, .large], selection: $siteDetent)
                 .presentationBackgroundInteraction(.enabled(upThrough: .medium))
                 .presentationCornerRadius(28)
         }

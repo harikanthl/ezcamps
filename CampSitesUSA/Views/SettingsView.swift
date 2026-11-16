@@ -22,6 +22,8 @@ struct SettingsView: View {
                 .padding(.vertical, 6)
             }
 
+            CommunityAccountSection()
+
             ForEach(sections, id: \.self) { section in
                 Section {
                     ForEach(AIFeature.allCases.filter { $0.section == section }) { feature in

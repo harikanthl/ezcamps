@@ -6,6 +6,7 @@ struct SavedView: View {
 
     @Environment(\.modelContext) private var context
     @Environment(SiteStore.self) private var store
+    @Environment(CommunityAccount.self) private var community
     @Query(sort: \SavedSite.savedAt, order: .reverse) private var saved: [SavedSite]
     @Query(sort: \Visit.date, order: .reverse) private var visits: [Visit]
     @State private var segment = Segment.saved
@@ -88,6 +89,13 @@ struct SavedView: View {
             }
             .listRowSeparator(.hidden)
         }
-        .onDelete { $0.map { visits[$0] }.forEach(context.delete) }
+        .onDelete { offsets in
+            // Take shared copies off the server too, then delete here.
+            let doomed = offsets.map { visits[$0] }
+            for v in doomed {
+                let account = community
+                if v.remoteID != nil { Task { await account.deleteRemote(v) ; context.delete(v) } } else { context.delete(v) }
+            }
+        }
     }
 }

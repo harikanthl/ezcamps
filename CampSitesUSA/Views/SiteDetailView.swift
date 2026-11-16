@@ -26,6 +26,7 @@ struct SiteDetailView: View {
     }
 
     var body: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 header
@@ -36,10 +37,20 @@ struct SiteDetailView: View {
                 CellSignalSection(site: site, visits: visits)
                 if let d = site.description, !d.isEmpty { about(d) }
                 NearbyActivitiesSection(site: site)
+                CommunityRatingsSection(site: site).id("community")
                 ratingsSection
                 infoSection
             }
             .padding()
+        }
+        #if DEBUG
+        // Screenshot aid: `-debugSiteSection community` scrolls the card to that section.
+        .task {
+            guard let id = DebugLaunch.string("debugSiteSection") else { return }
+            try? await Task.sleep(for: .seconds(1.5))
+            withAnimation { proxy.scrollTo(id, anchor: .top) }
+        }
+        #endif
         }
         .background(alignment: .top) {
             LinearGradient(colors: [site.kind.color.opacity(0.28), .clear], startPoint: .top, endPoint: .bottom)

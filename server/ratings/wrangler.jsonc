@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ezcamps-ratings",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-15",
+  "observability": { "enabled": true },
+  "workers_dev": true,
+  // Version preview URLs would expose untested builds on public URLs; deploys go straight to workers.dev.
+  "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ezcamps-ratings",
+      "database_id": "1fecd673-c8a4-4af1-9534-eb55bfe3fade",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "vars": {
+    // Sign in with Apple tokens must be issued for this app.
+    "APPLE_AUDIENCE": "com.harikanthlingutla.CampSitesUSA"
+  }
+  // Secrets (wrangler secret put): SUB_PEPPER, HMAC key for Apple user ids.
+  // Local only (.dev.vars, never deployed): ALLOW_DEV_AUTH=1 enables POST /v1/auth/dev for tests.
+}

@@ -7,6 +7,7 @@ struct RateVisitView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
     @Environment(LocationProvider.self) private var location
+    @Environment(CommunityAccount.self) private var community
 
     @State private var rating = 0
     @State private var date = Date.now
@@ -73,6 +74,17 @@ struct RateVisitView: View {
                 Text("Which carrier, and how was the signal at camp? Helps the next camper who needs to work or call.")
             }
 
+            if !community.isSignedIn {
+                Section {
+                    ShareRatingsSignIn()
+                        .listRowInsets(.init(top: 8, leading: 16, bottom: 8, trailing: 16))
+                } header: {
+                    Text("Share with other campers")
+                } footer: {
+                    Text("Optional. Your rating is saved on this iPhone either way. Shared ratings show without your name.")
+                }
+            }
+
             Section("Notes") {
                 DatePicker("Date", selection: $date, in: ...Date.now, displayedComponents: .date)
                 TextField("Road condition, best spots, tips…", text: $note, axis: .vertical)
@@ -123,6 +135,10 @@ struct RateVisitView: View {
         context.insert(Visit(site: site, date: date, rating: rating,
                              tags: Visit.tagOptions.filter(tags.contains), note: note, verified: isOnSite,
                              carrier: signal == nil ? nil : carrier, signal: signal))
+        try? context.save()
+        // Share it now if signed in (and not offline; otherwise it goes up on the next launch).
+        let account = community, ctx = context
+        Task { await account.sync(context: ctx) }
         dismiss()
     }
 }

@@ -9,6 +9,7 @@ struct CampSitesUSAApp: App {
     @State private var location = LocationProvider()
     @State private var offline = OfflineStore()
     @State private var ai = AISettings()
+    @State private var community = CommunityAccount()
 
     var body: some Scene {
         WindowGroup {
@@ -17,6 +18,7 @@ struct CampSitesUSAApp: App {
                 .environment(location)
                 .environment(offline)
                 .environment(ai)
+                .environment(community)
                 .tint(.sunset)
                 .task { await store.load() }
         }
@@ -26,6 +28,9 @@ struct CampSitesUSAApp: App {
 
 struct RootView: View {
     @State private var tab = "explore"
+    @Environment(CommunityAccount.self) private var community
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.scenePhase) private var scenePhase
     #if DEBUG
     @Environment(SiteStore.self) private var store
     @Environment(OfflineStore.self) private var offline
@@ -37,6 +42,15 @@ struct RootView: View {
             Tab("Explore", systemImage: "map.fill", value: "explore") { ExploreView() }
             Tab("Trips", systemImage: "point.topleft.down.to.point.bottomright.curvepath.fill", value: "trips") { TripsView() }
             Tab("Saved", systemImage: "heart.fill", value: "saved") { SavedView() }
+        }
+        // Shared ratings: drop the session if Apple ID access was revoked, then upload anything
+        // rated while offline. Again whenever the app comes back to the foreground.
+        .task {
+            await community.checkAppleCredential()
+            await community.sync(context: modelContext)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await community.sync(context: modelContext) } }
         }
         #if DEBUG
         // Testing aids: `-debugDownloadState UT` downloads a pack; `-debugOfflineProbe YES` logs
