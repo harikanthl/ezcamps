@@ -51,6 +51,7 @@ struct CampMapView: UIViewRepresentable {
             .rockClimbing, .kayaking, .fishing, .skiing, .marina,
         ])
         map.register(SiteMarkerView.self, forAnnotationViewWithReuseIdentifier: SiteMarkerView.reuseID)
+        map.register(Site3DPinView.self, forAnnotationViewWithReuseIdentifier: Site3DPinView.reuseID)
         map.register(SiteClusterView.self, forAnnotationViewWithReuseIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier)
         map.setRegion(.init(center: .init(latitude: 37.6, longitude: -111.6),
                             span: .init(latitudeDelta: 6, longitudeDelta: 6)), animated: false)
@@ -135,12 +136,26 @@ struct CampMapView: UIViewRepresentable {
         return rect
     }
 
+    /// Narrower than this (degrees; ~30 mi across in the lower 48) pins switch from flat markers to 3D icons.
+    /// Zoomed out there can be hundreds of pins, and full-colour art at that density is noise.
+    static let detailSpan = 0.6
+
     final class Coordinator: NSObject, MKMapViewDelegate {
         var parent: CampMapView
         var appliedStyle: MapStyleKey?
+        var showing3D = false
         init(_ parent: CampMapView) { self.parent = parent }
 
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            // Crossing the detail zoom: re-add the pins so each gets the right kind of view.
+            let span = mapView.region.span
+            let detailed = min(span.latitudeDelta, span.longitudeDelta) < CampMapView.detailSpan
+            if detailed != showing3D {
+                showing3D = detailed
+                let pins = mapView.annotations.compactMap { $0 as? SiteAnnotation }
+                mapView.removeAnnotations(pins)
+                mapView.addAnnotations(pins)
+            }
             // Can fire synchronously inside updateUIView (setRegion); SwiftUI drops state changes made
             // during a view update, so hand it over on the next run-loop pass.
             let region = mapView.region
@@ -153,7 +168,8 @@ struct CampMapView: UIViewRepresentable {
                 return mapView.dequeueReusableAnnotationView(
                     withIdentifier: MKMapViewDefaultClusterAnnotationViewReuseIdentifier, for: annotation)
             }
-            return mapView.dequeueReusableAnnotationView(withIdentifier: SiteMarkerView.reuseID, for: annotation)
+            let id = showing3D ? Site3DPinView.reuseID : SiteMarkerView.reuseID
+            return mapView.dequeueReusableAnnotationView(withIdentifier: id, for: annotation)
         }
 
         func mapView(_ mapView: MKMapView, didSelect annotation: MKAnnotation) {
@@ -205,6 +221,91 @@ final class SiteMarkerView: MKMarkerAnnotationView {
             titleVisibility = .adaptive
             displayPriority = site.likelyFree ? .defaultHigh : .defaultLow
         }
+    }
+}
+
+/// Zoomed-in pin: the site's 3D icon in a white bubble with a coloured ring (green when free) and a
+/// small pointer at the exact spot. Images are rendered once per kind and colour, then reused.
+final class Site3DPinView: MKAnnotationView {
+    static let reuseID = "site3d"
+    private static var cache: [String: UIImage] = [:]
+
+    /// Site name under the bubble, like Apple Maps labels: small, bold, with a soft halo for contrast.
+    private let nameLabel: UILabel = {
+        let l = UILabel()
+        l.font = .systemFont(ofSize: 11, weight: .semibold)
+        l.textColor = .label
+        l.textAlignment = .center
+        l.numberOfLines = 2
+        l.layer.shadowColor = UIColor.systemBackground.cgColor
+        l.layer.shadowOpacity = 1
+        l.layer.shadowRadius = 2
+        l.layer.shadowOffset = .zero
+        return l
+    }()
+
+    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
+        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        addSubview(nameLabel)
+    }
+
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        let width: CGFloat = 110
+        let fit = nameLabel.sizeThatFits(CGSize(width: width, height: 40))
+        nameLabel.frame = CGRect(x: (bounds.width - fit.width) / 2, y: bounds.height, width: fit.width, height: fit.height)
+    }
+
+    override func traitCollectionDidChange(_ previous: UITraitCollection?) {
+        super.traitCollectionDidChange(previous)
+        nameLabel.layer.shadowColor = UIColor.systemBackground.resolvedColor(with: traitCollection).cgColor
+    }
+
+    override var annotation: MKAnnotation? {
+        didSet {
+            guard let site = (annotation as? SiteAnnotation)?.site else { return }
+            clusteringIdentifier = "sites"
+            image = Self.image(for: site)
+            nameLabel.text = site.isNamed ? site.name : nil
+            setNeedsLayout()
+            centerOffset = CGPoint(x: 0, y: -image!.size.height / 2 + 2)  // pointer tip on the coordinate
+            displayPriority = site.likelyFree ? .defaultHigh : .defaultLow
+            collisionMode = .circle
+            accessibilityLabel = "\(site.name), \(site.priceLabel)"
+        }
+    }
+
+    private static func image(for site: Site) -> UIImage {
+        let key = "\(site.kind.rawValue)-\(site.likelyFree)"
+        if let hit = cache[key] { return hit }
+        let ring = UIColor(site.likelyFree ? Color.meadow : site.kind.color)
+        let bubble: CGFloat = 40, pointer: CGFloat = 7
+        let size = CGSize(width: bubble + 6, height: bubble + pointer + 6)
+        let img = UIGraphicsImageRenderer(size: size).image { ctx in
+            let g = ctx.cgContext
+            let rect = CGRect(x: 3, y: 2, width: bubble, height: bubble)
+            g.setShadow(offset: CGSize(width: 0, height: 1.5), blur: 3, color: UIColor.black.withAlphaComponent(0.3).cgColor)
+            // Pointer
+            let tip = CGPoint(x: size.width / 2, y: rect.maxY + pointer)
+            g.move(to: CGPoint(x: tip.x - 6, y: rect.maxY - 3))
+            g.addLine(to: tip)
+            g.addLine(to: CGPoint(x: tip.x + 6, y: rect.maxY - 3))
+            g.closePath()
+            ring.setFill()
+            g.fillPath()
+            // Ring and white bubble
+            g.fillEllipse(in: rect)
+            g.setShadow(offset: .zero, blur: 0)
+            UIColor.white.setFill()
+            g.fillEllipse(in: rect.insetBy(dx: 3, dy: 3))
+            if let icon = UIImage(named: "e3d-\(site.kind.icon3D)") {
+                icon.draw(in: rect.insetBy(dx: 7, dy: 7))
+            }
+        }
+        cache[key] = img
+        return img
     }
 }
 

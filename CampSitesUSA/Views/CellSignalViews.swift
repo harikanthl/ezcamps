@@ -32,7 +32,7 @@ struct CellSignalSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Cell signal").font(.headline)
+            SectionTitle("Cell signal", icon: "antenna")
 
             if let official = site.cell {
                 row(symbol: official == "none" ? "antenna.radiowaves.left.and.right.slash" : "antenna.radiowaves.left.and.right",

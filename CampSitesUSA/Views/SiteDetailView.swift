@@ -140,12 +140,12 @@ struct SiteDetailView: View {
 
     private var amenities: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Amenities").font(.headline)
+            SectionTitle("Amenities", icon: "camping")
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 8)], alignment: .leading, spacing: 8) {
                 ForEach(site.amenities.compactMap(Amenity.init(rawValue:))) { a in
-                    Label(a.label, systemImage: a.symbol)
+                    Label { Text(a.label) } icon: { Icon3D(a.icon3D, size: 22) }
                         .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color.sky)
+                        .foregroundStyle(.primary)
                         .padding(.horizontal, 10).padding(.vertical, 8)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Color.sky.opacity(0.12), in: .rect(cornerRadius: 12, style: .continuous))

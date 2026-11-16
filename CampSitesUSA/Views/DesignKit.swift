@@ -183,3 +183,124 @@ struct AppLogo: View {
             .accessibilityHidden(true)
     }
 }
+
+// MARK: - 3D icons (Microsoft Fluent Emoji 3D, MIT)
+
+/// A 3D icon from Assets › Icons3D. Decorative: the text next to it carries the meaning.
+/// Used for content (section headers, amenities, activities, services, empty states); controls,
+/// tab bar and map clusters keep flat SF Symbols, which read better small.
+struct Icon3D: View {
+    let name: String
+    var size: CGFloat = 24
+
+    init(_ name: String, size: CGFloat = 24) {
+        self.name = name
+        self.size = size
+    }
+
+    var body: some View {
+        Image("e3d-\(name)")
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .accessibilityHidden(true)
+    }
+}
+
+/// Section title with its 3D icon, e.g. 🌙 Night conditions.
+struct SectionTitle: View {
+    let title: String
+    let icon: String
+    @ScaledMetric(relativeTo: .headline) private var size: CGFloat = 26
+
+    init(_ title: String, icon: String) {
+        self.title = title
+        self.icon = icon
+    }
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Icon3D(icon, size: size)
+            Text(title).font(.headline)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// Empty state with a 3D icon instead of a flat symbol.
+struct EmptyState3D: View {
+    let title: String
+    let icon: String
+    let message: String
+
+    var body: some View {
+        ContentUnavailableView {
+            VStack(spacing: 12) {
+                Icon3D(icon, size: 72)
+                Text(title)
+            }
+        } description: {
+            Text(message)
+        }
+    }
+}
+
+extension Site.Kind {
+    var icon3D: String {
+        switch self {
+        case .campground: "camping"
+        case .dispersed: "mountain"
+        case .rvPark: "minibus"
+        }
+    }
+}
+
+extension Amenity {
+    var icon3D: String {
+        switch self {
+        case .water: "droplet"
+        case .toilets: "toilet"
+        case .showers: "shower"
+        case .dump: "wastebasket"
+        case .electric: "voltage"
+        case .tents: "tent"
+        case .rv: "minibus"
+        case .wifi: "antenna"
+        case .fireRing: "fire"
+        case .picnicTable: "forkknife"
+        }
+    }
+}
+
+extension Activity.Kind {
+    var icon3D: String {
+        switch self {
+        case .hike: "boot"
+        case .bike: "bicycle"
+        case .horse: "horse"
+        case .ohv: "suv"
+        case .climb: "climbing"
+        case .paddle: "canoe"
+        case .boat: "sailboat"
+        case .swim: "swimming"
+        case .fish: "fishing"
+        case .snow: "snowflake"
+        case .scenic: "sunrise"
+        case .program: "speech"
+        case .other: "sparkles"
+        }
+    }
+}
+
+extension ServiceKind {
+    var icon3D: String {
+        switch self {
+        case .gas: "fuel"
+        case .groceries: "cart"
+        case .hospital: "hospital"
+        case .police: "police"
+        }
+    }
+}

@@ -28,7 +28,7 @@ struct SafetySection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("Safety", systemImage: "shield.lefthalf.filled").font(.headline)
+            SectionTitle("Safety", icon: "shield")
             reports
             if !parks.isEmpty { parkAlerts }
             help
@@ -129,29 +129,28 @@ struct SafetySection: View {
     private var help: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Nearest help").font(.subheadline.weight(.semibold))
-            helpRow(symbol: "cross.case.fill", label: "Hospital", result: hospital, color: .berry)
-            helpRow(symbol: "shield.fill", label: "Police or ranger station", result: police, color: .sky)
+            helpRow(icon: "hospital", label: "Hospital", result: hospital)
+            helpRow(icon: "police", label: "Police or ranger station", result: police)
         }
     }
 
-    @ViewBuilder private func helpRow(symbol: String, label: String, result: ServicePlace??, color: Color) -> some View {
-        switch result {
-        case .none:
-            Label("\(label): searching…", systemImage: symbol).font(.caption).foregroundStyle(.secondary)
-        case .some(.none):
-            Label("\(label): none found within 80 mi", systemImage: symbol).font(.caption.weight(.semibold)).foregroundStyle(Color.canyon)
-        case .some(.some(let p)):
-            Button { p.item.openInMaps() } label: {
-                Label {
+    @ViewBuilder private func helpRow(icon: String, label: String, result: ServicePlace??) -> some View {
+        HStack(spacing: 8) {
+            Icon3D(icon, size: 22)
+            switch result {
+            case .none:
+                Text("\(label): searching…").font(.caption).foregroundStyle(.secondary)
+            case .some(.none):
+                Text("\(label): none found within 80 mi").font(.caption.weight(.semibold)).foregroundStyle(Color.canyon)
+            case .some(.some(let p)):
+                Button { p.item.openInMaps() } label: {
                     Text("\(p.name) · \(p.miles.formatted(.number.precision(.fractionLength(p.miles < 10 ? 1 : 0)))) mi")
                         .lineLimit(1)
-                } icon: {
-                    Image(systemName: symbol).foregroundStyle(color)
+                        .font(.caption.weight(.semibold))
                 }
-                .font(.caption.weight(.semibold))
+                .buttonStyle(.pressable)
+                .accessibilityHint("Opens in Maps")
             }
-            .buttonStyle(.plain)
-            .accessibilityHint("Opens in Maps")
         }
     }
 

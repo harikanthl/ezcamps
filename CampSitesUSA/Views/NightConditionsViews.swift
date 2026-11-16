@@ -28,7 +28,7 @@ struct NightConditionsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Night conditions").font(.headline)
+            SectionTitle("Night conditions", icon: "moon")
 
             if let data {
                 ForEach(data.alerts) { alert in

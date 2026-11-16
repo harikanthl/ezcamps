@@ -50,9 +50,8 @@ struct SavedView: View {
 
     @ViewBuilder private var savedList: some View {
         if saved.isEmpty {
-            ContentUnavailableView("No saved spots yet", systemImage: "heart",
-                                   description: Text("Tap the heart on any campsite to keep it here, even offline."))
-                .foregroundStyle(Color.berry)
+            EmptyState3D(title: "No saved spots yet", icon: "heart",
+                         message: "Tap the heart on any campsite to keep it here, even offline.")
                 .listRowBackground(Color.clear)
         }
         ForEach(saved) { s in
@@ -75,9 +74,8 @@ struct SavedView: View {
 
     @ViewBuilder private var visitList: some View {
         if visits.isEmpty {
-            ContentUnavailableView("No visits logged", systemImage: "star",
-                                   description: Text("Rate a campsite after you stay. Ratings logged on-site are marked verified."))
-                .foregroundStyle(Color.sunshine)
+            EmptyState3D(title: "No visits logged", icon: "star",
+                         message: "Rate a campsite after you stay. Ratings logged on-site are marked verified.")
                 .listRowBackground(Color.clear)
         }
         ForEach(visits) { v in

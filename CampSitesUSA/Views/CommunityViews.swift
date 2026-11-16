@@ -16,7 +16,7 @@ struct CommunityRatingsSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("From other campers").font(.headline)
+            SectionTitle("From other campers", icon: "star")
             if let data {
                 if data.summary.count == 0 {
                     Text("No shared ratings yet. Stay here and rate it to be the first.")

@@ -20,6 +20,8 @@ struct SettingsView: View {
                     }
                 }
                 .padding(.vertical, 6)
+            } footer: {
+                Text("3D icons: Fluent Emoji © Microsoft Corporation, MIT License.")
             }
 
             CommunityAccountSection()

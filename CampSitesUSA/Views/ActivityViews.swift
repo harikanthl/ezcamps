@@ -43,7 +43,7 @@ struct NearbyActivitiesSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Things to do nearby").font(.headline)
+                SectionTitle("Things to do nearby", icon: "compass")
                 Text("Within \(Int(Self.radius)) mi · easiest first").font(.caption).foregroundStyle(.secondary)
             }
 
@@ -98,11 +98,9 @@ struct ActivityRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: item.activity.type.symbol)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(width: 40, height: 40)
-                .background(item.activity.difficulty?.color ?? .secondary, in: .rect(cornerRadius: 11, style: .continuous))
+            Icon3D(item.activity.type.icon3D, size: 28)
+                .frame(width: 44, height: 44)
+                .background((item.activity.difficulty?.color ?? .secondary).opacity(0.14), in: .rect(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.activity.name).font(.subheadline.weight(.semibold)).lineLimit(2)
                     .foregroundStyle(.primary)

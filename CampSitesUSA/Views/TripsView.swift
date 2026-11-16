@@ -755,8 +755,8 @@ struct TripDetailView: View {
                             Button {
                                 p.item.openInMaps()
                             } label: {
-                                Label("\(kind.label) \(p.miles.formatted(.number.precision(.fractionLength(p.miles < 10 ? 1 : 0)))) mi",
-                                      systemImage: kind.symbol)
+                                Label { Text("\(kind.label) \(p.miles.formatted(.number.precision(.fractionLength(p.miles < 10 ? 1 : 0)))) mi") }
+                                    icon: { Icon3D(kind.icon3D, size: 18) }
                             }
                             .buttonStyle(ServicePillStyle(color: kind.color))
                             .accessibilityHint("Opens \(p.name) in Maps")
