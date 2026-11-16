@@ -4,7 +4,7 @@ import FoundationModels
 #endif
 
 /// What the model understood from a trip request. The model only fills this in; the route and the
-/// campsites always come from TripPlanner and ezcamp' own data, so it can't invent a campground.
+/// campsites always come from TripPlanner and ezcamp's own data, so it can't invent a campground.
 nonisolated struct TripIntent: Codable, Equatable, Sendable {
     var from: String?
     var to: String?

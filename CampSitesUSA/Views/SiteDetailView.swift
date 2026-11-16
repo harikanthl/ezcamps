@@ -13,6 +13,7 @@ struct SiteDetailView: View {
     @State private var showingRate = false
     @State private var showingNewTrip = false
     @State private var community: SiteCommunity?
+    @State private var packing = false
     @State private var communityFailed = false
     @Environment(CommunityAccount.self) private var account
 
@@ -37,6 +38,7 @@ struct SiteDetailView: View {
                 if site.isBare && visits.isEmpty { bareNote }
                 if !site.amenities.isEmpty { amenities }
                 NightConditionsSection(coordinate: site.coordinate, site: site)
+                packButton
                 SafetySection(site: site, community: community).id("safety")
                 FishingHuntingSection(site: site).id("fishing")
                 CellSignalSection(site: site, visits: visits)
@@ -72,6 +74,31 @@ struct SiteDetailView: View {
     }
 
     // MARK: Sections
+
+    /// Opens a pack list for a stay here: water, food, gear, sized to the forecast and the site.
+    private var packButton: some View {
+        Button { packing = true } label: {
+            HStack(spacing: 12) {
+                Icon3D("boot", size: 30)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Make a pack list").font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                    Text("Water, food and gear for what you're doing here").font(.caption).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+            }
+            .padding(12)
+            .background(Color.meadow.opacity(0.1), in: .rect(cornerRadius: 16, style: .continuous))
+            .contentShape(.rect)
+        }
+        .buttonStyle(.pressable)
+        #if DEBUG
+        .task { if DebugLaunch.flag("debugPack") { try? await Task.sleep(for: .seconds(1)); packing = true } }
+        #endif
+        .sheet(isPresented: $packing) {
+            PackListView(title: site.name, site: site, nights: 2, lows: [], storageKey: "site.\(site.id)")
+        }
+    }
 
     /// Bare OpenStreetMap points have a location and nothing else. Say so plainly rather than
     /// dressing them up: trust comes from real details and verified visits.

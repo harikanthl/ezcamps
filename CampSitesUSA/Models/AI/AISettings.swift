@@ -33,7 +33,7 @@ enum AIFeature: String, CaseIterable, Identifiable {
     var explainer: String {
         switch self {
         case .chat: "Ask anything about camping on the map: where to stay, whether you can camp somewhere, tonight's weather, safety, fish and game, and plan trips. Answers come from ezcamp's data with sources."
-        case .planTrip: "Turns a request like “SF to Moab via Zion, 5 nights, free sites” into a route. Campsites always come from ezcamp' open data, never from the model."
+        case .planTrip: "Turns a request like “SF to Moab via Zion, 5 nights, free sites” into a route. Campsites always come from ezcamp's open data, never from the model."
         }
     }
 }

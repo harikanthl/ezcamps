@@ -338,6 +338,7 @@ struct TripDetailView: View {
     @State private var services: [String: CampServices] = [:]
     @State private var nightConditions: [String: NightConditions] = [:]
     @State private var showServices = false
+    @State private var packing = false
 
     private let legColors: [Color] = [.sunset, .dusk, .sky, .berry, .meadow, .canyon]
 
@@ -420,6 +421,7 @@ struct TripDetailView: View {
                     if FeatureFlags.offlinePacks {
                         Button("Download for offline", systemImage: "arrow.down.circle") { downloadForOffline() }
                     }
+                    Button("Pack list", systemImage: "checklist") { packing = true }
                     Button("Reorder camps", systemImage: "arrow.up.arrow.down") { editMode = .active }
                     Button("Rename", systemImage: "pencil") { renaming = true }
                 } label: {
@@ -442,6 +444,13 @@ struct TripDetailView: View {
         }
         .sheet(item: $swapping) { stop in
             SwapStopView(trip: trip, stop: stop)
+        }
+        .sheet(isPresented: $packing) {
+            PackListView(title: trip.name,
+                         site: trip.orderedStops.first.flatMap { store.site(id: $0.siteID) },
+                         nights: max(1, trip.totalNights),
+                         lows: nightConditions.values.flatMap { $0.nights.prefix(3).map(\.low) },
+                         storageKey: "trip.\(Int(trip.createdAt.timeIntervalSince1970))")
         }
         .sheet(isPresented: $addingStop) {
             AddStopView(trip: trip, routes: legs.compactMap { $0 })

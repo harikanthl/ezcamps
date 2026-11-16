@@ -58,6 +58,15 @@ final class ChatTools {
                     parametersJSON: #"{"type":"object","properties":{"site_id":{"type":"string"}},"required":["site_id"]}"#),
         LLMToolSpec(name: "things_to_do", description: "Hikes, rides, paddles and other activities within 25 miles of a campsite, easiest first.",
                     parametersJSON: #"{"type":"object","properties":{"site_id":{"type":"string"},"difficulty":{"type":"string","enum":["any","easy","moderate","hard","strenuous"]}},"required":["site_id"]}"#),
+        LLMToolSpec(name: "pack_list", description: "What to bring for a stay: water amounts, meals, snacks, gear for the activities, and bear storage if bears are around. Each line has a source.",
+                    parametersJSON: """
+                    {"type":"object","properties":{
+                      "site_id":{"type":"string"},
+                      "activities":{"type":"string","description":"Comma-separated: camping, dayHiking, backpacking, mountainBiking, trailRunning, fishing, hunting."},
+                      "nights":{"type":"integer"},
+                      "people":{"type":"integer"}
+                    },"required":["site_id"]}
+                    """),
         LLMToolSpec(name: "plan_trip", description: "Plan and save a road trip with a camp at the end of each day's drive. Use only when the person asks to plan or save a trip.",
                     parametersJSON: """
                     {"type":"object","properties":{
@@ -90,6 +99,7 @@ final class ChatTools {
             case "fishing_hunting": value = await fishing(try site(a))
             case "things_to_do": value = try thingsToDo(a)
             case "plan_trip": value = try await planTrip(a)
+            case "pack_list": value = try await packList(a)
             default: throw ToolError("Unknown tool \(call.name).")
             }
             return Self.json(value)
@@ -245,6 +255,24 @@ final class ChatTools {
             ["name": n.activity.name, "type": n.activity.type.label, "difficulty": n.activity.difficulty?.label ?? "unrated",
              "miles_away": Self.miles(n.distance)] as [String: Any]
         }, "source": "NPS, Forest Service trails, RIDB"]
+    }
+
+    private func packList(_ a: [String: Any]) async throws -> [String: Any] {
+        let s = try site(a)
+        let acts = ((a["activities"] as? String) ?? "").split(separator: ",")
+            .compactMap { PackActivity(rawValue: $0.trimmingCharacters(in: .whitespaces)) }
+        let nights = min(max(a["nights"] as? Int ?? 2, 1), 21)
+        async let c = ConditionsService.conditions(at: s.coordinate)
+        async let w = try? RatingsAPI.wildlife(near: s.coordinate)
+        let (cond, wild) = await (c, w)
+        let lows = cond.nights.prefix(nights).map(\.low)
+        let sections = PackPlanner.make(PackInputs(
+            activities: acts.isEmpty ? PackActivity.favorites() : Set(acts), nights: nights, people: min(max(a["people"] as? Int ?? 2, 1), 12),
+            coldestLow: lows.min(), warmestLow: lows.max(), siteHasWater: s.amenities.contains("water"),
+            bearCountry: wild?.game.contains { $0.name.localizedCaseInsensitiveContains("bear") } ?? false))
+        return ["sections": sections.map { sec in
+            ["title": sec.title, "summary": sec.summary ?? "", "items": sec.items.prefix(8).map(\.title)] as [String: Any]
+        }, "note": "The full list with sources and a checklist is under Make a pack list on the site card."]
     }
 
     private func planTrip(_ a: [String: Any]) async throws -> [String: Any] {

@@ -58,6 +58,7 @@ struct RootView: View {
         .task {
             if let code = UserDefaults.standard.string(forKey: "debugDownloadState") { offline.download([code]) }
             if UserDefaults.standard.string(forKey: "debugAIPrompt") != nil { tab = "trips" }
+            if DebugLaunch.isSet("debugSettings") { tab = "saved" }
             if UserDefaults.standard.bool(forKey: "debugOfflineProbe") {
                 let log = Logger(subsystem: "ezcamps", category: "OfflineProbe")
                 let points: [(String, Double, Double)] = [("BLM near Moab", 38.9, -110.5), ("Arches NP", 38.62, -109.62),

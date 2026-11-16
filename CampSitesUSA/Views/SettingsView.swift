@@ -7,6 +7,7 @@ struct SettingsView: View {
     @Environment(AISettings.self) private var ai
     @State private var refreshing = false
     @AppStorage("showGearTips") private var showGearTips = true
+    @State private var debugChooser = false
 
     var body: some View {
         Form {
@@ -74,6 +75,10 @@ struct SettingsView: View {
         }
         .navigationTitle("Settings")
         .task { await ai.refreshCatalog() }
+        #if DEBUG
+        .navigationDestination(isPresented: $debugChooser) { ModelChooser(feature: .chat) }
+        .task { if DebugLaunch.flag("debugModelChooser") { try? await Task.sleep(for: .seconds(1)); debugChooser = true } }
+        #endif
     }
 
     private static var version: String {
@@ -102,7 +107,8 @@ private extension ISO8601DateFormatter {
     }()
 }
 
-/// One AI feature and the model it uses.
+/// One AI feature and the model it uses. Opens a full chooser: Apple's on-device model, then every
+/// provider, with a key field right there for providers that don't have one yet.
 private struct FeatureModelRow: View {
     let feature: AIFeature
     @Environment(AISettings.self) private var ai
@@ -110,23 +116,85 @@ private struct FeatureModelRow: View {
     var body: some View {
         let current = ai.model(for: feature)
         VStack(alignment: .leading, spacing: 8) {
-            Picker(selection: Binding(get: { current }, set: { ai.setModel($0, for: feature) })) {
-                ForEach(ai.pickerSections(current: current), id: \.provider) { section in
-                    Section(section.provider?.title ?? "Private") {
-                        ForEach(section.models, id: \.self) { Text($0.label).tag($0) }
-                    }
-                }
+            NavigationLink {
+                ModelChooser(feature: feature)
             } label: {
-                Label(feature.title, systemImage: feature.symbol)
+                LabeledContent {
+                    Text(current.isOnDevice ? "On this iPhone" : "\(current.provider?.shortTitle ?? "") · \(current.label)")
+                        .lineLimit(1)
+                } label: {
+                    Label(feature.title, systemImage: feature.symbol)
+                }
             }
-            .pickerStyle(.navigationLink)
             Text(feature.explainer).font(.caption).foregroundStyle(.secondary)
             if current.isOnDevice, let why = TripAI.onDeviceStatus {
-                Label("On-device model unavailable: \(why). Add a key below.", systemImage: "exclamationmark.triangle.fill")
+                Label("On-device model unavailable: \(why). Choose a provider model instead.", systemImage: "exclamationmark.triangle.fill")
                     .font(.caption).foregroundStyle(Color.canyon)
             }
         }
         .padding(.vertical, 2)
+    }
+}
+
+/// Pick the model for one feature. Every provider is listed; ones without a key show the key
+/// field inline, so adding a key and choosing a model happen on the same screen.
+private struct ModelChooser: View {
+    let feature: AIFeature
+    @Environment(AISettings.self) private var ai
+
+    var body: some View {
+        let current = ai.model(for: feature)
+        List {
+            Section {
+                choiceRow(.onDevice, current: current,
+                          detail: TripAI.onDeviceStatus.map { "Not available: \($0)" } ?? "Private and free. Runs on Apple Intelligence.")
+            } header: {
+                Text("On this iPhone")
+            }
+            ForEach(AIProvider.allCases) { provider in
+                Section {
+                    if ai.hasKey(provider) {
+                        let models = ai.models(for: provider)
+                        if models.isEmpty {
+                            Text("No models listed yet. Add a model ID under the key below.").font(.caption).foregroundStyle(.secondary)
+                        }
+                        ForEach(models.prefix(12), id: \.self) { m in choiceRow(m, current: current, detail: nil) }
+                    }
+                    ProviderKeyRow(provider: provider)
+                } header: {
+                    Text(provider.title)
+                } footer: {
+                    if !ai.hasKey(provider) {
+                        Text("Add your \(provider.shortTitle) key to use its models. It stays in this iPhone's Keychain.")
+                    }
+                }
+            }
+        }
+        .navigationTitle(feature.title)
+        .navigationBarTitleDisplayMode(.inline)
+        .task { await ai.refreshCatalog() }
+    }
+
+    private func choiceRow(_ m: ModelChoice, current: ModelChoice, detail: String?) -> some View {
+        let selected = m == current
+        let disabled = m.isOnDevice && TripAI.onDeviceStatus != nil
+        return Button {
+            ai.setModel(m, for: feature)
+        } label: {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(m.isOnDevice ? "Apple on-device model" : m.label).foregroundStyle(.primary)
+                    if let detail { Text(detail).font(.caption).foregroundStyle(.secondary) }
+                }
+                Spacer()
+                if selected {
+                    Image(systemName: "checkmark").fontWeight(.semibold).foregroundStyle(Color.sunset)
+                }
+            }
+            .contentShape(.rect)
+        }
+        .disabled(disabled && !selected)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 

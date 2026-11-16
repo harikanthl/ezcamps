@@ -215,7 +215,7 @@ struct CommunityAccountSection: View {
                 }
             }
         } message: {
-            Text("This removes every rating you shared from ezcamp' server. Your ratings stay on this iPhone.")
+            Text("This removes every rating you shared from ezcamp's server. Your ratings stay on this iPhone.")
         }
     }
 }

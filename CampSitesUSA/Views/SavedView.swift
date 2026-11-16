@@ -7,6 +7,7 @@ struct SavedView: View {
     @Environment(\.modelContext) private var context
     @Environment(SiteStore.self) private var store
     @Environment(CommunityAccount.self) private var community
+    @State private var debugSettings = false
     @Query(sort: \SavedSite.savedAt, order: .reverse) private var saved: [SavedSite]
     @Query(sort: \Visit.date, order: .reverse) private var visits: [Visit]
     @State private var segment = Segment.saved
@@ -28,6 +29,11 @@ struct SavedView: View {
                 }
             }
             .navigationTitle(segment.rawValue)
+            #if DEBUG
+            // Testing aid: `-debugSettings YES` opens Settings on launch.
+            .navigationDestination(isPresented: $debugSettings) { SettingsView() }
+            .task { if DebugLaunch.flag("debugSettings") { try? await Task.sleep(for: .seconds(1)); debugSettings = true } }
+            #endif
             .toolbar {
                 NavigationLink {
                     SettingsView()
