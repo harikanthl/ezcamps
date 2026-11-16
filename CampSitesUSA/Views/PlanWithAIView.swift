@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 import CoreLocation
 
-/// "Plan with AI": describe the trip in your own words. The model only reads the request; ezcamps'
+/// "Plan with AI": describe the trip in your own words. The model only reads the request; ezcamp'
 /// planner builds the route and picks real campsites. You confirm what it understood before planning.
 struct PlanWithAIView: View {
     var onCreate: (Trip) -> Void
@@ -234,7 +234,7 @@ private struct IntentCard: View {
                       systemImage: "info.circle")
                     .font(.caption).foregroundStyle(Color.canyon)
             }
-            Text("Not right? Edit your request above. Camps come from ezcamps' data, not the AI.")
+            Text("Not right? Edit your request above. Camps come from ezcamp' data, not the AI.")
                 .font(.caption).foregroundStyle(.secondary)
         }
         .padding(14)

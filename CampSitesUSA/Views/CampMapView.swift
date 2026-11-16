@@ -360,7 +360,7 @@ final class PublicLandsOverlay: MKTileOverlay {
         if let saved = TileCache.data(z: path.z, x: path.x, y: path.y) { result(saved, nil); return }
         var req = URLRequest(url: url, timeoutInterval: 20)
         req.assumesHTTP3Capable = false
-        req.setValue("ezcamps-ios", forHTTPHeaderField: "User-Agent")
+        req.setValue("ezcamp-ios", forHTTPHeaderField: "User-Agent")
         Self.session.dataTask(with: req) { data, response, error in
             let status = (response as? HTTPURLResponse)?.statusCode ?? 0
             if let data, status == 200 {
@@ -408,7 +408,7 @@ final class TopoOverlay: MKTileOverlay {
         if let hit = Self.cache.object(forKey: key) { result(hit as Data, nil); return }
         var req = URLRequest(url: url, timeoutInterval: 20)
         req.assumesHTTP3Capable = false
-        req.setValue("ezcamps-ios", forHTTPHeaderField: "User-Agent")
+        req.setValue("ezcamp-ios", forHTTPHeaderField: "User-Agent")
         Self.session.dataTask(with: req) { data, response, error in
             if let data, (response as? HTTPURLResponse)?.statusCode == 200 {
                 Self.cache.setObject(data as NSData, forKey: key, cost: data.count)

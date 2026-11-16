@@ -168,7 +168,7 @@ struct StarPicker: View {
 
 // MARK: - Logo
 
-/// The ezcamps glass-tile logo (same art as the app icon), clipped to the iOS icon shape.
+/// The ezcamp glass-tile logo (same art as the app icon), clipped to the iOS icon shape.
 struct AppLogo: View {
     var size: CGFloat = 64
 

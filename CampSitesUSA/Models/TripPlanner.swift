@@ -144,7 +144,7 @@ enum TripPlanner {
 
     /// Build and insert a trip: drive start → via places → destination, a camp near each via place,
     /// overnight camps every day's drive in between, and any extra requested nights added to the
-    /// via camps first, then the last camp. Every camp comes from ezcamps' data.
+    /// via camps first, then the last camp. Every camp comes from ezcamp' data.
     static func makeTrip(from start: TripPlace, to end: TripPlace, via: [TripPlace] = [], startDate: Date?,
                          dailyMiles: Int, preferFree: Bool, totalNights: Int? = nil,
                          store: SiteStore, context: ModelContext) async throws -> Trip {

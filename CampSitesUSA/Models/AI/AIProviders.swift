@@ -254,7 +254,7 @@ nonisolated enum CloudChat {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         authorize(&request, key: key, provider: provider, listing: false)
-        if provider == .openrouter { request.setValue("ezcamps", forHTTPHeaderField: "X-Title") }
+        if provider == .openrouter { request.setValue("ezcamp", forHTTPHeaderField: "X-Title") }
         let body: [String: Any] = [
             "model": model,
             "messages": [["role": "system", "content": system], ["role": "user", "content": user]],

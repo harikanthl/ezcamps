@@ -47,7 +47,7 @@ final class ForestRoadsOverlay: MKTileOverlay {
         if let hit = Self.cache.object(forKey: key) { result(hit as Data, nil); return }
         var req = URLRequest(url: url, timeoutInterval: 30)
         req.assumesHTTP3Capable = false
-        req.setValue("ezcamps-ios", forHTTPHeaderField: "User-Agent")
+        req.setValue("ezcamp-ios", forHTTPHeaderField: "User-Agent")
         Self.session.dataTask(with: req) { data, response, error in
             if let data, (response as? HTTPURLResponse)?.statusCode == 200,
                (response as? HTTPURLResponse)?.mimeType?.hasPrefix("image") == true {
@@ -91,7 +91,7 @@ nonisolated struct ForestRoad: Sendable {
             .init(name: "f", value: "json"),
         ]
         var req = URLRequest(url: comps.url!, timeoutInterval: 20)
-        req.setValue("ezcamps-ios", forHTTPHeaderField: "User-Agent")
+        req.setValue("ezcamp-ios", forHTTPHeaderField: "User-Agent")
         guard let (data, _) = try? await URLSession.shared.data(for: req),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let results = json["results"] as? [[String: Any]], let first = results.first,

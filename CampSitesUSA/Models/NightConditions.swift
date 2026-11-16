@@ -48,7 +48,7 @@ nonisolated struct NightConditions: Sendable {
 
 enum ConditionsService {
     static let fireRadiusMiles = 50.0
-    private static let userAgent = "ezcamps-ios"
+    private static let userAgent = "ezcamp-ios"
     private static var cache: [String: (Date, NightConditions)] = [:]
 
     /// Cached for 30 minutes per ~1 km cell.

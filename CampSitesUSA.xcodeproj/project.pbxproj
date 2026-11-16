@@ -252,7 +252,7 @@
 				DEVELOPMENT_TEAM = 2F5YSX6AK6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = ezcamps;
+				INFOPLIST_KEY_CFBundleDisplayName = ezcamp;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Shows campsites and public land near you.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -292,7 +292,7 @@
 				DEVELOPMENT_TEAM = 2F5YSX6AK6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = ezcamps;
+				INFOPLIST_KEY_CFBundleDisplayName = ezcamp;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Shows campsites and public land near you.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;

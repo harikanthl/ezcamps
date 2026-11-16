@@ -51,7 +51,7 @@ def fetch(after: int) -> dict:
     url = SERVICE + "?" + urllib.parse.urlencode(params)
     for attempt in range(5):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "ezcamps-data-pipeline"})
+            req = urllib.request.Request(url, headers={"User-Agent": "ezcamp-data-pipeline"})
             with urllib.request.urlopen(req, timeout=180) as r:
                 data = json.load(r)
             if "error" in data:

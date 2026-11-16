@@ -34,7 +34,7 @@ ASSET = "campsites.db.gz"
 
 
 def get(url: str) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": "ezcamps-fetch-db", "Accept": "application/vnd.github+json"})
+    req = urllib.request.Request(url, headers={"User-Agent": "ezcamp-fetch-db", "Accept": "application/vnd.github+json"})
     with urllib.request.urlopen(req, timeout=120) as r:
         return r.read()
 
@@ -69,7 +69,7 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory() as tmp:
         gz = Path(tmp) / ASSET
-        req = urllib.request.Request(assets[ASSET], headers={"User-Agent": "ezcamps-fetch-db"})
+        req = urllib.request.Request(assets[ASSET], headers={"User-Agent": "ezcamp-fetch-db"})
         with urllib.request.urlopen(req, timeout=600) as r, gz.open("wb") as out:
             shutil.copyfileobj(r, out)
 

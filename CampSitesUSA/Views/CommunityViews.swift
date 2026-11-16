@@ -204,7 +204,7 @@ struct CommunityAccountSection: View {
         } header: {
             Text("Shared ratings")
         } footer: {
-            Text("Sign in to share your ratings with other campers. They appear without your name, and ezcamps never sees your email. Ratings logged on-site are marked verified.")
+            Text("Sign in to share your ratings with other campers. They appear without your name, and ezcamp never sees your email. Ratings logged on-site are marked verified.")
         }
         .confirmationDialog("Delete your account?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete account", role: .destructive) {
@@ -215,7 +215,7 @@ struct CommunityAccountSection: View {
                 }
             }
         } message: {
-            Text("This removes every rating you shared from ezcamps' server. Your ratings stay on this iPhone.")
+            Text("This removes every rating you shared from ezcamp' server. Your ratings stay on this iPhone.")
         }
     }
 }

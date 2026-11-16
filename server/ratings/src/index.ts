@@ -1,4 +1,4 @@
-// ezcamps shared ratings API (Cloudflare Worker + D1).
+// ezcamp shared ratings API (Cloudflare Worker + D1).
 //
 // Reading is public. Writing needs a session from Sign in with Apple. People are stored only as an
 // HMAC of their Apple user id, and ratings are shown without any name. One rating per person, per

@@ -28,7 +28,7 @@ enum AIFeature: String, CaseIterable, Identifiable {
 
     var explainer: String {
         switch self {
-        case .planTrip: "Turns a request like “SF to Moab via Zion, 5 nights, free sites” into a route. Campsites always come from ezcamps' open data, never from the model."
+        case .planTrip: "Turns a request like “SF to Moab via Zion, 5 nights, free sites” into a route. Campsites always come from ezcamp' open data, never from the model."
         }
     }
 }

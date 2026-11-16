@@ -14,7 +14,7 @@ struct GearTipsSection: View {
                 Text(title).font(.headline)
                 ForEach(tips) { tip in card(tip) }
                 if GearLinks.hasAffiliates {
-                    Text("ezcamps may earn a commission from these links, at no cost to you.")
+                    Text("ezcamp may earn a commission from these links, at no cost to you.")
                         .font(.caption2).foregroundStyle(.secondary)
                 }
             }

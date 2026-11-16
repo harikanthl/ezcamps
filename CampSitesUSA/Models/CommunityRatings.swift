@@ -4,7 +4,7 @@ import Security
 import AuthenticationServices
 import Observation
 
-// Shared ratings: everyone's ratings for a site, from the ezcamps ratings Worker (server/ratings).
+// Shared ratings: everyone's ratings for a site, from the ezcamp ratings Worker (server/ratings).
 // Reading needs no account. Sharing your own ratings needs Sign in with Apple; the server keeps no
 // name or email, and ratings show up anonymously.
 
@@ -178,7 +178,7 @@ final class CommunityAccount {
         shareRatings = UserDefaults.standard.object(forKey: "ratings.share") as? Bool ?? true
     }
 
-    /// Completes Sign in with Apple: trades Apple's identity token for an ezcamps session.
+    /// Completes Sign in with Apple: trades Apple's identity token for an ezcamp session.
     func completeSignIn(_ result: Result<ASAuthorization, any Error>, context: ModelContext) async {
         lastError = nil
         switch result {
@@ -224,7 +224,7 @@ final class CommunityAccount {
         }
     }
 
-    /// Signs out if the person revoked ezcamps in Settings › Apple ID (Apple asks apps to check on launch).
+    /// Signs out if the person revoked ezcamp in Settings › Apple ID (Apple asks apps to check on launch).
     func checkAppleCredential() async {
         guard isSignedIn, let user = RatingsKeychain.get("appleUser") else { return }
         let state = try? await ASAuthorizationAppleIDProvider().credentialState(forUserID: user)

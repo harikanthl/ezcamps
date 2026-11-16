@@ -14,7 +14,7 @@ struct SettingsView: View {
                 HStack(spacing: 14) {
                     AppLogo(size: 60)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text("ezcamps").font(.title3.weight(.bold))
+                        Text("ezcamp").font(.title3.weight(.bold))
                         Text("Version \(Self.version) · Camps from open public data")
                             .font(.caption).foregroundStyle(.secondary)
                     }
@@ -43,7 +43,7 @@ struct SettingsView: View {
             } header: {
                 Text("Your API keys")
             } footer: {
-                Text("Bring your own key for any provider. Keys stay in this iPhone's Keychain and go only to that provider; you pay them directly and ezcamps adds nothing. Add a model ID under a provider to use a model that isn't listed.")
+                Text("Bring your own key for any provider. Keys stay in this iPhone's Keychain and go only to that provider; you pay them directly and ezcamp adds nothing. Add a model ID under a provider to use a model that isn't listed.")
             }
 
             Section {

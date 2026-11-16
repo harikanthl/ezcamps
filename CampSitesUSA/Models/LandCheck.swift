@@ -33,7 +33,7 @@ nonisolated struct LandCheck: Identifiable, Sendable {
             .init(name: "f", value: "json"),
         ]
         var req = URLRequest(url: comps.url!, timeoutInterval: 15)
-        req.setValue("ezcamps-ios", forHTTPHeaderField: "User-Agent")
+        req.setValue("ezcamp-ios", forHTTPHeaderField: "User-Agent")
         let (data, _) = try await URLSession.shared.data(for: req)
         let decoded = try JSONDecoder().decode(IdentifyResponse.self, from: data)
         let attrs = decoded.results.first?.attributes ?? [:]

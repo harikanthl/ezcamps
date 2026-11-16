@@ -167,7 +167,7 @@ def cde(path: str, key: str) -> dict:
     if cached.exists():
         return json.loads(cached.read_text())
     sep = "&" if "?" in path else "?"
-    req = urllib.request.Request(f"{CDE}/{path}{sep}API_KEY={urllib.parse.quote(key)}", headers={"User-Agent": "ezcamps-pipeline"})
+    req = urllib.request.Request(f"{CDE}/{path}{sep}API_KEY={urllib.parse.quote(key)}", headers={"User-Agent": "ezcamp-pipeline"})
     for attempt in range(6):
         try:
             with urllib.request.urlopen(req, timeout=60) as r:

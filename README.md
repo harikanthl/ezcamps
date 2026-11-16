@@ -1,6 +1,6 @@
-<p align="center"><img src="docs/assets/logo.png" width="128" alt="ezcamps logo"></p>
+<p align="center"><img src="docs/assets/logo.png" width="128" alt="ezcamp logo"></p>
 
-# CampSitesUSA (ezcamps)
+# CampSitesUSA (ezcamp)
 
 A SwiftUI + SwiftData multiplatform app for finding and planning campsites across the United States — with a focus on **open data**, **public land**, and **free/dispersed camping**.
 
@@ -96,7 +96,7 @@ The app is implemented as a SwiftUI + SwiftData multiplatform project:
 - **Saved** — SwiftData-backed saved sites.
 - **Visits** — 1–5 star ratings, quick tags, notes, and location-verified check-ins (`Visit.verifyRadius = 500 m`) as the seed for trusted community ratings.
 - **Trips** — plan From → To with a daily driving budget; overnight camps are suggested along the route (even days, named camps, free first). Day-by-day itinerary with swap/add/reorder, slow or seasonal road warnings, and **nearest gas, groceries and hospital** for every camp (Apple Maps search; also shown on the trip map with the Services toggle).
-- **Plan with AI** — describe a trip in plain words ("SF to Moab via Zion, 5 nights, free sites, under 3 h a day"). The model only extracts from / via / to / dates / nights / driving limit; ezcamps' planner builds the route and picks real camps from its own data, after you confirm what it understood. Runs on Apple's on-device model (Foundation Models) or **any model you bring a key for** (Anthropic, OpenAI, Gemini, xAI, OpenRouter, custom OpenAI-compatible), with your own model IDs. Falls back to a pattern reader when no model is available.
+- **Plan with AI** — describe a trip in plain words ("SF to Moab via Zion, 5 nights, free sites, under 3 h a day"). The model only extracts from / via / to / dates / nights / driving limit; ezcamp' planner builds the route and picks real camps from its own data, after you confirm what it understood. Runs on Apple's on-device model (Foundation Models) or **any model you bring a key for** (Anthropic, OpenAI, Gemini, xAI, OpenRouter, custom OpenAI-compatible), with your own model IDs. Falls back to a pattern reader when no model is available.
 - **Settings › AI** — per-feature model picker, BYOK keys in the Keychain (this device only), custom model IDs per provider, model catalog from the Operator catalog worker (`catalog.operatorok.com/provider-models`, ETag-cached, snapshot bundled).
 - **Night conditions** — on every site card and trip night: overnight low, wind and rain chance (NWS, 7 days), active weather alerts (NWS), wildfires within 50 mi that aren't fully contained (NIFC WFIGS), and overnight smoke / AQI (Open-Meteo air-quality model). No keys needed.
 - **Forest roads (MVUM)** — USFS Motor Vehicle Use Map layer (roads and motorized trails, with route numbers, from zoom 10) and a legend with the official swatches. In national forests, *Can I camp here?* also names the nearest forest road with its vehicle access, open dates and surface.

@@ -215,7 +215,7 @@ final class OfflineStore {
                     if let existing = try? Data(contentsOf: TileCache.url(z: t.z, x: t.x, y: t.y)) { return (existing.count, true) }
                     var req = URLRequest(url: URL(string: "\(PublicLandsService.base)/tile/\(t.z)/\(t.y)/\(t.x)")!, timeoutInterval: 30)
                     req.assumesHTTP3Capable = false
-                    req.setValue("ezcamps-ios", forHTTPHeaderField: "User-Agent")
+                    req.setValue("ezcamp-ios", forHTTPHeaderField: "User-Agent")
                     guard let (data, resp) = try? await session.data(for: req),
                           (resp as? HTTPURLResponse)?.statusCode == 200 else { return (0, false) }
                     TileCache.write(data, z: t.z, x: t.x, y: t.y)
