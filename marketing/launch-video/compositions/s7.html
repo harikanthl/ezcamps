@@ -2,37 +2,49 @@
   <style>
     @font-face{font-family:'Anton';src:url('assets/fonts/Anton-Regular.ttf') format('truetype');}
     #root { position: absolute; inset: 0; overflow: hidden; }
-    #s7-bg { position: absolute; inset: 0; background: linear-gradient(165deg, #c084fc 0%, #ff8a1f 100%); }
-    #s7-text { position: absolute; left: 150px; top: 0; bottom: 0; width: 820px; display: flex; flex-direction: column; justify-content: center; }
-    #s7 .head { font-family: 'Anton'; font-size: 148px; line-height: 1.0; color: #fff; text-transform: uppercase; margin: 0; text-shadow: 0 6px 30px rgba(0,0,0,0.12); }
-    #s7 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 6px; }
-    #s7 .wi { display: inline-block; }
-    #s7 .kick { font-family: 'Inter'; font-weight: 900; font-size: 34px; letter-spacing: 3px; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.16); align-self: flex-start; padding: 10px 18px; border-radius: 10px; margin-bottom: 26px; }
-    #s7 .sub { font-family: 'Inter'; font-weight: 700; font-size: 40px; line-height: 1.3; color: rgba(255,255,255,0.95); margin: 28px 0 0; max-width: 760px; }
-    #s7-phone { position: absolute; left: 1150px; top: 60px; width: 444px; height: 960px; border-radius: 74px; background: #0d0d10; padding: 13px; box-shadow: 0 50px 90px rgba(40,10,0,0.30), inset 0 0 0 2px #2a2a30; }
+    #s7 .big { font-family: 'Anton'; color: #fff; text-transform: uppercase; line-height: 1; margin: 0; text-shadow: 0 6px 30px rgba(0,0,0,0.14); }
+    #s7 .w { display: inline-block; }
+    #s7-text { position: absolute; left: 150px; top: 0; bottom: 0; width: 820px; justify-content: center; display: flex; flex-direction: column; }
+    #s7 .head { font-size: 148px; }
+    #s7 .kick { font-family: 'Inter'; font-weight: 900; font-size: 34px; letter-spacing: 3px; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.18); align-self: flex-start; padding: 10px 18px; border-radius: 10px; margin-bottom: 26px; }
+    #s7 .sub { font-family: 'Inter'; font-weight: 700; font-size: 40px; line-height: 1.3; color: rgba(255,255,255,0.96); margin: 28px 0 0; max-width: 760px; }
+    #s7-phone { position: absolute; left: 1150px; top: 60px; width: 444px; height: 960px; border-radius: 74px; padding: 13px; background: #0d0d10; box-shadow: 0 50px 90px rgba(40,10,0,0.30), inset 0 0 0 2px #2a2a30; }
     #s7-screen { position: relative; width: 100%; height: 100%; border-radius: 61px; overflow: hidden; background: #fff; }
     #s7-screen video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    #s7 .lbl { position: absolute; font-family: 'Anton'; font-size: 40px; line-height: 1.05; color: #0d0d10; background: #FFC233; padding: 10px 16px 12px; border-radius: 12px; text-transform: uppercase; box-shadow: 0 14px 30px rgba(0,0,0,0.22); }
+
   </style>
   <div id="root" data-composition-id="s7" data-width="1920" data-height="1080">
-    <div id="s7" style="position:absolute;inset:0;">
-    <div id="s7-bg"></div>
-    <div id="s7-text">
-      
-      <h1 id="s7-head" class="head"><span class="w"><span id="s7-w0" class="wi">Plan</span></span> <span class="w"><span id="s7-w1" class="wi">it.</span></span> <span class="w"><span id="s7-w2" class="wi">Pack</span></span> <span class="w"><span id="s7-w3" class="wi">it.</span></span></h1>
-      <p id="s7-sub" class="sub">A camp at the end of every day's drive, and the gear you already own.</p>
-    </div>
-    <div id="s7-phone" data-layout-allow-overflow>
-      <div id="s7-screen">
-      <video id="s7-v0" class="clip" src="assets/ai.mp4" data-start="0" data-duration="2.9" data-media-start="0" data-playback-rate="2.5" muted playsinline></video>
-      <video id="s7-v1" class="clip" src="assets/gear.mp4" data-start="2.9" data-duration="2.2" data-media-start="0" data-playback-rate="1.2" muted playsinline></video>
+    <div id="s7" style="position:absolute;inset:0;" data-layout-allow-overflow data-layout-allow-overlap>
+
+      <div id="s7-bg" style="position:absolute;inset:0;background:linear-gradient(165deg,#c084fc 0%,#ff8a1f 100%);"></div>
+      <div id="s7-text">
+        <h1 id="s7-head" class="big head"><span class="w " id="s7-w0">Plan</span> <span class="w " id="s7-w1">it.</span><br><span class="w " id="s7-x0">Pack</span> <span class="w " id="s7-x1">it.</span></h1>
+        <p id="s7-sub" class="sub">A camp at the end of every day's drive, and the gear you already own.</p>
       </div>
-    </div>
+      <div id="s7-phone"><div id="s7-screen">
+<video id="s7-v0" class="clip" src="assets/ai.mp4" data-start="0" data-duration="2.9" data-media-start="0" data-playback-rate="2.5" muted playsinline></video>
+<video id="s7-v1" class="clip" src="assets/gear.mp4" data-start="2.9" data-duration="2.2" data-media-start="0" data-playback-rate="1.2" muted playsinline></video>
+      </div></div>
+      <svg id="s7-marks" style="position:absolute;left:0;top:0;width:1920px;height:1080px;overflow:visible" viewBox="0 0 1920 1080"><ellipse id="s7-c0" cx="1372" cy="269" rx="212" ry="124" transform="rotate(-3 1372 269)" fill="none" stroke="#FFC233" stroke-width="7" stroke-linecap="round" pathLength="1" stroke-dasharray="1.04 1" stroke-dashoffset="1.04"/><path id="s7-a0" d="M1606,193 Q1605,153 1590,269" fill="none" stroke="#FFC233" stroke-width="6" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/><ellipse id="s7-c1" cx="1372" cy="465" rx="212" ry="115" transform="rotate(-3 1372 465)" fill="none" stroke="#FFC233" stroke-width="7" stroke-linecap="round" pathLength="1" stroke-dasharray="1.04 1" stroke-dashoffset="1.04"/><path id="s7-a1" d="M1606,389 Q1605,349 1590,465" fill="none" stroke="#FFC233" stroke-width="6" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1" stroke-dashoffset="1"/></svg><div id="s7-l0" class="lbl" style="left:1612px;top:159px;max-width:280px">A camp every night</div><div id="s7-l1" class="lbl" style="left:1612px;top:355px;max-width:280px">Your gear, cut out</div>
     </div>
   </div>
   <script>
     const tl = gsap.timeline({ paused: true });
-        tl.fromTo("#s7 .wi", {yPercent: 110}, {yPercent: 0, duration: 0.5, ease: "power4.out", stagger: 0.07}, 0.15);
-    tl.fromTo("#s7-sub", {opacity: 0, y: 24}, {opacity: 1, y: 0, duration: 0.45, ease: "power3.out"}, 0.15 + 4 * 0.07 + 0.25);
+        tl.fromTo("#s7-phone", {x: 1920, filter: "blur(14px)"}, {x: 0, filter: "blur(0px)", duration: 0.5, ease: "expo.out"}, 0);
+    tl.fromTo("#s7-head .w", {opacity: 0, x: -60, filter: "blur(10px)"}, {opacity: 1, x: 0, filter: "blur(0px)", duration: 0.3, ease: "expo.out", stagger: 0.09}, 0.1);
+    tl.fromTo("#s7-sub", {opacity: 0}, {opacity: 1, duration: 0.3}, 0.6);
+    tl.fromTo("#s7-phone", {rotationY: 0}, {rotationY: 0, duration: 0.01}, 2.85);
+    tl.fromTo("#s7-screen", {filter: "blur(0px)"}, {filter: "blur(10px)", duration: 0.1, yoyo: true, repeat: 1, ease: "power1.inOut"}, 2.8);
+    tl.to("#s7-phone, #s7-text, #s7-marks, #s7 .lbl", {x: -1920, filter: "blur(14px)", duration: 0.3, ease: "power3.in"}, 4.80);
+    tl.to("#s7-c0", {strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut"}, 1.2);
+    tl.to("#s7-a0", {strokeDashoffset: 0, duration: 0.35, ease: "power2.out"}, 1.6);
+    tl.fromTo("#s7-l0", {opacity: 0, scale: 0.6, rotation: -6}, {opacity: 1, scale: 1, rotation: -2, duration: 0.45, ease: "back.out(2)"}, 1.7999999999999998);
+    tl.to("#s7-l0, #s7-a0, #s7-c0", {opacity: 0, filter: "blur(6px)", duration: 0.2, ease: "power2.in"}, 2.55);
+    tl.to("#s7-c1", {strokeDashoffset: 0, duration: 0.5, ease: "power2.inOut"}, 3.4);
+    tl.to("#s7-a1", {strokeDashoffset: 0, duration: 0.35, ease: "power2.out"}, 3.8);
+    tl.fromTo("#s7-l1", {opacity: 0, scale: 0.6, rotation: -6}, {opacity: 1, scale: 1, rotation: -2, duration: 0.45, ease: "back.out(2)"}, 4.0);
+    tl.to("#s7-l1, #s7-a1, #s7-c1", {opacity: 0, filter: "blur(6px)", duration: 0.2, ease: "power2.in"}, 4.55);
     tl.set({}, {}, 5.09);
     window.__timelines["s7"] = tl;
   </script>

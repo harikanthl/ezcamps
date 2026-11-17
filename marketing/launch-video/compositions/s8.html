@@ -2,39 +2,44 @@
   <style>
     @font-face{font-family:'Anton';src:url('assets/fonts/Anton-Regular.ttf') format('truetype');}
     #root { position: absolute; inset: 0; overflow: hidden; }
-    #s8-bg { position: absolute; inset: 0; background: linear-gradient(165deg, #a3e635 0%, #10b981 100%); }
-    #s8-text { position: absolute; left: 150px; top: 0; bottom: 0; width: 820px; display: flex; flex-direction: column; justify-content: center; }
-    #s8 .head { font-family: 'Anton'; font-size: 148px; line-height: 1.0; color: #fff; text-transform: uppercase; margin: 0; text-shadow: 0 6px 30px rgba(0,0,0,0.12); }
-    #s8 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 6px; }
-    #s8 .wi { display: inline-block; }
-    #s8 .kick { font-family: 'Inter'; font-weight: 900; font-size: 34px; letter-spacing: 3px; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.16); align-self: flex-start; padding: 10px 18px; border-radius: 10px; margin-bottom: 26px; }
-    #s8 .sub { font-family: 'Inter'; font-weight: 700; font-size: 40px; line-height: 1.3; color: rgba(255,255,255,0.95); margin: 28px 0 0; max-width: 760px; }
-    #s8-phone { position: absolute; left: 1150px; top: 60px; width: 444px; height: 960px; border-radius: 74px; background: #0d0d10; padding: 13px; box-shadow: 0 50px 90px rgba(40,10,0,0.30), inset 0 0 0 2px #2a2a30; }
+    #s8 .big { font-family: 'Anton'; color: #fff; text-transform: uppercase; line-height: 1; margin: 0; text-shadow: 0 6px 30px rgba(0,0,0,0.14); }
+    #s8 .w { display: inline-block; }
+    #s8-text { position: absolute; left: 150px; top: 0; bottom: 0; width: 820px; justify-content: center; display: flex; flex-direction: column; }
+    #s8 .head { font-size: 148px; }
+    #s8 .kick { font-family: 'Inter'; font-weight: 900; font-size: 34px; letter-spacing: 3px; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.18); align-self: flex-start; padding: 10px 18px; border-radius: 10px; margin-bottom: 26px; }
+    #s8 .sub { font-family: 'Inter'; font-weight: 700; font-size: 40px; line-height: 1.3; color: rgba(255,255,255,0.96); margin: 28px 0 0; max-width: 760px; }
+    #s8-phone { position: absolute; left: 1150px; top: 60px; width: 444px; height: 960px; border-radius: 74px; padding: 13px; background: #0d0d10; box-shadow: 0 50px 90px rgba(40,10,0,0.30), inset 0 0 0 2px #2a2a30; }
     #s8-screen { position: relative; width: 100%; height: 100%; border-radius: 61px; overflow: hidden; background: #fff; }
     #s8-screen video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    #s8 .lbl { position: absolute; font-family: 'Anton'; font-size: 40px; line-height: 1.05; color: #0d0d10; background: #FFC233; padding: 10px 16px 12px; border-radius: 12px; text-transform: uppercase; box-shadow: 0 14px 30px rgba(0,0,0,0.22); }
+
   </style>
   <div id="root" data-composition-id="s8" data-width="1920" data-height="1080">
-    <div id="s8" style="position:absolute;inset:0;">
-    <div id="s8-bg"></div>
-    <div id="s8-text">
-      
-      <h1 id="s8-head" class="head"><span class="w"><span id="s8-w0" class="wi">29,105</span></span> <span class="w"><span id="s8-w1" class="wi">campsites</span></span></h1>
-      <p id="s8-sub" class="sub">All 50 states. Satellite, topo, forest roads, rivers and public lands.</p>
-    </div>
-    <div id="s8-phone" data-layout-allow-overflow>
-      <div id="s8-screen">
-      <video id="s8-v0" class="clip" src="assets/m_sat.mp4" data-start="0" data-duration="0.9" data-media-start="1.5" data-playback-rate="1.3" muted playsinline></video>
-      <video id="s8-v1" class="clip" src="assets/m_topo.mp4" data-start="0.9" data-duration="0.9" data-media-start="3" data-playback-rate="1.3" muted playsinline></video>
-      <video id="s8-v2" class="clip" src="assets/m_lands.mp4" data-start="1.8" data-duration="0.9" data-media-start="4" data-playback-rate="1.3" muted playsinline></video>
-      <video id="s8-v3" class="clip" src="assets/m_water.mp4" data-start="2.7" data-duration="0.8" data-media-start="5" data-playback-rate="1.3" muted playsinline></video>
+    <div id="s8" style="position:absolute;inset:0;" data-layout-allow-overflow data-layout-allow-overlap>
+
+      <div id="s8-bg" style="position:absolute;inset:0;background:linear-gradient(165deg,#a3e635 0%,#10b981 100%);"></div>
+      <div id="s8-num" class="big" style="position:absolute;left:150px;top:300px;font-size:230px">0</div>
+      <div class="big" style="position:absolute;left:150px;top:300px;margin-top:240px;font-size:75px">campsites · all 50 states</div>
+      <div id="s8-rollbox" style="position:absolute;left:150px;top:560px;margin-top:115px;height:70px;overflow:hidden">
+        <div id="s8-roll" style="font-family:Inter;font-weight:900;font-size:54px;line-height:70px;color:#0d0d10;text-transform:uppercase"><div class="ro">Satellite</div><div class="ro">Topo</div><div class="ro">Forest roads</div><div class="ro">Rivers & lakes</div></div>
       </div>
-    </div>
+      <div id="s8-phone"><div id="s8-screen">
+<video id="s8-v0" class="clip" src="assets/m_sat.mp4" data-start="0" data-duration="0.9" data-media-start="1.5" data-playback-rate="1.3" muted playsinline></video>
+<video id="s8-v1" class="clip" src="assets/m_topo.mp4" data-start="0.9" data-duration="0.9" data-media-start="3" data-playback-rate="1.3" muted playsinline></video>
+<video id="s8-v2" class="clip" src="assets/m_lands.mp4" data-start="1.8" data-duration="0.9" data-media-start="4" data-playback-rate="1.3" muted playsinline></video>
+<video id="s8-v3" class="clip" src="assets/m_water.mp4" data-start="2.7" data-duration="0.8" data-media-start="5" data-playback-rate="1.3" muted playsinline></video>
+      </div></div>
     </div>
   </div>
   <script>
     const tl = gsap.timeline({ paused: true });
-        tl.fromTo("#s8 .wi", {yPercent: 110}, {yPercent: 0, duration: 0.5, ease: "power4.out", stagger: 0.07}, 0.15);
-    tl.fromTo("#s8-sub", {opacity: 0, y: 24}, {opacity: 1, y: 0, duration: 0.45, ease: "power3.out"}, 0.15 + 2 * 0.07 + 0.25);
+        const n = { v: 0 }; const el = document.querySelector("#s8-num");
+    tl.to(n, { v: 29105, duration: 1.4, ease: "power3.out", onUpdate: () => { el.textContent = Math.round(n.v).toLocaleString("en-US"); } }, 0.05);
+    tl.fromTo("#s8-phone", {y: 1080}, {y: 0, duration: 0.5, ease: "expo.out"}, 0);
+    tl.to("#s8-roll", {y: -70, duration: 0.18, ease: "power3.inOut"}, 0.81);
+    tl.to("#s8-roll", {y: -140, duration: 0.18, ease: "power3.inOut"}, 1.71);
+    tl.to("#s8-roll", {y: -210, duration: 0.18, ease: "power3.inOut"}, 2.61);
+    tl.to("#s8-phone", {y: 1080, duration: 0.3, ease: "power3.in"}, 3.20);
     tl.set({}, {}, 3.49);
     window.__timelines["s8"] = tl;
   </script>

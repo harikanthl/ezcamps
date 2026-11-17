@@ -70,3 +70,9 @@ No ads, no tracking.
 - No account needed. Sign in with Apple is only for sharing ratings; Settings › Shared ratings has Delete account.
 - Ask ezcamp uses Apple's on-device model on devices with Apple Intelligence; elsewhere it asks for the user's own API key (Settings › AI). No key is needed to use the rest of the app.
 - Long-press the map to try "Can I camp here?".
+
+## 1.0.1 (submitted 2026-11-17)
+
+- Build 1.0.1 (2) uploaded with `asc builds upload`; version 1.0.1 created from 1.0's metadata, release type MANUAL, submitted for review (submission 503bf209).
+- What's New: one-photo gear cut-outs with photo tips, one AI model setting for Ask ezcamp and Plan with AI, provider models listed before a key, clearer rejected-key message.
+- 1.0 is live (READY_FOR_DISTRIBUTION); harikanth.site/ezcamp links to https://apps.apple.com/us/app/ezcamp-free-camping-and-trips/id6835444197.

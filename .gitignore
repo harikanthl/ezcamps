@@ -41,3 +41,6 @@ marketing/launch-video/assets/*.mp3
 marketing/launch-video/renders/
 marketing/launch-video/.hyperframes/
 marketing/launch-video/node_modules/
+marketing/launch-video-vertical/renders/
+marketing/launch-video-vertical/.hyperframes/
+marketing/launch-video-vertical/node_modules/
