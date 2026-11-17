@@ -9,6 +9,7 @@ struct GearClosetView: View {
     @Query(sort: \GearItem.addedAt, order: .reverse) private var items: [GearItem]
     @State private var picks: [PhotosPickerItem] = []
     @State private var camera = false
+    @State private var directions = false
     @State private var working = 0
     @State private var editing: GearItem?
     @State private var note: String?
@@ -44,6 +45,24 @@ struct GearClosetView: View {
             .ignoresSafeArea()
         }
         .sheet(item: $editing) { GearEditor(item: $0) }
+        .sheet(isPresented: $directions) {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("One photo, all your gear").font(.title3.weight(.bold))
+                photoTips
+                Button {
+                    directions = false
+                    Task { try? await Task.sleep(for: .milliseconds(400)); camera = true }
+                } label: {
+                    Label("Open camera", systemImage: "camera.fill").font(.headline)
+                        .frame(maxWidth: .infinity).padding(.vertical, 14)
+                        .background(Color.sunset, in: .capsule).foregroundStyle(.white)
+                }
+                .buttonStyle(.pressable)
+            }
+            .padding(20)
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
         #if DEBUG
         // Testing aid: `-debugSeedGear <folder>` adds the folder's photos as gear (two confirmed).
         .task {
@@ -70,11 +89,13 @@ struct GearClosetView: View {
             Spacer()
             if working > 0 { ProgressView().padding(.trailing, 6) }
             Menu {
-                PhotosPicker(selection: $picks, maxSelectionCount: 30, matching: .images) {
-                    Label("From Photos", systemImage: "photo.on.rectangle")
-                }
-                if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                    Button("Take a photo", systemImage: "camera") { camera = true }
+                Section("Lay it all flat, shoot from above, in good light") {
+                    if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                        Button("Take a photo", systemImage: "camera") { directions = true }
+                    }
+                    PhotosPicker(selection: $picks, maxSelectionCount: 30, matching: .images) {
+                        Label("From Photos", systemImage: "photo.on.rectangle")
+                    }
                 }
             } label: {
                 Label("Add gear", systemImage: "plus").font(.subheadline.weight(.semibold))
@@ -89,11 +110,36 @@ struct GearClosetView: View {
         VStack(spacing: 12) {
             Icon3D("tent", size: 72)
             Text("Your gear, as stickers").font(.headline)
-            Text("Snap your tent, stove, headlamp, rod. Each one is cut out on your iPhone and lands on a shelf, ready to tick off when you pack.")
+            Text("Lay your gear on the ground and take one photo. Each item is cut out on your iPhone and lands on its shelf, ready to tick off when you pack.")
                 .font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+            photoTips
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 30)
+    }
+
+    /// How to take the one photo so every item gets cut out cleanly.
+    private var photoTips: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("How to take it").font(.subheadline.weight(.semibold))
+            tip("square.grid.3x3.square", "1. Lay every item flat on the floor. Leave a hand's width between items so none touch or overlap.")
+            tip("rectangle.dashed", "2. Use a plain background that contrasts with your gear: a bare floor, a sheet or a tarp.")
+            tip("sun.max.fill", "3. Get bright, even light: daylight by a window or outdoors in shade. Avoid hard shadows and glare.")
+            tip("arrow.down.to.line", "4. Stand on a chair if needed and shoot straight down, so the whole spread fits in the frame.")
+            tip("checkmark.circle", "5. Check the names we guess, then tap Looks right. Fix anything we missed.")
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.sky.opacity(0.10), in: .rect(cornerRadius: 16))
+        .padding(.top, 6)
+    }
+
+    private func tip(_ symbol: String, _ text: String) -> some View {
+        Label {
+            Text(text).font(.footnote).foregroundStyle(.secondary)
+        } icon: {
+            Image(systemName: symbol).foregroundStyle(Color.sky)
+        }
     }
 
     private var reviewTray: some View {
@@ -162,11 +208,17 @@ struct GearClosetView: View {
         working += 1
         defer { working -= 1 }
         do {
-            let sticker = try await GearStore.makeSticker(from: data)
-            let guess = await GearStore.suggest(for: sticker.image)
-            let item = GearItem(name: guess.name, category: guess.category, imageFile: sticker.file, isCutout: sticker.isCutout)
-            withAnimation(.spring(duration: 0.35, bounce: 0.15)) { context.insert(item) }
-            if !sticker.isCutout { note = "Cut-outs need the iPhone's Neural Engine; this one keeps the full photo." }
+            let stickers = try await GearStore.makeStickers(from: data)
+            for sticker in stickers {
+                let guess = await GearStore.suggest(for: sticker.image)
+                let item = GearItem(name: guess.name, category: guess.category, imageFile: sticker.file, isCutout: sticker.isCutout)
+                withAnimation(.spring(duration: 0.35, bounce: 0.15)) { context.insert(item) }
+            }
+            if stickers.contains(where: { !$0.isCutout }) {
+                note = "Cut-outs need the iPhone's Neural Engine; this one keeps the full photo."
+            } else if stickers.count > 1 {
+                note = "Found \(stickers.count) items in that photo. Check their names below."
+            }
         } catch {
             note = error.localizedDescription
         }

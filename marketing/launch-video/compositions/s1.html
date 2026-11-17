@@ -1,0 +1,39 @@
+<template>
+  <style>
+    @font-face{font-family:'Anton';src:url('assets/fonts/Anton-Regular.ttf') format('truetype');}
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #s1-bg { position: absolute; inset: 0; background: linear-gradient(165deg, #5eead4 0%, #2f9bff 100%); }
+    #s1-text { position: absolute; left: 150px; top: 0; bottom: 0; width: 820px; display: flex; flex-direction: column; justify-content: center; }
+    #s1 .head { font-family: 'Anton'; font-size: 148px; line-height: 1.0; color: #fff; text-transform: uppercase; margin: 0; text-shadow: 0 6px 30px rgba(0,0,0,0.12); }
+    #s1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 6px; }
+    #s1 .wi { display: inline-block; }
+    #s1 .kick { font-family: 'Inter'; font-weight: 900; font-size: 34px; letter-spacing: 3px; text-transform: uppercase; color: #fff; background: rgba(0,0,0,0.16); align-self: flex-start; padding: 10px 18px; border-radius: 10px; margin-bottom: 26px; }
+    #s1 .sub { font-family: 'Inter'; font-weight: 700; font-size: 40px; line-height: 1.3; color: rgba(255,255,255,0.95); margin: 28px 0 0; max-width: 760px; }
+    #s1-phone { position: absolute; left: 1150px; top: 60px; width: 444px; height: 960px; border-radius: 74px; background: #0d0d10; padding: 13px; box-shadow: 0 50px 90px rgba(40,10,0,0.30), inset 0 0 0 2px #2a2a30; }
+    #s1-screen { position: relative; width: 100%; height: 100%; border-radius: 61px; overflow: hidden; background: #fff; }
+    #s1-screen video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  </style>
+  <div id="root" data-composition-id="s1" data-width="1920" data-height="1080">
+    <div id="s1" style="position:absolute;inset:0;">
+    <div id="s1-bg"></div>
+    <div id="s1-text">
+      
+      <h1 id="s1-head" class="head"><span class="w"><span id="s1-w0" class="wi">640</span></span> <span class="w"><span id="s1-w1" class="wi">million</span></span> <span class="w"><span id="s1-w2" class="wi">acres.</span></span> <span class="w"><span id="s1-w3" class="wi">Yours.</span></span></h1>
+      <p id="s1-sub" class="sub">America's public land. Most of us never spend a night on it.</p>
+    </div>
+    <div id="s1-phone" data-layout-allow-overflow>
+      <div id="s1-screen">
+      <video id="s1-v0" class="clip" src="assets/map.mp4" data-start="0" data-duration="8.3" data-media-start="0" data-playback-rate="1.0" muted playsinline></video>
+      </div>
+    </div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+        tl.fromTo("#s1 .wi", {yPercent: 110}, {yPercent: 0, duration: 0.5, ease: "power4.out", stagger: 0.07}, 0.15);
+    tl.fromTo("#s1-sub", {opacity: 0, y: 24}, {opacity: 1, y: 0, duration: 0.45, ease: "power3.out"}, 0.15 + 4 * 0.07 + 0.25);
+    tl.fromTo("#s1-phone", {y: 700}, {y: 0, duration: 0.8, ease: "power4.out"}, 0);
+    tl.set({}, {}, 8.290000000000001);
+    window.__timelines["s1"] = tl;
+  </script>
+</template>

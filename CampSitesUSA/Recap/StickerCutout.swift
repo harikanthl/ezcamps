@@ -124,6 +124,33 @@ nonisolated enum StickerCutout {
                       height: CGFloat(maxY - minY + 1) / scale)
     }
 
+    /// Smallest piece kept when splitting a photo into items, as a fraction of the photo's area, so specks
+    /// and shadows Vision picks up don't become stickers.
+    static let minItemArea: CGFloat = 0.004
+
+    /// Gear laid out on the ground: one cut-out per thing Vision separates (each foreground instance on its
+    /// own mask), largest first. A photo with a single subject gives one sticker, as `make` does.
+    @concurrent
+    static func makeEach(from data: Data) async throws -> [URL] {
+        let image = try photo(data)
+        let request = VNGenerateForegroundInstanceMaskRequest()
+        let handler = VNImageRequestHandler(cgImage: image)
+        do { try handler.perform([request]) } catch { throw CutoutError.modelUnavailable }
+        guard let observation = request.results?.first, !observation.allInstances.isEmpty else { throw CutoutError.nothingInFront }
+        let photoArea = CGFloat(image.width * image.height)
+        var pieces: [(area: CGFloat, image: CGImage)] = []
+        for instance in observation.allInstances {
+            let buffer = try observation.generateScaledMaskForImage(forInstances: IndexSet(integer: instance), from: handler)
+            guard let sticker = cutOut(image, mask: CIImage(cvPixelBuffer: buffer)) else { continue }
+            pieces.append((CGFloat(sticker.width * sticker.height), sticker))
+        }
+        // Compare against the photo at sticker scale: cutOut caps the long side at maxSide.
+        let scale = min(1, maxSide / CGFloat(max(image.width, image.height)))
+        let kept = pieces.filter { $0.area >= photoArea * scale * scale * minItemArea }.sorted { $0.area > $1.area }
+        guard !kept.isEmpty else { throw CutoutError.nothingInFront }
+        return try kept.map { try UserStickers.save($0.image) }
+    }
+
     /// A photo's cut-out saved to Yours: Vision's mask, or `mask` when given (tests and the Debug harness, which
     /// stand in for the model the simulator can't run).
     @concurrent

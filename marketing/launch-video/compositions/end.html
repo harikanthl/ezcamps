@@ -1,0 +1,33 @@
+<template>
+  <style>
+    @font-face{font-family:'Anton';src:url('assets/fonts/Anton-Regular.ttf') format('truetype');}
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #end-bg { position: absolute; inset: 0; background: linear-gradient(165deg, #ffb347 0%, #ff5f8f 100%); }
+    #end-lock { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    #end-row { display: flex; align-items: center; gap: 44px; }
+    #end-logo { width: 300px; height: 300px; border-radius: 68px; box-shadow: 0 40px 80px rgba(80,10,30,0.30); }
+    #end-word { font-family: 'Anton'; font-size: 230px; color: #fff; line-height: 1; letter-spacing: 1px; clip-path: inset(0 100% 0 0); }
+    #end-tag { font-family: 'Inter'; font-weight: 700; font-size: 52px; color: #fff; margin-top: 48px; }
+    #end-cta { font-family: 'Inter'; font-weight: 700; font-size: 38px; color: #ff5f3d; background: #fff; border-radius: 22px; padding: 18px 40px; margin-top: 30px; }
+  </style>
+  <div id="root" data-composition-id="end" data-width="1920" data-height="1080">
+    <div id="end-bg"></div>
+    <div id="end-lock">
+      <div id="end-row">
+        <img id="end-logo" src="assets/logo.png" alt="ezcamp logo">
+        <div id="end-word">ezcamp</div>
+      </div>
+      <div id="end-tag">It's your land. Go camp on it.</div>
+      <div id="end-cta">Free on the App Store</div>
+    </div>
+  </div>
+  <script>
+    const tl = gsap.timeline({ paused: true });
+    tl.fromTo("#end-logo", { scale: 0.2, rotation: -14, opacity: 0 }, { scale: 1, rotation: 0, opacity: 1, duration: 0.7, ease: "back.out(1.6)" }, 0.1);
+    tl.fromTo("#end-word", { clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.6, ease: "power3.inOut" }, 0.55);
+    tl.fromTo("#end-tag", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 0.25);
+    tl.fromTo("#end-cta", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, 3.4);
+    tl.set({}, {}, 6.390000000000001);
+    window.__timelines["end"] = tl;
+  </script>
+</template>

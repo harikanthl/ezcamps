@@ -30,3 +30,14 @@ data/cache/
 
 # Apple private keys (Sign in with Apple .p8): never commit
 *.p8
+
+# Local builds
+build/
+Packages/OperatorLLM/.build/
+
+# Launch video: media and renders stay local (recordings, voiceover, music)
+marketing/launch-video/assets/*.mp4
+marketing/launch-video/assets/*.mp3
+marketing/launch-video/renders/
+marketing/launch-video/.hyperframes/
+marketing/launch-video/node_modules/

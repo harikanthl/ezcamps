@@ -101,20 +101,22 @@ final class GearItem {
 enum GearStore {
     static var folder: URL { UserStickers.folder }
 
-    /// Cuts the item out of the photo (on-device Vision); where that can't run (the Simulator, very
-    /// old devices) keeps the photo itself so the item is still saved.
-    static func makeSticker(from data: Data) async throws -> (file: String, isCutout: Bool, image: CGImage) {
+    /// Cuts every item out of the photo (on-device Vision): lay your gear on the ground, take one photo, and
+    /// each thing becomes its own sticker. Where Vision can't run (the Simulator, very old devices) the photo
+    /// itself is kept as one item.
+    static func makeStickers(from data: Data) async throws -> [(file: String, isCutout: Bool, image: CGImage)] {
         do {
-            let url = try await StickerCutout.make(from: data)
-            guard let src = CGImageSourceCreateWithURL(url as CFURL, nil),
-                  let img = CGImageSourceCreateImageAtIndex(src, 0, nil) else { throw StickerCutout.CutoutError.unreadable }
-            return (url.lastPathComponent, true, img)
+            return try await StickerCutout.makeEach(from: data).compactMap { url in
+                guard let src = CGImageSourceCreateWithURL(url as CFURL, nil),
+                      let img = CGImageSourceCreateImageAtIndex(src, 0, nil) else { return nil }
+                return (url.lastPathComponent, true, img)
+            }
         } catch StickerCutout.CutoutError.nothingInFront {
             throw StickerCutout.CutoutError.nothingInFront
         } catch {
             let photo = try StickerCutout.photo(data)
             let url = try UserStickers.save(photo)
-            return (url.lastPathComponent, false, photo)
+            return [(url.lastPathComponent, false, photo)]
         }
     }
 

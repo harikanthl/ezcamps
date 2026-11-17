@@ -107,6 +107,8 @@ public enum LLMError: LocalizedError {
         case .rateLimited(let retryAfter):
             let wait = retryAfter.map { " Try again in \($0)s." } ?? ""
             return "Provider rate limit reached for this model.\(wait) If every model except the cheapest is rate-limited, the key is likely a subscription/OAuth token rather than a console API key — those carry little or no general API quota."
+        case .http(let status, _) where status == 401 || status == 403:
+            return "The provider didn't accept this API key (\(status)). Paste it again in Settings, or make a new one."
         case .http(let status, let body):
             let trimmed = body.count > 300 ? String(body.prefix(300)) + "…" : body
             return "Provider error (\(status)): \(trimmed)"

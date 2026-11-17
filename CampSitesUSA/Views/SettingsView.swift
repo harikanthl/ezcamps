@@ -1,11 +1,10 @@
 import SwiftUI
 
-/// Settings. AI is organised by the feature that uses it: each feature picks its model, and the keys
-/// below unlock providers for all of them. Model lists come from the Operator catalog worker, so new
-/// models show up without an app update.
+/// Settings. AI is one choice: the model ezcamp uses for every AI feature, picked on a screen where
+/// keys are added inline. Model lists come from the Operator catalog worker, so new models show up
+/// without an app update.
 struct SettingsView: View {
     @Environment(AISettings.self) private var ai
-    @State private var refreshing = false
     @AppStorage("showGearTips") private var showGearTips = true
     @State private var debugChooser = false
 
@@ -27,24 +26,12 @@ struct SettingsView: View {
 
             CommunityAccountSection()
 
-            ForEach(sections, id: \.self) { section in
-                Section {
-                    ForEach(AIFeature.allCases.filter { $0.section == section }) { feature in
-                        FeatureModelRow(feature: feature)
-                    }
-                } header: {
-                    Text("AI · \(section)")
-                }
-            }
-
             Section {
-                ForEach(AIProvider.allCases) { provider in
-                    ProviderKeyRow(provider: provider)
-                }
+                AIModelRow()
             } header: {
-                Text("Your API keys")
+                Text("AI")
             } footer: {
-                Text("Bring your own key for any provider. Keys stay in this iPhone's Keychain and go only to that provider; you pay them directly and ezcamp adds nothing. Add a model ID under a provider to use a model that isn't listed.")
+                Text("Powers Ask ezcamp and Plan with AI. Campsites and facts always come from ezcamp's open data, never from the model.")
             }
 
             Section {
@@ -55,47 +42,17 @@ struct SettingsView: View {
                 Text("Short packing tips when a night is freezing, rainy or smoky, or a camp has no water or signal.")
             }
 
-            Section {
-                Button {
-                    refreshing = true
-                    Task {
-                        await ai.refreshCatalog()
-                        refreshing = false
-                    }
-                } label: {
-                    HStack {
-                        Text("Refresh model list")
-                        Spacer()
-                        if refreshing { ProgressView() }
-                    }
-                }
-            } footer: {
-                Text(catalogFooter)
-            }
         }
         .navigationTitle("Settings")
         .task { await ai.refreshCatalog() }
         #if DEBUG
-        .navigationDestination(isPresented: $debugChooser) { ModelChooser(feature: .chat) }
+        .navigationDestination(isPresented: $debugChooser) { ModelChooser() }
         .task { if DebugLaunch.flag("debugModelChooser") { try? await Task.sleep(for: .seconds(1)); debugChooser = true } }
         #endif
     }
 
     private static var version: String {
         Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0"
-    }
-
-    private var sections: [String] {
-        var seen = Set<String>()
-        return AIFeature.allCases.map(\.section).filter { seen.insert($0).inserted }
-    }
-
-    private var catalogFooter: String {
-        _ = ai.version
-        guard let raw = ai.catalog.updatedAt,
-              let date = ISO8601DateFormatter.withFractions.date(from: raw) ?? ISO8601DateFormatter().date(from: raw)
-        else { return "Model lists update automatically." }
-        return "Model lists update automatically. Last updated \(date.formatted(.relative(presentation: .named)))."
     }
 }
 
@@ -107,26 +64,23 @@ private extension ISO8601DateFormatter {
     }()
 }
 
-/// One AI feature and the model it uses. Opens a full chooser: Apple's on-device model, then every
-/// provider, with a key field right there for providers that don't have one yet.
-private struct FeatureModelRow: View {
-    let feature: AIFeature
+/// The one AI setting: which model ezcamp uses. Opens the chooser, where keys are added inline.
+private struct AIModelRow: View {
     @Environment(AISettings.self) private var ai
 
     var body: some View {
-        let current = ai.model(for: feature)
+        let current = ai.model(for: .chat)
         VStack(alignment: .leading, spacing: 8) {
             NavigationLink {
-                ModelChooser(feature: feature)
+                ModelChooser()
             } label: {
                 LabeledContent {
-                    Text(current.isOnDevice ? "On this iPhone" : "\(current.provider?.shortTitle ?? "") · \(current.label)")
+                    Text(current.isOnDevice ? "On this iPhone" : current.label)
                         .lineLimit(1)
                 } label: {
-                    Label(feature.title, systemImage: feature.symbol)
+                    Label("Model", systemImage: "sparkles")
                 }
             }
-            Text(feature.explainer).font(.caption).foregroundStyle(.secondary)
             if current.isOnDevice, let why = TripAI.onDeviceStatus {
                 Label("On-device model unavailable: \(why). Choose a provider model instead.", systemImage: "exclamationmark.triangle.fill")
                     .font(.caption).foregroundStyle(Color.canyon)
@@ -136,14 +90,14 @@ private struct FeatureModelRow: View {
     }
 }
 
-/// Pick the model for one feature. Every provider is listed; ones without a key show the key
+/// Pick the model ezcamp uses for every AI feature. Every provider is listed; ones without a key show the key
 /// field inline, so adding a key and choosing a model happen on the same screen.
 private struct ModelChooser: View {
-    let feature: AIFeature
     @Environment(AISettings.self) private var ai
+    @State private var refreshing = false
 
     var body: some View {
-        let current = ai.model(for: feature)
+        let current = ai.model(for: .chat)
         List {
             Section {
                 choiceRow(.onDevice, current: current,
@@ -159,6 +113,17 @@ private struct ModelChooser: View {
                             Text("No models listed yet. Add a model ID under the key below.").font(.caption).foregroundStyle(.secondary)
                         }
                         ForEach(models.prefix(12), id: \.self) { m in choiceRow(m, current: current, detail: nil) }
+                    } else {
+                        // No key yet: still name the models, so people know what a key unlocks.
+                        ForEach(ai.models(for: provider).prefix(6), id: \.self) { m in
+                            HStack {
+                                Text(m.label).foregroundStyle(.secondary)
+                                Spacer()
+                                Image(systemName: "lock.fill").font(.caption).foregroundStyle(.tertiary)
+                            }
+                            .accessibilityElement(children: .combine)
+                            .accessibilityHint("Add a \(provider.shortTitle) key below to use this model.")
+                        }
                     }
                     ProviderKeyRow(provider: provider)
                 } header: {
@@ -169,17 +134,39 @@ private struct ModelChooser: View {
                     }
                 }
             }
+            Section {
+                Button {
+                    refreshing = true
+                    Task { await ai.refreshCatalog(); refreshing = false }
+                } label: {
+                    HStack {
+                        Text("Refresh model list")
+                        Spacer()
+                        if refreshing { ProgressView() }
+                    }
+                }
+            } footer: {
+                Text("Bring your own key for any provider. Keys stay in this iPhone's Keychain and go only to that provider; you pay them directly and ezcamp adds nothing. \(catalogFooter)")
+            }
         }
-        .navigationTitle(feature.title)
+        .navigationTitle("AI model")
         .navigationBarTitleDisplayMode(.inline)
         .task { await ai.refreshCatalog() }
+    }
+
+    private var catalogFooter: String {
+        _ = ai.version
+        guard let raw = ai.catalog.updatedAt,
+              let date = ISO8601DateFormatter.withFractions.date(from: raw) ?? ISO8601DateFormatter().date(from: raw)
+        else { return "Model lists update automatically." }
+        return "Model lists update automatically. Last updated \(date.formatted(.relative(presentation: .named)))."
     }
 
     private func choiceRow(_ m: ModelChoice, current: ModelChoice, detail: String?) -> some View {
         let selected = m == current
         let disabled = m.isOnDevice && TripAI.onDeviceStatus != nil
         return Button {
-            ai.setModel(m, for: feature)
+            for f in AIFeature.allCases { ai.setModel(m, for: f) }
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
@@ -227,7 +214,8 @@ struct ProviderKeyRow: View {
 
                 // Any provider: type a model that isn't in the list.
                 HStack {
-                    TextField("Model ID (optional)", text: $modelID, prompt: Text(provider.modelIDPlaceholder))
+                    TextField("Model ID (optional)", text: $modelID,
+                              prompt: Text(ai.models(for: provider).first.map { "Other model, e.g. \($0.modelID)" } ?? provider.modelIDPlaceholder))
                         .textFieldStyle(.roundedBorder)
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
                         .onSubmit(addModel)
